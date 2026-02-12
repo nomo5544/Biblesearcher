@@ -1,13 +1,13 @@
 const CACHE_NAME = 'bible-searcher-v1';
 const ASSETS = [
-  'index.html',
-  'reader.html',
-  'reader.js',
-  'app.webmanifest',
-  'bibleTextUA.json',
-  'bibleTextRU.json',
-  'icon-192.png',
-  'icon-512.png'
+  './index.html',
+  './reader.html',
+  './reader.js',
+  './app.webmanifest',
+  './bibleTextUA.json',
+  './bibleTextRU.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // Встановлення: зберігаємо всі файли в пам'ять пристрою
