@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Bible Searcher",
+  "version": "4.3",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": ["storage"]
+}
