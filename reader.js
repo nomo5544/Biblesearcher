@@ -143,13 +143,18 @@ const maps = {
     }
 };
 
-// Створюємо впорядковані масиви повних назв для пошуку за індексом
+// --- 1. ПІДГОТОВКА ПАРАМЕТРІВ ---
+const urlParams = new URLSearchParams(window.location.search);
+const fullRef = urlParams.get('ref') || "";
+const lang = urlParams.get('lang') || "ukr";
+
+// Створюємо масиви для пошуку книг на різних мовах
 const orderUA = [...new Set(Object.values(maps.ukr))];
 const orderRU = [...new Set(Object.values(maps.ru))];
 
 let bookName = "", chapterNum = "", targetVerseStart = null, targetVerseEnd = null;
 
-// --- ЛОГІКА РОЗБОРУ ТА ЗБЕРЕЖЕННЯ ВІРШІВ ---
+// Розбір посилання (Регулярні вирази)
 const rangeMatch = fullRef.match(/^(.+)\s(\d+):(\d+)-(\d+)$/);
 const singleMatch = fullRef.match(/^(.+)\s(\d+):(\d+)$/);
 const chapterMatch = fullRef.match(/^(.+)\s(\d+)$/);
@@ -159,7 +164,6 @@ if (rangeMatch) {
     chapterNum = rangeMatch[2];
     targetVerseStart = parseInt(rangeMatch[3]);
     targetVerseEnd = parseInt(rangeMatch[4]);
-    // Зберігаємо Книгу ТА Розділ ТА Вірші
     sessionStorage.setItem('savedBook', bookName);
     sessionStorage.setItem('savedChap', chapterNum);
     sessionStorage.setItem('savedStart', targetVerseStart);
@@ -169,7 +173,6 @@ if (rangeMatch) {
     chapterNum = singleMatch[2];
     targetVerseStart = parseInt(singleMatch[3]);
     targetVerseEnd = targetVerseStart;
-    // Зберігаємо Книгу ТА Розділ ТА Вірш
     sessionStorage.setItem('savedBook', bookName);
     sessionStorage.setItem('savedChap', chapterNum);
     sessionStorage.setItem('savedStart', targetVerseStart);
@@ -177,103 +180,61 @@ if (rangeMatch) {
 } else if (chapterMatch) {
     bookName = chapterMatch[1];
     chapterNum = chapterMatch[2];
-    
-    // ПЕРЕВІРКА: Підсвічуємо лише якщо Книга ТА Розділ збігаються з тими, де ми клікнули
     const sBook = sessionStorage.getItem('savedBook');
     const sChap = sessionStorage.getItem('savedChap');
-    
     if (sBook === bookName && sChap === chapterNum) {
         targetVerseStart = parseInt(sessionStorage.getItem('savedStart'));
         targetVerseEnd = parseInt(sessionStorage.getItem('savedEnd'));
-    } else {
-        // Якщо перейшли в інший розділ або книгу — візуально не підсвічуємо
-        targetVerseStart = null;
-        targetVerseEnd = null;
     }
 }
 
-const chapterRef = `${bookName} ${chapterNum}`;
 const refHeader = document.getElementById('refHeader');
-const contentDiv = document.getElementById('content');
-const parallelDiv = document.getElementById('content-parallel');
 const toggleBtn = document.getElementById('toggleParallel');
+const layout = document.getElementById('reader-layout');
 
 let bibleDataUA = null;
 let bibleDataRU = null;
 let isParallel = localStorage.getItem('parallelMode') === 'true';
 
-// --- ФУНКЦІЯ ПЕРЕКЛАДУ НАЗВИ КНИГИ ЧЕРЕЗ ПОРЯДКОВИЙ НОМЕР ---
+// --- 2. ДОПОМІЖНІ ФУНКЦІЇ ---
+
 function getCrossLangBookName(currentName, fromLang) {
     const fromOrder = (fromLang === 'ukr') ? orderUA : orderRU;
     const toOrder = (fromLang === 'ukr') ? orderRU : orderUA;
-    
-    // 1. Шукаємо повну назву в картах, якщо прийшло скорочення
     let fullName = currentName;
     if (maps[fromLang][currentName.toLowerCase().replace(/\.$/, "")]) {
         fullName = maps[fromLang][currentName.toLowerCase().replace(/\.$/, "")];
     }
-
-    // 2. Знаходимо індекс цієї книги в біблійному порядку
     const index = fromOrder.indexOf(fullName);
-    
-    // 3. Повертаємо назву з іншого списку за тим самим індексом
-    if (index !== -1 && toOrder[index]) {
-        return toOrder[index];
+    return (index !== -1 && toOrder[index]) ? toOrder[index] : currentName;
+}
+
+function applyParallelState() {
+    const rows = document.querySelectorAll('.verse-row');
+    if (isParallel) {
+        rows.forEach(row => row.classList.remove('single-mode'));
+        toggleBtn.style.background = 'var(--accent-color)';
+        toggleBtn.style.color = '#fff';
+    } else {
+        rows.forEach(row => row.classList.add('single-mode'));
+        toggleBtn.style.background = '#f4f4f4';
+        toggleBtn.style.color = 'var(--text-color)';
     }
-    
-    return currentName; // Якщо не знайшли, повертаємо як є
 }
 
-function buildChapterHtml(bibleData, bName, cNum, isMainColumn) {
-    let chapterHtml = "";
-    const searchPrefix = `${bName} ${cNum}:`;
-    
-    const keys = Object.keys(bibleData).filter(k => k.startsWith(searchPrefix));
-    
-    keys.sort((a, b) => {
-        const vA = parseInt(a.split(':')[1]);
-        const vB = parseInt(b.split(':')[1]);
-        return vA - vB;
-    });
-
-    keys.forEach(key => {
-        const verseNum = parseInt(key.split(':')[1]);
-        const text = bibleData[key];
-
-        let isHighlighted = false;
-        if (targetVerseStart && targetVerseEnd) {
-            isHighlighted = (verseNum >= targetVerseStart && verseNum <= targetVerseEnd);
-        } else if (targetVerseStart) {
-            isHighlighted = (verseNum === targetVerseStart);
-        }
-
-        const highlightClass = isHighlighted ? 'highlight' : '';
-        const idAttr = (isMainColumn && targetVerseStart && verseNum === targetVerseStart) ? 'id="target"' : '';
-
-        // Використовуємо div та клас verse-item, щоб кожен вірш був з нового рядка
-        chapterHtml += `<div class="verse-item ${highlightClass}" ${idAttr}><span class="verse-num">${verseNum}</span>${text}</div>`;
-    });
-
-    return chapterHtml || "Текст не знайдено";
-}
+// --- 3. ВІДОБРАЖЕННЯ ТЕКСТУ ---
 
 function renderContent() {
-    // 1. Визначаємо назву книги для іншої мови
+    if (!layout) return;
+    layout.innerHTML = ""; 
+
     const parallelBookName = getCrossLangBookName(bookName, lang);
-    
-    // 2. Визначаємо, які дані головні, а які паралельні
     const mainData = (lang === 'ukr') ? bibleDataUA : bibleDataRU;
     const sideData = (lang === 'ukr') ? bibleDataRU : bibleDataUA;
-
-    const layout = document.getElementById('reader-layout');
-    if (!layout) return;
-    
-    layout.innerHTML = ""; // Очищуємо контейнер
 
     const mainPrefix = `${bookName} ${chapterNum}:`;
     const sidePrefix = `${parallelBookName} ${chapterNum}:`;
     
-    // 3. Отримуємо всі вірші
     const keys = Object.keys(mainData).filter(k => k.startsWith(mainPrefix));
     keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
 
@@ -282,22 +243,20 @@ function renderContent() {
         return;
     }
 
-    // 4. Створюємо кожен вірш як рядок
     keys.forEach((key, index) => {
         const vNum = key.split(':')[1];
         const sideKey = `${sidePrefix}${vNum}`;
 
         const row = document.createElement('div');
-        // Додаємо клас single-mode, якщо паралель вимкнена
         row.className = `verse-row animate-verse ${isParallel ? '' : 'single-mode'}`;
-        row.style.animationDelay = `${index * 0.03}s`;
+        row.style.animationDelay = `${index * 0.02}s`;
 
-        // Перевірка на підсвітку
         let isHighlighted = false;
         if (targetVerseStart) {
             const vInt = parseInt(vNum);
             isHighlighted = targetVerseEnd ? (vInt >= targetVerseStart && vInt <= targetVerseEnd) : (vInt === targetVerseStart);
         }
+        
         const hClass = isHighlighted ? 'highlight' : '';
         const idAttr = (isHighlighted && vNum == targetVerseStart) ? 'id="target"' : '';
 
@@ -312,31 +271,38 @@ function renderContent() {
         layout.appendChild(row);
     });
 
-    // 5. Плавний скрол до вірша
     if (targetVerseStart) {
         setTimeout(() => {
             const target = document.getElementById('target');
             if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 500);
+        }, 400);
     }
 }
-// Навігація клавішами
-document.addEventListener('keydown', (e) => {
-    if (e.key === "ArrowLeft") {
-        navigate(-1);
-    } else if (e.key === "ArrowRight") {
-        navigate(1);
-    }
-});
-// Оновлюємо кнопку перемикання
+
+// --- 4. КЕРУВАННЯ ТА НАВІГАЦІЯ ---
+
 toggleBtn.onclick = () => {
     isParallel = !isParallel;
     localStorage.setItem('parallelMode', isParallel);
     applyParallelState();
-    renderContent(); // Перемальовуємо, щоб запустити анімацію та змінити розкладку
 };
 
-// --- ЗАПУСК ---
+function navigate(direction) {
+    const newChapter = parseInt(chapterNum) + direction;
+    if (newChapter < 1) return;
+    let newRef = `${bookName} ${newChapter}`;
+    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${lang}`;
+}
+
+document.getElementById('prevBtn').onclick = () => navigate(-1);
+document.getElementById('nextBtn').onclick = () => navigate(1);
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === "ArrowLeft") navigate(-1);
+    if (e.key === "ArrowRight") navigate(1);
+});
+
+// --- 5. ЗАПУСК ---
 
 Promise.all([
     fetch('bibleTextUA.json').then(res => res.json()),
@@ -345,49 +311,8 @@ Promise.all([
 .then(([uaData, ruData]) => {
     bibleDataUA = uaData;
     bibleDataRU = ruData;
-    refHeader.innerText = chapterRef;
+    refHeader.innerText = `${bookName} ${chapterNum}`;
     renderContent();
-    applyParallelState();
+    applyParallelState(); // Встановлюємо візуальний стан кнопки
 })
-.catch(err => console.error("Помилка файлів:", err));
-
-function applyParallelState() {
-    const rows = document.querySelectorAll('.verse-row');
-    const toggleBtn = document.getElementById('toggleParallel');
-
-    if (isParallel) {
-        rows.forEach(row => row.classList.remove('single-mode'));
-        toggleBtn.style.background = 'var(--accent-color)';
-        toggleBtn.style.color = '#fff';
-        toggleBtn.innerText = "||"; // Фіксований текст
-    } else {
-        rows.forEach(row => row.classList.add('single-mode'));
-        toggleBtn.style.background = '#f4f4f4';
-        toggleBtn.style.color = 'var(--text-color)';
-        toggleBtn.innerText = "||"; // Або залиште UA | RU
-    }
-}
-
-// Повна логіка натискання кнопки
-toggleBtn.onclick = () => {
-    isParallel = !isParallel; // Змінюємо стан
-    localStorage.setItem('parallelMode', isParallel); // Зберігаємо вибір
-    
-    // Варіант А: Швидке перемикання без перемальовування тексту
-    applyParallelState();
-    
-    // Варіант Б (якщо хочете, щоб анімація програлася знову при зміні режиму):
-    // renderContent(); 
-};
-
-function navigate(direction) {
-    const newChapter = parseInt(chapterNum) + direction;
-    if (newChapter < 1) return;
-
-    // Стрілки ведуть просто на розділ, без номерів віршів у посиланні
-    let newRef = `${bookName} ${newChapter}`;
-    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${lang}`;
-}
-
-document.getElementById('prevBtn').onclick = () => navigate(-1);
-document.getElementById('nextBtn').onclick = () => navigate(1);
+.catch(err => console.error("Помилка завантаження даних:", err));
