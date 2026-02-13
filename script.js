@@ -174,9 +174,10 @@ function renderDirectResult(ref, text) {
 }
 
 function addVerseToFragment(fragment, ref, htmlContent) {
-    const div = document.createElement('div'); // Змінено на div для нового рядка
-    div.className = 'verse'; // Додано клас для зв'язку з вашим CSS
+    const div = document.createElement('div');
+    div.className = 'verse'; // Використовуємо клас, який прописаний у стилях
     
+    // Прибираємо margin-left у ref, щоб текст не "з'їжджав" вправо
     div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; font-weight: bold;">${ref}</span> ${htmlContent}`;
     
     div.querySelector('.ref').addEventListener('click', () => {
