@@ -32,14 +32,30 @@
         }
         
         /* Сітка для ідеального вирівнювання: Назад | Попередня | Заголовок | Паралель | Наступна */
+/* Оновлена сітка для симетрії */
         .ref-header-container {
             display: grid;
-            grid-template-columns: 45px 45px 1fr 85px 45px;
+            /* Ліва частина 100px | Центр | Права частина 100px */
+            grid-template-columns: 100px 1fr 100px; 
             align-items: center;
-            max-width: 950px;
+            max-width: 900px; /* Збігається з контентом */
             margin: 0 auto;
             padding: 0 15px;
+            height: 50px;
+        }
+
+        /* Групуємо кнопки зліва */
+        .nav-group-left {
+            display: flex;
             gap: 8px;
+            justify-content: flex-start;
+        }
+
+        /* Групуємо кнопки справа */
+        .nav-group-right {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
         }
 
         .ref-header { 
@@ -49,7 +65,7 @@
             letter-spacing: 1px;
             color: var(--accent-color);
             font-weight: 600;
-            text-align: center;
+            text-align: center; /* Центрування тексту */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
