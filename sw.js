@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bible-searcher-v1';
+const CACHE_NAME = 'bible-searcher-v1.0';
 const ASSETS = [
   'index.html',
   'reader.html',
