@@ -231,6 +231,19 @@ function renderContent() {
 
     const mainPrefix = `${bookName} ${chapterNum}:`;
     const sidePrefix = `${parallelBookName} ${chapterNum}:`;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightVerse = urlParams.get('verse'); // або інший параметр, який ви передаєте
+    
+    if (highlightVerse) {
+        setTimeout(() => {
+            const element = document.getElementById(`v${highlightVerse}`);
+            if (element) {
+                element.classList.add('highlight');
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 500); // невелика затримка, щоб текст встиг відрендеритись
+    }
     
     const keys = Object.keys(mainData).filter(k => k.startsWith(mainPrefix));
     keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
