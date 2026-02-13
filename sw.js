@@ -3,7 +3,7 @@ const ASSETS = [
   'index.html',
   'reader.html',
   'reader.js',
-  'app.webmanifest',
+  'app.webmanifest.json', // Додав .json як у вас у переліку
   'bibleTextUA.json',
   'bibleTextRU.json',
   'icon-192.png',
