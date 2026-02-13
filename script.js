@@ -167,7 +167,7 @@ function renderDirectResult(ref, text) {
     div.className = 'verse';
     div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer;">● ${ref}</span> ${text}`;
     div.querySelector('.ref').addEventListener('click', () => {
-        window.open(`reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`, '_blank');
+        window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${lang}`;
     });
     resultsDiv.appendChild(div);
 }
@@ -178,7 +178,7 @@ function addVerseToFragment(fragment, ref, htmlContent) {
     div.className = 'verse';
     div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE;">${ref}</span> ${htmlContent}`;
     div.querySelector('.ref').addEventListener('click', () => {
-        window.open(`reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`, '_blank');
+        window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${lang}`;
     });
     fragment.appendChild(div);
 }
