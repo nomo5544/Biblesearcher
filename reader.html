@@ -30,6 +30,19 @@
             border-bottom: 1px solid rgba(0,0,0,0.08);
             padding: 8px 0;
         }
+
+        .highlight {
+            background-color: #FFE5B4 !important; /* Ніжно-оранжевий */
+            border-radius: 4px;
+            transition: background 0.3s ease;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        /* Додатково: підсвічуємо і текст у паралельному перекладі, якщо потрібно */
+        .primary-cell.highlight, .secondary-cell.highlight {
+            background-color: #FFE5B4 !important;
+        }
         
         /* Сітка: 3 колонки (боки по 100px, центр вільний) */
         .ref-header-container {
