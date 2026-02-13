@@ -142,76 +142,50 @@ const maps = {
         "откр": "Откровение", "откровение": "Откроение", "отк": "Откровение"
     }
 };
-
-// Створюємо масиви для пошуку книг
-const orderUA = typeof maps !== 'undefined' ? [...new Set(Object.values(maps.ukr))] : [];
-const orderRU = typeof maps !== 'undefined' ? [...new Set(Object.values(maps.ru))] : [];
-
-let bookName = "", chapterNum = "", targetVerseStart = null, targetVerseEnd = null;
+let bibleDataUA = null;
+let bibleDataRU = null;
+let isParallel = localStorage.getItem('parallelMode') === 'true';
 
 // Розбір посилання
+let bookName = "", chapterNum = "1", targetVerseStart = null, targetVerseEnd = null;
 const rangeMatch = fullRef.match(/^(.+)\s(\d+):(\d+)-(\d+)$/);
 const singleMatch = fullRef.match(/^(.+)\s(\d+):(\d+)$/);
 const chapterMatch = fullRef.match(/^(.+)\s(\d+)$/);
 
 if (rangeMatch) {
-    bookName = rangeMatch[1];
-    chapterNum = rangeMatch[2];
-    targetVerseStart = parseInt(rangeMatch[3]);
-    targetVerseEnd = parseInt(rangeMatch[4]);
+    [ , bookName, chapterNum, targetVerseStart, targetVerseEnd] = rangeMatch.map((v, i) => i > 1 ? parseInt(v) : v);
 } else if (singleMatch) {
-    bookName = singleMatch[1];
-    chapterNum = singleMatch[2];
-    targetVerseStart = parseInt(singleMatch[3]);
+    [ , bookName, chapterNum, targetVerseStart] = singleMatch.map((v, i) => i > 1 ? parseInt(v) : v);
     targetVerseEnd = targetVerseStart;
 } else if (chapterMatch) {
-    bookName = chapterMatch[1];
-    chapterNum = chapterMatch[2];
+    [ , bookName, chapterNum] = chapterMatch;
 }
 
-const refHeader = document.getElementById('refHeader');
-const toggleBtn = document.getElementById('toggleParallel');
-const layout = document.getElementById('reader-layout');
+// --- 2. ФУНКЦІЇ ---
 
-let bibleDataUA = null;
-let bibleDataRU = null;
-let isParallel = localStorage.getItem('parallelMode') === 'true';
+function getCrossLangBookName(name, fromLang) {
+    // Якщо об'єкт maps не знайдено, повертаємо назву як є, щоб не "класти" скрипт
+    if (typeof maps === 'undefined' || !maps[fromLang]) return name;
+    
+    const currentMaps = maps[fromLang];
+    const targetLang = fromLang === 'ukr' ? 'ru' : 'ukr';
+    const targetMaps = maps[targetLang];
 
-// --- 2. ДОПОМІЖНІ ФУНКЦІЇ ---
+    // Шукаємо ключ книги
+    const bookKey = Object.keys(currentMaps).find(key => 
+        currentMaps[key].toLowerCase() === name.toLowerCase()
+    );
 
-function getCrossLangBookName(currentName, fromLang) {
-    if (typeof maps === 'undefined') return currentName;
-    const fromOrder = (fromLang === 'ukr') ? orderUA : orderRU;
-    const toOrder = (fromLang === 'ukr') ? orderRU : orderUA;
-    let fullName = currentName;
-    const bookKey = currentName.toLowerCase().replace(/\.$/, "");
-    if (maps[fromLang][bookKey]) {
-        fullName = maps[fromLang][bookKey];
-    }
-    const index = fromOrder.indexOf(fullName);
-    return (index !== -1 && toOrder[index]) ? toOrder[index] : currentName;
+    return (bookKey && targetMaps[bookKey]) ? targetMaps[bookKey] : name;
 }
-
-function applyParallelState() {
-    const rows = document.querySelectorAll('.verse-row');
-    if (!toggleBtn) return;
-
-    if (isParallel) {
-        rows.forEach(row => row.classList.remove('single-mode'));
-        toggleBtn.style.background = 'var(--accent-color)';
-        toggleBtn.style.color = '#fff';
-    } else {
-        rows.forEach(row => row.classList.add('single-mode'));
-        toggleBtn.style.background = '#f4f4f4';
-        toggleBtn.style.color = 'var(--text-color)';
-    }
-}
-
-// --- 3. ВІДОБРАЖЕННЯ ТЕКСТУ ---
 
 function renderContent() {
+    const layout = document.getElementById('reader-layout');
+    const refHeader = document.getElementById('refHeader');
     if (!layout || !bibleDataUA || !bibleDataRU) return;
-    layout.innerHTML = ""; 
+
+    layout.innerHTML = "";
+    if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
 
     const parallelBookName = getCrossLangBookName(bookName, lang);
     const mainData = (lang === 'ukr') ? bibleDataUA : bibleDataRU;
@@ -220,89 +194,76 @@ function renderContent() {
     const mainPrefix = `${bookName} ${chapterNum}:`;
     const sidePrefix = `${parallelBookName} ${chapterNum}:`;
 
+    // Фільтруємо вірші розділу
     const keys = Object.keys(mainData).filter(k => k.startsWith(mainPrefix));
     keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
 
     if (keys.length === 0) {
-        layout.innerHTML = "<div style='padding:20px; opacity:0.5;'>Розділ не знайдено...</div>";
+        layout.innerHTML = `<div style="padding:40px; text-align:center; opacity:0.5;">Розділ "${fullRef}" не знайдено.</div>`;
         return;
     }
 
+    const fragment = document.createDocumentFragment();
     keys.forEach((key, index) => {
         const vNum = key.split(':')[1];
+        const vInt = parseInt(vNum);
         const sideKey = `${sidePrefix}${vNum}`;
 
-        let isHighlighted = false;
-        const vInt = parseInt(vNum);
-        if (targetVerseStart) {
-            isHighlighted = targetVerseEnd ? (vInt >= targetVerseStart && vInt <= targetVerseEnd) : (vInt === targetVerseStart);
-        }
+        const isHighlighted = targetVerseStart && (targetVerseEnd ? (vInt >= targetVerseStart && vInt <= targetVerseEnd) : (vInt === targetVerseStart));
         
-        const hClass = isHighlighted ? 'highlight' : '';
-        const idAttr = (isHighlighted && vInt === targetVerseStart) ? 'id="target"' : '';
-
         const row = document.createElement('div');
-        row.className = `verse-row animate-verse ${isParallel ? '' : 'single-mode'}`;
-        row.style.animationDelay = `${index * 0.03}s`;
-        row.id = `v${vNum}`; 
+        row.className = `verse-row ${isParallel ? '' : 'single-mode'}`;
+        row.id = `v${vNum}`;
 
         row.innerHTML = `
-            <div class="verse-cell primary-cell ${hClass}" ${idAttr}>
+            <div class="verse-cell primary-cell ${isHighlighted ? 'highlight' : ''}" ${isHighlighted && vInt === targetVerseStart ? 'id="target"' : ''}>
                 <span class="verse-num">${vNum}</span>${mainData[key]}
             </div>
-            <div class="verse-cell secondary-cell ${hClass}">
-                <span class="verse-num">${vNum}</span>${sideData[sideKey] || "—"}
+            <div class="verse-cell secondary-cell ${isHighlighted ? 'highlight' : ''}">
+                <span class="verse-num">${vNum}</span>${sideData[sideKey] || sideData[`${parallelBookName} ${chapterNum}:${vNum.padStart(2, '0')}`] || "—"}
             </div>
         `;
-        layout.appendChild(row);
+        fragment.appendChild(row);
     });
 
+    layout.appendChild(fragment);
+
+    // Прокрутка
     if (targetVerseStart) {
         setTimeout(() => {
-            const target = document.getElementById('target');
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 400);
+            const targetEl = document.getElementById('target');
+            if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 500);
     }
 }
 
-// --- 4. КЕРУВАННЯ ТА НАВІГАЦІЯ ---
+// --- 3. ПОДІЇ ТА ЗАВАНТАЖЕННЯ ---
 
-if (toggleBtn) {
-    toggleBtn.onclick = () => {
-        isParallel = !isParallel;
-        localStorage.setItem('parallelMode', isParallel);
-        applyParallelState();
-    };
+function navigate(dir) {
+    const newChap = parseInt(chapterNum) + dir;
+    if (newChap < 1) return;
+    window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + newChap)}&lang=${lang}`;
 }
 
-function navigate(direction) {
-    const newChapter = parseInt(chapterNum) + direction;
-    if (newChapter < 1) return;
-    let newRef = `${bookName} ${newChapter}`;
-    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${lang}`;
-}
+document.getElementById('prevBtn').onclick = () => navigate(-1);
+document.getElementById('nextBtn').onclick = () => navigate(1);
+document.getElementById('toggleParallel').onclick = function() {
+    isParallel = !isParallel;
+    localStorage.setItem('parallelMode', isParallel);
+    document.querySelectorAll('.verse-row').forEach(r => r.classList.toggle('single-mode'));
+    this.style.background = isParallel ? 'var(--accent-color)' : '#f4f4f4';
+    this.style.color = isParallel ? '#fff' : 'var(--text-color)';
+};
 
-const pBtn = document.getElementById('prevBtn');
-const nBtn = document.getElementById('nextBtn');
-if (pBtn) pBtn.onclick = () => navigate(-1);
-if (nBtn) nBtn.onclick = () => navigate(1);
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === "ArrowLeft") navigate(-1);
-    if (e.key === "ArrowRight") navigate(1);
-});
-
-// --- 5. ЗАПУСК ---
-
+// Завантаження файлів
 Promise.all([
-    fetch('bibleTextUA.json').then(res => res.json()),
-    fetch('bibleTextRU.json').then(res => res.json())
-])
-.then(([uaData, ruData]) => {
-    bibleDataUA = uaData;
-    bibleDataRU = ruData;
-    if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
+    fetch('bibleTextUA.json').then(r => r.json()),
+    fetch('bibleTextRU.json').then(r => r.json())
+]).then(([ua, ru]) => {
+    bibleDataUA = ua;
+    bibleDataRU = ru;
     renderContent();
-    applyParallelState();
-})
-.catch(err => console.error("Помилка завантаження:", err));
+}).catch(err => {
+    document.getElementById('reader-layout').innerHTML = "Помилка завантаження JSON файлів.";
+    console.error(err);
+});
