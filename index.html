@@ -1,175 +1,170 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
-  <meta charset="utf-8">
-  <title>Біблійний Пошук</title>
-  <link rel="manifest" href="app.webmanifest.json">
-  <style>
-    body {
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* Центрує все по горизонталі */
-        min-height: 100vh;
-        margin: 0;
-        background-color: var(--bg-color);}
-    .main-container {
-        width: 90%;
-        max-width: 800px; /* Обмежуємо ширину, щоб пошук не був занадто широким */
-        margin: 20px auto;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;}
-    .header { 
-        position: sticky; 
-        top: 0; 
-        background: #f8f8f8; 
-        padding: 10px; 
-        border-bottom: 1px solid #ddd; 
-        z-index: 1000; }
-    .top-bar { 
-        display: flex; 
-        align-items: center; 
-        gap: 10px; 
-        height: 32px; }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Біблійний Пошук</title>
+    <link rel="manifest" href="app.webmanifest.json">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --header-bg: #f8f8f8;
+            --border-color: #ddd;
+        }
 
-    /* Кнопка мови */
-    .lang-button {
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
-        height: 100%; 
-        width: 36px; 
-        font-size: 20px; 
-        color: #0000FF; 
-        background: #ececec; 
-        border: 1px solid #ccc;
-        border-radius: 4px; 
-        cursor: pointer; 
-        user-select: none; 
-        box-sizing: border-box;
-    }
-    .lang-active-ru { 
-        color: #333; 
-        background: #ececec; 
-        border-color: #ccc; }
-    /* Лічильник результатів */
-      #resultCount { 
-        font-size: 18px; 
-        color: #000; 
-        min-width: 35px; 
-        text-align: center; }
-    input#searchInput { 
-        flex-grow: 1; 
-        width: 100%;
-        height: 100%; 
-        padding: 0 10px; 
-        border: 1px solid #ccc; 
-        border-radius: 4px; 
-        font-size: 16px; 
-        box-sizing: border-box; /* Щоб padding не роздував ширину */
-    /* Стиль для кнопки копіювання */
-    #copyRefsBtn { 
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
-        height: 100%; 
-        width: 36px; 
-        font-size: 17px;
-        color: #333; 
-        background: #ececec; 
-        border: 1px solid #ccc;
-        border-radius: 4px; 
-        cursor: pointer; 
-        user-select: none; 
-        box-sizing: border-box;
-    }
-    #copyRefsBtn:hover { 
-        background: #e0e0e0; }
-    #copyRefsBtn:active { 
-        background: #d0d0d0; }
-    /* Стиль для повзунка зміни розміру шрифта результату */
-      .toggle-container { 
-        height: 100%; 
-        display: flex; 
-        align-items: center; }
-    #exactMatch { 
-        display: none; }
-    .toggle-label {
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
-        height: 100%; 
-        width: 36px; 
-        font-size: 17px;
-        color: #555; 
-        background: #ececec; 
-        border: 1px solid #ccc;
-        border-radius: 4px; 
-        cursor: pointer; 
-        box-sizing: border-box;
-    }
-    #exactMatch:checked + .toggle-label { 
-        background: #1E90FF; 
-        color: white; 
-        border-color: #1E90FF; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            background-color: var(--bg-color);
+        }
 
-    .font-controls { 
-        display: flex; 
-        align-items: center; 
-        gap: 5px; height: 100%; 
-        font-size: 13px; 
-        color: #666; }
-    
-    #results { 
-        padding: 10px 12px; 
-        font-size: 18px; }
-    .verse { 
-        margin-bottom: 10px; 
-        line-height: 1.5; 
-        border-bottom: 1px solid #f0f0f0; 
-        padding-bottom: 8px; }
-    .ref { 
-        font-weight: bold; 
-        color: #2c3e50; 
-        cursor: pointer; 
-        text-decoration: none; 
-        margin-right: 5px; }
-    mark { 
-        background-color: #ffeb3b; 
-        padding: 0; }
-  </style>
+        /* Фіксована панель зверху */
+        .header { 
+            position: sticky; 
+            top: 0; 
+            background: var(--header-bg); 
+            padding: 10px; 
+            border-bottom: 1px solid var(--border-color); 
+            z-index: 1000;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-container {
+            width: 95%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px 0;
+        }
+
+        .top-bar { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            height: 36px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Поле пошуку */
+        input#searchInput { 
+            flex-grow: 1; 
+            height: 100%; 
+            padding: 0 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            font-size: 16px; 
+            box-sizing: border-box;
+        }
+
+        /* Кнопки керування */
+        .btn-ui, .lang-button, .toggle-label {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            height: 36px; 
+            width: 36px; 
+            background: #ececec; 
+            border: 1px solid #ccc;
+            border-radius: 4px; 
+            cursor: pointer; 
+            user-select: none; 
+            font-size: 18px;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        .lang-button { color: #0000FF; font-weight: bold; font-size: 14px; }
+
+        #resultCount { 
+            font-size: 18px; 
+            color: #000; 
+            min-width: 35px; 
+            text-align: center; 
+        }
+
+        /* Перемикач точного пошуку */
+        #exactMatch { display: none; }
+        #exactMatch:checked + .toggle-label { 
+            background: #1E90FF; 
+            color: white; 
+            border-color: #1E90FF; 
+        }
+
+        /* Результати */
+        #results { 
+            width: 100%;
+            padding: 10px 0; 
+            font-size: 18px; 
+        }
+
+        .verse { 
+            margin-bottom: 15px; 
+            line-height: 1.6; 
+            border-bottom: 1px solid #f0f0f0; 
+            padding-bottom: 10px; 
+            text-align: left;
+        }
+
+        .ref { 
+            font-weight: bold; 
+            color: #2c3e50; 
+            cursor: pointer; 
+            text-decoration: none; 
+            margin-right: 8px; 
+        }
+
+        mark { background-color: #ffeb3b; }
+
+        .font-controls { display: flex; align-items: center; gap: 5px; }
+
+        h1 { text-align: center; margin: 10px 0; font-size: 24px; }
+    </style>
 </head>
 <body>
-  <div class="main-container">
-    <h1>Bible Searcher</h1>
-    <input type="text" id="searchInput" placeholder="Пошук...">
-    <div id="results"></div>
-</div>  
-  <div class="header">
+
+    <div class="header">
         <div class="top-bar">
-            <button id="copyRefsBtn" title="Копіювати посилання">📌</button>
+            <button id="copyRefsBtn" class="btn-ui" title="Копіювати посилання">📌</button>
+            
             <input type="text" id="searchInput" placeholder="Введи слово чи посилання..." autofocus>
-        <div id="resultCount" title="Лічильник результатів">0</div>
-        <div id="langToggle" class="lang-button" title="Зміна мови">UA</div>       
+            
+            <div id="resultCount" title="Лічильник результатів">0</div>
+            
+            <div id="langToggle" class="lang-button" title="Зміна мови">UA</div>       
+            
             <label class="toggle-container">
-            <input type="checkbox" id="exactMatch">
-            <span class="toggle-label" title="Повна або часткова відповідність">📚</span>
+                <input type="checkbox" id="exactMatch">
+                <span class="toggle-label" title="Повна або часткова відповідність">📚</span>
             </label>
-        <div class="font-controls" title="Зміна розміру шрифта">
-           <input type="range" id="fontSizeRange" min="12" max="25" value="18" style="width: 50px; cursor: pointer;">
+
+            <div class="font-controls" title="Розмір шрифту">
+               <input type="range" id="fontSizeRange" min="12" max="30" value="18" style="width: 60px;">
+            </div>
         </div>
     </div>
-  </div>
-  <div id="results"></div>
-  <script src="script.js"></script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('Service Worker зареєстровано!'))
-        .catch(err => console.log('Помилка реєстрації:', err));
-    });
-  }
-</script>
+
+    <div class="main-container">
+        <h1>Bible Searcher</h1>
+        <div id="results"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA Ready'))
+                    .catch(err => console.log('Error:', err));
+            });
+        }
+    </script>
 </body>
 </html>
