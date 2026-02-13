@@ -206,15 +206,18 @@ function getCrossLangBookName(currentName, fromLang) {
 
 function applyParallelState() {
     const rows = document.querySelectorAll('.verse-row');
+    if (!toggleBtn) return;
+
     if (isParallel) {
         rows.forEach(row => row.classList.remove('single-mode'));
-        toggleBtn.style.background = 'var(--accent-color)';
+        toggleBtn.style.background = 'var(--accent-color)'; // Чорний (активний)
         toggleBtn.style.color = '#fff';
     } else {
         rows.forEach(row => row.classList.add('single-mode'));
-        toggleBtn.style.background = '#f4f4f4';
+        toggleBtn.style.background = '#f4f4f4'; // Світлий (пасивний)
         toggleBtn.style.color = 'var(--text-color)';
     }
+    // Текст || залишається незмінним, бо ми його тут не чіпаємо
 }
 
 // --- 3. ВІДОБРАЖЕННЯ ТЕКСТУ ---
