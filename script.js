@@ -1,13 +1,14 @@
-let currentLang = localStorage.getItem('selectedLang') || 'ukr';
-let currentLangData = {};
-
+// --- 1. ОГОЛОШЕННЯ ЗМІННИХ (ЕЛЕМЕНТИ ІНТЕРФЕЙСУ) ---
 const searchInput = document.getElementById('searchInput');
 const resultsDiv = document.getElementById('results');
 const countDisplay = document.getElementById('resultCount');
+const langToggle = document.getElementById('langToggle');
 const exactMatch = document.getElementById('exactMatch');
 const fontSlider = document.getElementById('fontSizeRange');
-const fontLabel = document.getElementById('fontSizeValue');
-const langBtn = document.getElementById('langToggle');
+const copyRefsBtn = document.getElementById('copyRefsBtn');
+
+let currentLang = localStorage.getItem('selectedLang') || 'ukr';
+let currentLangData = {};
 
 // --- СЛОВНИКИ ДЛЯ ОБОХ МОВ ---
 const maps = {
@@ -149,7 +150,7 @@ const maps = {
     }
 };
 
-// --- ФУНКЦІЇ ЗАВАНТАЖЕННЯ ---
+// --- 2. ФУНКЦІЇ ЗАВАНТАЖЕННЯ ---
 function loadLanguage(langCode) {
     const fileName = langCode === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
     fetch(fileName)
@@ -161,31 +162,28 @@ function loadLanguage(langCode) {
         .catch(err => console.error("Файл не знайдено:", fileName));
 }
 
-// --- ВІДОБРАЖЕННЯ ПРЯМОГО РЕЗУЛЬТАТУ ---
+// --- 3. ВІДОБРАЖЕННЯ РЕЗУЛЬТАТІВ ---
 function renderDirectResult(ref, text) {
     const div = document.createElement('div');
     div.className = 'verse';
     div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer;">● ${ref}</span> ${text}`;
     div.querySelector('.ref').addEventListener('click', () => {
-        // ВИПРАВЛЕНО: використовуємо currentLang та location.href
         window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
     });
     resultsDiv.appendChild(div);
 }
 
-// --- ДОПОМІЖНА ФУНКЦІЯ ДЛЯ СТВОРЕННЯ ВІРША ---
 function addVerseToFragment(fragment, ref, htmlContent) {
     const div = document.createElement('div');
     div.className = 'verse';
     div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE;">${ref}</span> ${htmlContent}`;
     div.querySelector('.ref').addEventListener('click', () => {
-        // ВИПРАВЛЕНО: використовуємо currentLang та location.href
         window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
     });
     fragment.appendChild(div);
 }
 
-// --- ГОЛОВНА ФУНКЦІЯ ПОШУКУ (без змін, окрім виклику фрагментів) ---
+// --- 4. ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
 function performSearch() {
     const query = searchInput.value.trim();
     resultsDiv.innerHTML = '';
@@ -198,14 +196,14 @@ function performSearch() {
     const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
     const match = query.match(refRegex);
 
-    if (match) {
+    if (match && typeof maps !== 'undefined') {
         const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
         const chapter = match[2];
         const vStart = parseInt(match[3] || "1");
         const vEnd = match[4] ? parseInt(match[4]) : vStart;
         
         const currentMap = maps[currentLang];
-        const fullBookName = currentMap[bookInput];
+        const fullBookName = currentMap ? currentMap[bookInput] : null;
 
         if (fullBookName) {
             let combinedText = "";
@@ -275,8 +273,27 @@ function performSearch() {
     countDisplay.innerText = count;
 }
 
-// --- СЛУХАЧІ ПОДІЙ ---
-langToggle.addEventListener('click', () => { // Перевірте, чи id збігається з index.html
+// --- 5. ФУНКЦІЯ КОПІЮВАННЯ (ПОВЕРНУТО) ---
+if (copyRefsBtn) {
+    copyRefsBtn.addEventListener('click', () => {
+        const refElements = resultsDiv.querySelectorAll('.ref');
+        if (refElements.length === 0) return;
+
+        const refsList = Array.from(refElements).map(el => {
+            return el.innerText.replace(/[●]/g, '').trim();
+        });
+
+        const textToCopy = refsList.join(', ');
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalIcon = copyRefsBtn.innerText;
+            copyRefsBtn.innerText = '✅';
+            setTimeout(() => { copyRefsBtn.innerText = originalIcon; }, 1500);
+        });
+    });
+}
+
+// --- 6. СЛУХАЧІ ПОДІЙ ---
+langToggle.addEventListener('click', () => {
     currentLang = (currentLang === 'ukr') ? 'ru' : 'ukr';
     langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
     localStorage.setItem('selectedLang', currentLang);
@@ -293,16 +310,15 @@ searchInput.addEventListener('keydown', (event) => {
         const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
         const match = query.match(refRegex);
 
-        if (match) {
+        if (match && typeof maps !== 'undefined') {
             const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
             const fullBookName = maps[currentLang][bookInput];
             if (fullBookName) {
                 const chapter = match[2];
-                const verseStart = match[3] || "1";
-                const verseEnd = match[4];
-                let finalRef = `${fullBookName} ${chapter}:${verseStart}`;
-                if (verseEnd) finalRef += `-${verseEnd}`;
-                // ВИПРАВЛЕНО: location.href замість window.open
+                const vStart = match[3] || "1";
+                const vEnd = match[4];
+                let finalRef = `${fullBookName} ${chapter}:${vStart}`;
+                if (vEnd) finalRef += `-${vEnd}`;
                 window.location.href = `reader.html?ref=${encodeURIComponent(finalRef)}&lang=${currentLang}`;
                 return;
             }
@@ -311,6 +327,17 @@ searchInput.addEventListener('keydown', (event) => {
     }
 });
 
-// --- СТАРТ ---
-// Виклик завантаження при старті
+// Слухач шрифту
+fontSlider.addEventListener('input', () => {
+    const size = fontSlider.value;
+    resultsDiv.style.fontSize = size + 'px';
+    localStorage.setItem('bibleFontSize', size);
+});
+
+// --- 7. СТАРТ ---
+const savedFontSize = localStorage.getItem('bibleFontSize') || '18';
+resultsDiv.style.fontSize = savedFontSize + 'px';
+fontSlider.value = savedFontSize;
+
+langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
 loadLanguage(currentLang);
