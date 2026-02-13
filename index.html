@@ -5,11 +5,20 @@
   <title>Біблійний Пошук</title>
   <link rel="manifest" href="app.webmanifest.json">
   <style>
-    body { 
-        width: 580px; 
-        margin: 0; 
-        font-family: sans-serif; 
-        background-color: #fff; }
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Центрує все по горизонталі */
+        min-height: 100vh;
+        margin: 0;
+        background-color: var(--bg-color);}
+    .main-container {
+        width: 90%;
+        max-width: 800px; /* Обмежуємо ширину, щоб пошук не був занадто широким */
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;}
     .header { 
         position: sticky; 
         top: 0; 
@@ -51,12 +60,13 @@
         text-align: center; }
     input#searchInput { 
         flex-grow: 1; 
+        width: 100%;
         height: 100%; 
         padding: 0 10px; 
         border: 1px solid #ccc; 
         border-radius: 4px; 
         font-size: 16px; 
-        box-sizing: border-box; }
+        box-sizing: border-box; /* Щоб padding не роздував ширину */
     /* Стиль для кнопки копіювання */
     #copyRefsBtn { 
         display: flex; 
