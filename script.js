@@ -174,13 +174,14 @@ function renderDirectResult(ref, text) {
 }
 
 function addVerseToFragment(fragment, ref, htmlContent) {
-    const div = document.createElement('div');
-    div.className = 'verse';
-    div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE;">${ref}</span> ${htmlContent}`;
-    div.querySelector('.ref').addEventListener('click', () => {
+    const span = document.createElement('span');
+    span.style.display = "inline"; // Текст йде підряд
+    span.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; margin-left: 5px; font-weight: bold;">${ref}</span> ${htmlContent} `;
+    
+    span.querySelector('.ref').addEventListener('click', () => {
         window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
     });
-    fragment.appendChild(div);
+    fragment.appendChild(span);
 }
 
 // --- 4. ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
