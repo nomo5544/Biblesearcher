@@ -232,21 +232,13 @@ function renderContent() {
     const mainPrefix = `${bookName} ${chapterNum}:`;
     const sidePrefix = `${parallelBookName} ${chapterNum}:`;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const highlightVerse = urlParams.get('verse'); // або інший параметр, який ви передаєте
-    
-    if (highlightVerse) {
-        setTimeout(() => {
-            const element = document.getElementById(`v${highlightVerse}`);
-            if (element) {
-                element.classList.add('highlight');
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }, 500); // невелика затримка, щоб текст встиг відрендеритись
-    }
-    
     const keys = Object.keys(mainData).filter(k => k.startsWith(mainPrefix));
-    keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
+    // Сортування ключів (щоб вірші йшли по порядку 1, 2, 3...)
+    keys.sort((a, b) => {
+        const vA = parseInt(a.split(':')[1]);
+        const vB = parseInt(b.split(':')[1]);
+        return vA - vB;
+    });
 
     if (keys.length === 0) {
         layout.innerHTML = "<div style='padding:20px; opacity:0.5;'>Розділ не знайдено...</div>";
@@ -255,7 +247,7 @@ function renderContent() {
 
     keys.forEach((key, index) => {
         const vNum = key.split(':')[1];
-        const sideKey = `${sidePrefix}${vNum}`; // Створюємо sideKey
+        const sideKey = `${sidePrefix}${vNum}`;
 
         // Розрахунок підсвічування
         let isHighlighted = false;
@@ -265,12 +257,15 @@ function renderContent() {
         }
         
         const hClass = isHighlighted ? 'highlight' : '';
+        // Додаємо ID "target" для першого підсвіченого вірша, щоб до нього прокрутити
         const idAttr = (isHighlighted && vInt === targetVerseStart) ? 'id="target"' : '';
 
         const row = document.createElement('div');
         row.className = `verse-row animate-verse ${isParallel ? '' : 'single-mode'}`;
-        row.style.animationDelay = `${index * 0.03}s`; // Плавне відкривання
-        row.id = `v${vNum}`; // Цей ID критично важливий для підсвічування!
+        row.style.animationDelay = `${index * 0.03}s`;
+        
+        // ВИПРАВЛЕНО: використовуємо vNum замість неіснуючої verseNumber
+        row.id = `v${vNum}`; 
 
         row.innerHTML = `
             <div class="verse-cell primary-cell ${hClass}" ${idAttr}>
@@ -283,10 +278,13 @@ function renderContent() {
         layout.appendChild(row);
     });
 
+    // Прокрутка до потрібного вірша
     if (targetVerseStart) {
         setTimeout(() => {
             const target = document.getElementById('target');
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }, 400);
     }
 }
