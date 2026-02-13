@@ -86,11 +86,28 @@
             cursor: pointer;
         }
 
-        #resultCount { 
+        /* Результати */
+        #results { 
+            width: 100%;
+            padding: 10px 0; 
             font-size: 18px; 
-            color: #000; 
-            min-width: 35px; 
-            text-align: center; 
+        }
+
+        .verse { 
+            display: block;          /* Кожен вірш з нового рядка */
+            margin-bottom: 15px;    /* ВІДСТАНЬ МІЖ ВІРШАМИ (змінюйте тут) */
+            line-height: 1.6;       /* МІЖРЯДКОВИЙ ІНТЕРВАЛ (змінюйте тут) */
+            border-bottom: none;    /* ПРИБРАНО ЛІНІЮ */
+            padding-bottom: 0;      /* ПРИБРАНО ЗАЙВИЙ ВІДСТУП */
+            text-align: left;
+        }
+
+        .ref { 
+            font-weight: bold; 
+            color: #0000EE;         /* Стандартний колір посилання */
+            cursor: pointer; 
+            text-decoration: none; 
+            margin-right: 8px; 
         }
 
         /* Перемикач точного пошуку */
