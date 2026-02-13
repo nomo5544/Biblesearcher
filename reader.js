@@ -270,7 +270,7 @@ function renderContent() {
         const row = document.createElement('div');
         row.className = `verse-row animate-verse ${isParallel ? '' : 'single-mode'}`;
         row.style.animationDelay = `${index * 0.03}s`; // Плавне відкривання
-        row.id = `v${verseNumber}`; // Цей ID критично важливий для підсвічування!
+        row.id = `v${vNum}`; // Цей ID критично важливий для підсвічування!
 
         row.innerHTML = `
             <div class="verse-cell primary-cell ${hClass}" ${idAttr}>
