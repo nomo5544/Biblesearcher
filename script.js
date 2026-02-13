@@ -338,7 +338,7 @@ fontSlider.addEventListener('input', () => {
 });
 
 // --- 7. СТАРТ ---
-const savedFontSize = localStorage.getItem('bibleFontSize') || '18';
+const savedFontSize = localStorage.getItem('bibleFontSize') || '';
 resultsDiv.style.fontSize = savedFontSize + 'px';
 fontSlider.value = savedFontSize;
 
