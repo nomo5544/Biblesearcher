@@ -204,27 +204,40 @@ function renderContent() {
     }
 
     const fragment = document.createDocumentFragment();
-    keys.forEach((key, index) => {
-        const vNum = key.split(':')[1];
-        const vInt = parseInt(vNum);
-        const sideKey = `${sidePrefix}${vNum}`;
+keys.forEach((key, index) => {
+    const vNum = key.split(':')[1];
+    const vInt = parseInt(vNum);
+    const sideKey = `${sidePrefix}${vNum}`;
 
-        const isHighlighted = targetVerseStart && (targetVerseEnd ? (vInt >= targetVerseStart && vInt <= targetVerseEnd) : (vInt === targetVerseStart));
-        
-        const row = document.createElement('div');
-        row.className = `verse-row ${isParallel ? '' : 'single-mode'}`;
-        row.id = `v${vNum}`;
+    // Перевірка: чи входить цей вірш у діапазон підсвічування
+    let isHighlighted = false;
+    if (targetVerseStart !== null) {
+        if (targetVerseEnd !== null) {
+            // Якщо є діапазон (напр. 1:1-5)
+            isHighlighted = (vInt >= targetVerseStart && vInt <= targetVerseEnd);
+        } else {
+            // Якщо тільки один вірш (напр. 1:1)
+            isHighlighted = (vInt === targetVerseStart);
+        }
+    }
+    
+    const hClass = isHighlighted ? 'highlight' : '';
+    const idAttr = (isHighlighted && vInt === targetVerseStart) ? 'id="target"' : '';
 
-        row.innerHTML = `
-            <div class="verse-cell primary-cell ${isHighlighted ? 'highlight' : ''}" ${isHighlighted && vInt === targetVerseStart ? 'id="target"' : ''}>
-                <span class="verse-num">${vNum}</span>${mainData[key]}
-            </div>
-            <div class="verse-cell secondary-cell ${isHighlighted ? 'highlight' : ''}">
-                <span class="verse-num">${vNum}</span>${sideData[sideKey] || sideData[`${parallelBookName} ${chapterNum}:${vNum.padStart(2, '0')}`] || "—"}
-            </div>
-        `;
-        fragment.appendChild(row);
-    });
+    const row = document.createElement('div');
+    row.className = `verse-row ${isParallel ? '' : 'single-mode'}`;
+    row.id = `v${vNum}`;
+
+    row.innerHTML = `
+        <div class="verse-cell primary-cell ${hClass}" ${idAttr}>
+            <span class="verse-num">${vNum}</span>${mainData[key]}
+        </div>
+        <div class="verse-cell secondary-cell ${hClass}">
+            <span class="verse-num">${vNum}</span>${sideData[sideKey] || "—"}
+        </div>
+    `;
+    layout.appendChild(row);
+});
 
     layout.appendChild(fragment);
 
