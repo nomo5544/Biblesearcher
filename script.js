@@ -338,9 +338,20 @@ fontSlider.addEventListener('input', () => {
 });
 
 // --- 7. СТАРТ ---
-const savedFontSize = localStorage.getItem('bibleFontSize') || '';
-resultsDiv.style.fontSize = savedFontSize + 'px';
-fontSlider.value = savedFontSize;
+const fontSizeRange = document.getElementById('fontSizeRange');
+const resultsDiv = document.getElementById('results');
+
+// 1. При завантаженні: беремо збережений розмір або ставимо 18 за замовчуванням
+const savedSize = localStorage.getItem('searchFontSize') || '18';
+fontSizeRange.value = savedSize;
+resultsDiv.style.fontSize = savedSize + 'px';
+
+// 2. При зміні повзунка: змінюємо розмір і зберігаємо в пам'ять
+fontSizeRange.addEventListener('input', () => {
+    const size = fontSizeRange.value;
+    resultsDiv.style.fontSize = size + 'px';
+    localStorage.setItem('searchFontSize', size);
+});
 
 langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
 loadLanguage(currentLang);
