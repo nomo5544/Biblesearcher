@@ -143,11 +143,6 @@ const maps = {
     }
 };
 
-// --- 1. ОТРИМАННЯ ПАРАМЕТРІВ З URL ---
-const urlParams = new URLSearchParams(window.location.search);
-const fullRef = urlParams.get('ref') || "";
-const lang = urlParams.get('lang') || "ukr";
-
 // Створюємо масиви для пошуку книг
 const orderUA = typeof maps !== 'undefined' ? [...new Set(Object.values(maps.ukr))] : [];
 const orderRU = typeof maps !== 'undefined' ? [...new Set(Object.values(maps.ru))] : [];
