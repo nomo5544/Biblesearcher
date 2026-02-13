@@ -222,7 +222,7 @@ function applyParallelState() {
 // --- 3. ВІДОБРАЖЕННЯ ТЕКСТУ ---
 
 function renderContent() {
-    if (!layout) return;
+    if (!layout || !bibleDataUA || !bibleDataRU) return;
     layout.innerHTML = ""; 
 
     const parallelBookName = getCrossLangBookName(bookName, lang);
@@ -242,15 +242,22 @@ function renderContent() {
 
     keys.forEach((key, index) => {
         const vNum = key.split(':')[1];
-        // ... ваш код розрахунку підсвічування ...
-    
-        const row = document.createElement('div');
-        // Додаємо клас animate-verse для плавного відкривання
-        row.className = `verse-row animate-verse ${isParallel ? '' : 'single-mode'}`;
+        const sideKey = `${sidePrefix}${vNum}`; // Створюємо sideKey
+
+        // Розрахунок підсвічування
+        let isHighlighted = false;
+        const vInt = parseInt(vNum);
+        if (targetVerseStart) {
+            isHighlighted = targetVerseEnd ? (vInt >= targetVerseStart && vInt <= targetVerseEnd) : (vInt === targetVerseStart);
+        }
         
-        // Повертаємо ступінчасту затримку для ефекту "шторки"
-        row.style.animationDelay = `${index * 0.03}s`; 
-    
+        const hClass = isHighlighted ? 'highlight' : '';
+        const idAttr = (isHighlighted && vInt === targetVerseStart) ? 'id="target"' : '';
+
+        const row = document.createElement('div');
+        row.className = `verse-row animate-verse ${isParallel ? '' : 'single-mode'}`;
+        row.style.animationDelay = `${index * 0.03}s`; // Плавне відкривання
+
         row.innerHTML = `
             <div class="verse-cell primary-cell ${hClass}" ${idAttr}>
                 <span class="verse-num">${vNum}</span>${mainData[key]}
