@@ -143,13 +143,18 @@ const maps = {
     }
 };
 
-// Створюємо масиви для пошуку книг на різних мовах
-const orderUA = [...new Set(Object.values(maps.ukr))];
-const orderRU = [...new Set(Object.values(maps.ru))];
+// --- 1. ОТРИМАННЯ ПАРАМЕТРІВ З URL ---
+const urlParams = new URLSearchParams(window.location.search);
+const fullRef = urlParams.get('ref') || "";
+const lang = urlParams.get('lang') || "ukr";
+
+// Створюємо масиви для пошуку книг
+const orderUA = typeof maps !== 'undefined' ? [...new Set(Object.values(maps.ukr))] : [];
+const orderRU = typeof maps !== 'undefined' ? [...new Set(Object.values(maps.ru))] : [];
 
 let bookName = "", chapterNum = "", targetVerseStart = null, targetVerseEnd = null;
 
-// Розбір посилання (Регулярні вирази)
+// Розбір посилання
 const rangeMatch = fullRef.match(/^(.+)\s(\d+):(\d+)-(\d+)$/);
 const singleMatch = fullRef.match(/^(.+)\s(\d+):(\d+)$/);
 const chapterMatch = fullRef.match(/^(.+)\s(\d+)$/);
@@ -159,28 +164,14 @@ if (rangeMatch) {
     chapterNum = rangeMatch[2];
     targetVerseStart = parseInt(rangeMatch[3]);
     targetVerseEnd = parseInt(rangeMatch[4]);
-    sessionStorage.setItem('savedBook', bookName);
-    sessionStorage.setItem('savedChap', chapterNum);
-    sessionStorage.setItem('savedStart', targetVerseStart);
-    sessionStorage.setItem('savedEnd', targetVerseEnd);
 } else if (singleMatch) {
     bookName = singleMatch[1];
     chapterNum = singleMatch[2];
     targetVerseStart = parseInt(singleMatch[3]);
     targetVerseEnd = targetVerseStart;
-    sessionStorage.setItem('savedBook', bookName);
-    sessionStorage.setItem('savedChap', chapterNum);
-    sessionStorage.setItem('savedStart', targetVerseStart);
-    sessionStorage.setItem('savedEnd', targetVerseEnd);
 } else if (chapterMatch) {
     bookName = chapterMatch[1];
     chapterNum = chapterMatch[2];
-    const sBook = sessionStorage.getItem('savedBook');
-    const sChap = sessionStorage.getItem('savedChap');
-    if (sBook === bookName && sChap === chapterNum) {
-        targetVerseStart = parseInt(sessionStorage.getItem('savedStart'));
-        targetVerseEnd = parseInt(sessionStorage.getItem('savedEnd'));
-    }
 }
 
 const refHeader = document.getElementById('refHeader');
@@ -194,11 +185,13 @@ let isParallel = localStorage.getItem('parallelMode') === 'true';
 // --- 2. ДОПОМІЖНІ ФУНКЦІЇ ---
 
 function getCrossLangBookName(currentName, fromLang) {
+    if (typeof maps === 'undefined') return currentName;
     const fromOrder = (fromLang === 'ukr') ? orderUA : orderRU;
     const toOrder = (fromLang === 'ukr') ? orderRU : orderUA;
     let fullName = currentName;
-    if (maps[fromLang][currentName.toLowerCase().replace(/\.$/, "")]) {
-        fullName = maps[fromLang][currentName.toLowerCase().replace(/\.$/, "")];
+    const bookKey = currentName.toLowerCase().replace(/\.$/, "");
+    if (maps[fromLang][bookKey]) {
+        fullName = maps[fromLang][bookKey];
     }
     const index = fromOrder.indexOf(fullName);
     return (index !== -1 && toOrder[index]) ? toOrder[index] : currentName;
@@ -233,12 +226,7 @@ function renderContent() {
     const sidePrefix = `${parallelBookName} ${chapterNum}:`;
 
     const keys = Object.keys(mainData).filter(k => k.startsWith(mainPrefix));
-    // Сортування ключів (щоб вірші йшли по порядку 1, 2, 3...)
-    keys.sort((a, b) => {
-        const vA = parseInt(a.split(':')[1]);
-        const vB = parseInt(b.split(':')[1]);
-        return vA - vB;
-    });
+    keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
 
     if (keys.length === 0) {
         layout.innerHTML = "<div style='padding:20px; opacity:0.5;'>Розділ не знайдено...</div>";
@@ -249,7 +237,6 @@ function renderContent() {
         const vNum = key.split(':')[1];
         const sideKey = `${sidePrefix}${vNum}`;
 
-        // Розрахунок підсвічування
         let isHighlighted = false;
         const vInt = parseInt(vNum);
         if (targetVerseStart) {
@@ -257,14 +244,11 @@ function renderContent() {
         }
         
         const hClass = isHighlighted ? 'highlight' : '';
-        // Додаємо ID "target" для першого підсвіченого вірша, щоб до нього прокрутити
         const idAttr = (isHighlighted && vInt === targetVerseStart) ? 'id="target"' : '';
 
         const row = document.createElement('div');
         row.className = `verse-row animate-verse ${isParallel ? '' : 'single-mode'}`;
         row.style.animationDelay = `${index * 0.03}s`;
-        
-        // ВИПРАВЛЕНО: використовуємо vNum замість неіснуючої verseNumber
         row.id = `v${vNum}`; 
 
         row.innerHTML = `
@@ -278,24 +262,23 @@ function renderContent() {
         layout.appendChild(row);
     });
 
-    // Прокрутка до потрібного вірша
     if (targetVerseStart) {
         setTimeout(() => {
             const target = document.getElementById('target');
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 400);
     }
 }
 
 // --- 4. КЕРУВАННЯ ТА НАВІГАЦІЯ ---
 
-toggleBtn.onclick = () => {
-    isParallel = !isParallel;
-    localStorage.setItem('parallelMode', isParallel);
-    applyParallelState();
-};
+if (toggleBtn) {
+    toggleBtn.onclick = () => {
+        isParallel = !isParallel;
+        localStorage.setItem('parallelMode', isParallel);
+        applyParallelState();
+    };
+}
 
 function navigate(direction) {
     const newChapter = parseInt(chapterNum) + direction;
@@ -304,8 +287,10 @@ function navigate(direction) {
     window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${lang}`;
 }
 
-document.getElementById('prevBtn').onclick = () => navigate(-1);
-document.getElementById('nextBtn').onclick = () => navigate(1);
+const pBtn = document.getElementById('prevBtn');
+const nBtn = document.getElementById('nextBtn');
+if (pBtn) pBtn.onclick = () => navigate(-1);
+if (nBtn) nBtn.onclick = () => navigate(1);
 
 document.addEventListener('keydown', (e) => {
     if (e.key === "ArrowLeft") navigate(-1);
@@ -321,8 +306,8 @@ Promise.all([
 .then(([uaData, ruData]) => {
     bibleDataUA = uaData;
     bibleDataRU = ruData;
-    refHeader.innerText = `${bookName} ${chapterNum}`;
+    if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
     renderContent();
-    applyParallelState(); // Встановлюємо візуальний стан кнопки
+    applyParallelState();
 })
-.catch(err => console.error("Помилка завантаження даних:", err));
+.catch(err => console.error("Помилка завантаження:", err));
