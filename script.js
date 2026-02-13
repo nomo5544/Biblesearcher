@@ -303,4 +303,37 @@ const maps = {
     // Запуск
     if (langToggle) langToggle.innerText = window.currentLang === 'ukr' ? 'UA' : 'RU';
     window.loadLanguage(window.currentLang);
+    // --- ОБРОБНИК ENTER ---
+    if (searchInput) {
+        searchInput.onkeydown = (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Зупиняємо перезавантаження сторінки
+                const query = searchInput.value.trim();
+                
+                // Перевіряємо, чи це посилання (напр. Матвія 1:1)
+                const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
+                const match = query.match(refRegex);
+
+                if (match && typeof maps !== 'undefined') {
+                    const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
+                    const currentMap = maps[window.currentLang];
+                    const fullBookName = currentMap ? currentMap[bookInput] : null;
+
+                    if (fullBookName) {
+                        const chapter = match[2];
+                        const vStart = match[3] || "1";
+                        const vEnd = match[4];
+                        let finalRef = `${fullBookName} ${chapter}:${vStart}`;
+                        if (vEnd) finalRef += `-${vEnd}`;
+                        
+                        // Перехід на reader.html
+                        window.location.href = `reader.html?ref=${encodeURIComponent(finalRef)}&lang=${window.currentLang}`;
+                        return;
+                    }
+                }
+                // Якщо це не посилання, просто запускаємо пошук по словах
+                window.performSearch();
+            }
+        };
+    }
 })();
