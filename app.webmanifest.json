@@ -1,11 +1,12 @@
 {
   "name": "Bible Searcher",
-  "short_name": "Bible",
+  "short_name": "BS",
   "description": "Зручне читання та пошук у Біблії",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
+  "scope": "./",
   "icons": [
     {
       "src": "icon-192.png",
