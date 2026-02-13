@@ -21,6 +21,9 @@
 
         /* Шапка */
         .header-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Розносить кнопки по краях */
             position: sticky;
             top: 0;
             background: var(--bg-color);
@@ -28,7 +31,11 @@
             border-bottom: 1px solid rgba(0,0,0,0.05);
             padding: 5px 0;
         }
-
+        
+        .nav-btn:hover {
+            background: #e0e0e0;
+        }
+        
         .ref-header-container {
             display: grid;
             grid-template-columns: 50px 1fr 140px;
@@ -47,6 +54,9 @@
             color: var(--accent-color);
             font-weight: 600;
             opacity: 0.7;
+            flex-grow: 1;
+            text-align: center;
+            margin: 0 10px;
         }
 
         /* Контейнер тексту */
