@@ -1,11 +1,11 @@
-// --- 1. ОГОЛОШЕННЯ ЗМІННИХ (ЕЛЕМЕНТИ ІНТЕРФЕЙСУ) ---
+// --- 1. ОГОЛОШЕННЯ ЗМІННИХ ---
 const searchInput = document.getElementById('searchInput');
 const resultsDiv = document.getElementById('results');
 const countDisplay = document.getElementById('resultCount');
 const langToggle = document.getElementById('langToggle');
 const exactMatch = document.getElementById('exactMatch');
-const fontSlider = document.getElementById('fontSizeRange');
 const copyRefsBtn = document.getElementById('copyRefsBtn');
+const fontSizeRange = document.getElementById('fontSizeRange');
 
 let currentLang = localStorage.getItem('selectedLang') || 'ukr';
 let currentLangData = {};
@@ -157,6 +157,7 @@ function loadLanguage(langCode) {
         .then(response => response.json())
         .then(data => {
             currentLangData = data;
+            // Якщо в полі вже щось є — шукаємо відразу
             if (searchInput.value.trim().length >= 2) performSearch();
         })
         .catch(err => console.error("Файл не знайдено:", fileName));
@@ -166,7 +167,7 @@ function loadLanguage(langCode) {
 function renderDirectResult(ref, text) {
     const div = document.createElement('div');
     div.className = 'verse';
-    // ПРИБРАНО font-weight: bold
+    // font-weight: normal (як ви просили)
     div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer; font-weight: normal;">● ${ref}</span> ${text}`;
     div.querySelector('.ref').addEventListener('click', () => {
         window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
@@ -177,8 +178,7 @@ function renderDirectResult(ref, text) {
 function addVerseToFragment(fragment, ref, htmlContent) {
     const div = document.createElement('div');
     div.className = 'verse'; 
-    
-    // ПРИБРАНО font-weight: bold
+    // font-weight: normal
     div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; font-weight: normal;">${ref}</span> ${htmlContent}`;
     
     div.querySelector('.ref').addEventListener('click', () => {
@@ -190,13 +190,15 @@ function addVerseToFragment(fragment, ref, htmlContent) {
 // --- 4. ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
 function performSearch() {
     const query = searchInput.value.trim();
+    if (!resultsDiv) return;
     resultsDiv.innerHTML = '';
     
     if (query.length < 2) { 
-        countDisplay.innerText = '0'; 
+        if (countDisplay) countDisplay.innerText = '0'; 
         return; 
     }
 
+    // Регулярний вираз для посилань
     const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
     const match = query.match(refRegex);
 
@@ -225,14 +227,14 @@ function performSearch() {
                 let displayRef = `${fullBookName} ${chapter}:${vStart}`;
                 if (match[4]) displayRef += `-${vEnd}`;
                 renderDirectResult(displayRef, combinedText);
-                countDisplay.innerText = '1';
+                if (countDisplay) countDisplay.innerText = '1';
                 return; 
             }
         }
     }
 
     let count = 0;
-    const isExact = exactMatch.checked;
+    const isExact = exactMatch ? exactMatch.checked : false;
     const fragment = document.createDocumentFragment();
 
     if (isExact) {
@@ -274,79 +276,47 @@ function performSearch() {
     }
 
     resultsDiv.appendChild(fragment);
-    countDisplay.innerText = count;
+    if (countDisplay) countDisplay.innerText = count;
 }
 
-// --- 5. ФУНКЦІЯ КОПІЮВАННЯ ---
-if (typeof copyRefsBtn !== 'undefined' && copyRefsBtn) {
-    copyRefsBtn.addEventListener('click', () => {
+// --- 5. КОПІЮВАННЯ ---
+if (copyRefsBtn) {
+    copyRefsBtn.onclick = () => {
         const refElements = resultsDiv.querySelectorAll('.ref');
         if (refElements.length === 0) return;
-
-        const refsList = Array.from(refElements).map(el => {
-            return el.innerText.replace(/[●]/g, '').trim();
-        });
-
-        const textToCopy = refsList.join(', ');
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            const originalIcon = copyRefsBtn.innerText;
+        const refsList = Array.from(refElements).map(el => el.innerText.replace(/[●]/g, '').trim());
+        navigator.clipboard.writeText(refsList.join(', ')).then(() => {
+            const oldIcon = copyRefsBtn.innerText;
             copyRefsBtn.innerText = '✅';
-            setTimeout(() => { copyRefsBtn.innerText = originalIcon; }, 1500);
+            setTimeout(() => copyRefsBtn.innerText = oldIcon, 1500);
         });
-    });
+    };
 }
 
-// --- 6. СЛУХАЧІ ПОДІЙ ---
-langToggle.addEventListener('click', () => {
-    currentLang = (currentLang === 'ukr') ? 'ru' : 'ukr';
-    langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
-    localStorage.setItem('selectedLang', currentLang);
-    loadLanguage(currentLang);
-});
+// --- 6. ПОДІЇ ТА ШРИФТ ---
+if (langToggle) {
+    langToggle.onclick = () => {
+        currentLang = (currentLang === 'ukr') ? 'ru' : 'ukr';
+        langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
+        localStorage.setItem('selectedLang', currentLang);
+        loadLanguage(currentLang);
+    };
+}
 
-searchInput.addEventListener('input', performSearch);
-exactMatch.addEventListener('change', performSearch);
+if (searchInput) searchInput.oninput = performSearch;
+if (exactMatch) exactMatch.onchange = performSearch;
 
-searchInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        const query = searchInput.value.trim();
-        const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
-        const match = query.match(refRegex);
-
-        if (match && typeof maps !== 'undefined') {
-            const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
-            const fullBookName = maps[currentLang][bookInput];
-            if (fullBookName) {
-                const chapter = match[2];
-                const vStart = match[3] || "1";
-                const vEnd = match[4];
-                let finalRef = `${fullBookName} ${chapter}:${vStart}`;
-                if (vEnd) finalRef += `-${vEnd}`;
-                window.location.href = `reader.html?ref=${encodeURIComponent(finalRef)}&lang=${currentLang}`;
-                return;
-            }
-        }
-        performSearch();
-    }
-});
-
-// --- 7. РОБОТА ЗІ ШРИФТОМ ТА СТАРТ ---
-const fontSizeRange = document.getElementById('fontSizeRange');
-const resultsDiv = document.getElementById('results');
-
-// Завантаження збереженого розміру
-const savedSize = localStorage.getItem('searchFontSize') || '18';
+// Шрифт
 if (fontSizeRange && resultsDiv) {
+    const savedSize = localStorage.getItem('searchFontSize') || '18';
     fontSizeRange.value = savedSize;
     resultsDiv.style.fontSize = savedSize + 'px';
-
-    fontSizeRange.addEventListener('input', () => {
-        const size = fontSizeRange.value;
-        resultsDiv.style.fontSize = size + 'px';
-        localStorage.setItem('searchFontSize', size);
-    });
+    fontSizeRange.oninput = () => {
+        resultsDiv.style.fontSize = fontSizeRange.value + 'px';
+        localStorage.setItem('searchFontSize', fontSizeRange.value);
+    };
 }
 
+// Старт
 langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
 loadLanguage(currentLang);
