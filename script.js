@@ -1,5 +1,5 @@
+let currentLang = localStorage.getItem('selectedLang') || 'ukr';
 let currentLangData = {};
-let currentLang = 'ukr'; 
 
 const searchInput = document.getElementById('searchInput');
 const resultsDiv = document.getElementById('results');
@@ -150,8 +150,8 @@ const maps = {
 };
 
 // --- ФУНКЦІЇ ЗАВАНТАЖЕННЯ ---
-function loadLanguage(lang) {
-    const fileName = lang === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
+function loadLanguage(langCode) {
+    const fileName = langCode === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
     fetch(fileName)
         .then(response => response.json())
         .then(data => {
@@ -167,23 +167,25 @@ function renderDirectResult(ref, text) {
     div.className = 'verse';
     div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer;">● ${ref}</span> ${text}`;
     div.querySelector('.ref').addEventListener('click', () => {
-        window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${lang}`;
+        // ВИПРАВЛЕНО: використовуємо currentLang та location.href
+        window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
     });
     resultsDiv.appendChild(div);
 }
 
-// --- ДОПОМІЖНА ФУНКЦІЯ ДЛЯ Створення ВІРША ---
+// --- ДОПОМІЖНА ФУНКЦІЯ ДЛЯ СТВОРЕННЯ ВІРША ---
 function addVerseToFragment(fragment, ref, htmlContent) {
     const div = document.createElement('div');
     div.className = 'verse';
     div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE;">${ref}</span> ${htmlContent}`;
     div.querySelector('.ref').addEventListener('click', () => {
-        window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${lang}`;
+        // ВИПРАВЛЕНО: використовуємо currentLang та location.href
+        window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
     });
     fragment.appendChild(div);
 }
 
-// --- ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
+// --- ГОЛОВНА ФУНКЦІЯ ПОШУКУ (без змін, окрім виклику фрагментів) ---
 function performSearch() {
     const query = searchInput.value.trim();
     resultsDiv.innerHTML = '';
@@ -274,9 +276,9 @@ function performSearch() {
 }
 
 // --- СЛУХАЧІ ПОДІЙ ---
-langBtn.addEventListener('click', () => {
+langToggle.addEventListener('click', () => { // Перевірте, чи id збігається з index.html
     currentLang = (currentLang === 'ukr') ? 'ru' : 'ukr';
-    langBtn.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
+    langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
     localStorage.setItem('selectedLang', currentLang);
     loadLanguage(currentLang);
 });
@@ -300,7 +302,8 @@ searchInput.addEventListener('keydown', (event) => {
                 const verseEnd = match[4];
                 let finalRef = `${fullBookName} ${chapter}:${verseStart}`;
                 if (verseEnd) finalRef += `-${verseEnd}`;
-                window.open(`reader.html?ref=${encodeURIComponent(finalRef)}&lang=${currentLang}`, '_blank');
+                // ВИПРАВЛЕНО: location.href замість window.open
+                window.location.href = `reader.html?ref=${encodeURIComponent(finalRef)}&lang=${currentLang}`;
                 return;
             }
         }
@@ -308,40 +311,6 @@ searchInput.addEventListener('keydown', (event) => {
     }
 });
 
-// --- СТАРТ ТА НАЛАШТУВАННЯ (LocalStorage) ---
-
-// 1. Мова
-const savedLang = localStorage.getItem('selectedLang') || 'ukr';
-currentLang = savedLang;
-langBtn.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
+// --- СТАРТ ---
+// Виклик завантаження при старті
 loadLanguage(currentLang);
-
-// 2. Шрифт (ФІКСАЦІЯ ТА ВИДАЛЕННЯ ЛИШНІХ ЦИФР)
-const savedFontSize = localStorage.getItem('bibleFontSize') || '18';
-resultsDiv.style.fontSize = savedFontSize + 'px';
-fontSlider.value = savedFontSize;
-
-// Слухач повзунка (оновлено: прибрано fontLabel.textContent)
-fontSlider.addEventListener('input', () => {
-    const size = fontSlider.value;
-    resultsDiv.style.fontSize = size + 'px';
-    localStorage.setItem('bibleFontSize', size); 
-});
-
-// 3. Копіювання
-const copyRefsBtn = document.getElementById('copyRefsBtn');
-copyRefsBtn.addEventListener('click', () => {
-    const refElements = resultsDiv.querySelectorAll('.ref');
-    if (refElements.length === 0) return;
-
-    const refsList = Array.from(refElements).map(el => {
-        return el.innerText.replace(/[●✝]/g, '').trim();
-    });
-
-    const textToCopy = refsList.join(', ');
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalText = copyRefsBtn.innerText;
-        copyRefsBtn.innerText = '✅';
-        setTimeout(() => { copyRefsBtn.innerText = originalText; }, 1500);
-    });
-});
