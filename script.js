@@ -178,7 +178,7 @@ function addVerseToFragment(fragment, ref, htmlContent) {
     div.className = 'verse'; // Використовуємо клас, який прописаний у стилях
     
     // Прибираємо margin-left у ref, щоб текст не "з'їжджав" вправо
-    div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; font-weight: bold;">${ref}</span> ${htmlContent}`;
+    div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE;">${ref}</span> ${htmlContent}`;
     
     div.querySelector('.ref').addEventListener('click', () => {
         window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
