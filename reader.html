@@ -21,7 +21,7 @@
             line-height: 1.6;
         }
 
-        /* Шапка з фіксованою позицією */
+        /* Шапка */
         .header-wrapper {
             position: sticky;
             top: 0;
@@ -31,27 +31,25 @@
             padding: 8px 0;
         }
         
-        /* Сітка для ідеального вирівнювання: Назад | Попередня | Заголовок | Паралель | Наступна */
-/* Оновлена сітка для симетрії */
+        /* Сітка: 3 колонки (боки по 100px, центр вільний) */
         .ref-header-container {
             display: grid;
-            /* Ліва частина 10px | Центр | Права частина 10px */
             grid-template-columns: 100px 1fr 100px; 
             align-items: center;
-            max-width: 900px; /* Збігається з контентом */
+            max-width: 900px;
             margin: 0 auto;
             padding: 0 15px;
             height: 50px;
+            box-sizing: border-box;
         }
 
-        /* Групуємо кнопки зліва */
+        /* Групування кнопок для Grid */
         .nav-group-left {
             display: flex;
             gap: 8px;
             justify-content: flex-start;
         }
 
-        /* Групуємо кнопки справа */
         .nav-group-right {
             display: flex;
             gap: 8px;
@@ -65,13 +63,12 @@
             letter-spacing: 1px;
             color: var(--accent-color);
             font-weight: 600;
-            text-align: center; /* Центрування тексту */
+            text-align: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Кнопки */
         .nav-btn { 
             border: none;
             font-size: 20px;
@@ -86,23 +83,12 @@
             transition: all 0.2s ease;
             color: var(--text-color);
             text-decoration: none;
+            flex-shrink: 0;
         }
 
         .nav-btn:hover { 
             background: var(--accent-color); 
             color: #fff; 
-        }
-
-        /* Спеціальна кнопка для перемикання мов */
-        #toggleParallel {
-            width: 40px;          /* Точно як у сусідніх кнопок */
-            height: 40px;         /* Точно як у сусідніх кнопок */
-            border-radius: 50%;   /* Робимо її ідеально круглою */
-            font-size: 16px;      /* Розмір для значка || */
-            padding: 0;           /* Скидаємо внутрішні відступи */
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         /* Контейнер тексту */
@@ -114,11 +100,6 @@
             box-sizing: border-box;
         }
 
-        /* Приховати другу колонку, якщо активований клас single-mode */
-        .single-mode .secondary-cell {
-            display: none;
-        }
-        
         .verse-row {
             display: flex;
             gap: 25px;
@@ -146,32 +127,21 @@
             border-left: 1px solid rgba(0,0,0,0.1);
             padding-left: 20px;
             color: #555;
-        }
-        
-        .highlight {
-            background-color: var(--highlight-color) !important;
-            border-radius: 4px;
-            transition: background 0.3s ease;
+            flex: 1;
         }
 
-        .animate-verse {
-            animation: fadeInRow 0.5s ease-out forwards;
-            opacity: 0;
-        }
-        
-        @keyframes fadeInRow {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .single-mode .secondary-cell {
+            display: none;
         }
         
         /* Мобільна адаптація */
         @media (max-width: 600px) {
             .ref-header-container {
-                grid-template-columns: 40px 1fr 40px; /* Спрощуємо для малих екранів */
+                grid-template-columns: 85px 1fr 85px;
+                padding: 0 8px;
             }
-            /* Ховаємо навігацію розділів у мобільній шапці, якщо тісно, або зменшуємо */
-            .nav-btn { width: 35px; height: 35px; font-size: 18px; }
-            .ref-header { font-size: 14px; letter-spacing: 0; }
+            .nav-btn { width: 36px; height: 36px; font-size: 18px; }
+            .ref-header { font-size: 15px; }
             .verse-cell { font-size: 18px; text-align: left; }
         }
     </style>
@@ -180,15 +150,18 @@
     <div class="header-wrapper">
         <div class="ref-header-container">
             
-            <button class="nav-btn" id="prevBtn" title="Попередній розділ">‹</button>
-            
-            <button onclick="window.location.href='index.html'" class="nav-btn" title="До пошуку">🔍</button>
+            <div class="nav-group-left">
+                <button onclick="window.location.href='index.html'" class="nav-btn" title="До пошуку">🔍</button>
+                <button class="nav-btn" id="prevBtn" title="Попередній розділ">‹</button>
+            </div>
             
             <div class="ref-header" id="refHeader">Завантаження...</div>
             
-            <button id="toggleParallel" class="nav-btn">||</button>
-            
-            <button class="nav-btn" id="nextBtn" title="Наступний розділ">›</button>
+            <div class="nav-group-right">
+                <button id="toggleParallel" class="nav-btn">||</button>
+                <button class="nav-btn" id="nextBtn" title="Наступний розділ">›</button>
+            </div>
+
         </div>
     </div>
 
