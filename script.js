@@ -166,7 +166,8 @@ function loadLanguage(langCode) {
 function renderDirectResult(ref, text) {
     const div = document.createElement('div');
     div.className = 'verse';
-    div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer;">● ${ref}</span> ${text}`;
+    // ПРИБРАНО font-weight: bold
+    div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer; font-weight: normal;">● ${ref}</span> ${text}`;
     div.querySelector('.ref').addEventListener('click', () => {
         window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
     });
@@ -175,10 +176,10 @@ function renderDirectResult(ref, text) {
 
 function addVerseToFragment(fragment, ref, htmlContent) {
     const div = document.createElement('div');
-    div.className = 'verse'; // Використовуємо клас, який прописаний у стилях
+    div.className = 'verse'; 
     
-    // Прибираємо margin-left у ref, щоб текст не "з'їжджав" вправо
-    div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE;">${ref}</span> ${htmlContent}`;
+    // ПРИБРАНО font-weight: bold
+    div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; font-weight: normal;">${ref}</span> ${htmlContent}`;
     
     div.querySelector('.ref').addEventListener('click', () => {
         window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
@@ -276,8 +277,8 @@ function performSearch() {
     countDisplay.innerText = count;
 }
 
-// --- 5. ФУНКЦІЯ КОПІЮВАННЯ (ПОВЕРНУТО) ---
-if (copyRefsBtn) {
+// --- 5. ФУНКЦІЯ КОПІЮВАННЯ ---
+if (typeof copyRefsBtn !== 'undefined' && copyRefsBtn) {
     copyRefsBtn.addEventListener('click', () => {
         const refElements = resultsDiv.querySelectorAll('.ref');
         if (refElements.length === 0) return;
@@ -330,28 +331,22 @@ searchInput.addEventListener('keydown', (event) => {
     }
 });
 
-// Слухач шрифту
-fontSlider.addEventListener('input', () => {
-    const size = fontSlider.value;
-    resultsDiv.style.fontSize = size + 'px';
-    localStorage.setItem('bibleFontSize', size);
-});
-
-// --- 7. СТАРТ ---
+// --- 7. РОБОТА ЗІ ШРИФТОМ ТА СТАРТ ---
 const fontSizeRange = document.getElementById('fontSizeRange');
 const resultsDiv = document.getElementById('results');
 
-// 1. При завантаженні: беремо збережений розмір або ставимо 18 за замовчуванням
+// Завантаження збереженого розміру
 const savedSize = localStorage.getItem('searchFontSize') || '18';
-fontSizeRange.value = savedSize;
-resultsDiv.style.fontSize = savedSize + 'px';
+if (fontSizeRange && resultsDiv) {
+    fontSizeRange.value = savedSize;
+    resultsDiv.style.fontSize = savedSize + 'px';
 
-// 2. При зміні повзунка: змінюємо розмір і зберігаємо в пам'ять
-fontSizeRange.addEventListener('input', () => {
-    const size = fontSizeRange.value;
-    resultsDiv.style.fontSize = size + 'px';
-    localStorage.setItem('searchFontSize', size);
-});
+    fontSizeRange.addEventListener('input', () => {
+        const size = fontSizeRange.value;
+        resultsDiv.style.fontSize = size + 'px';
+        localStorage.setItem('searchFontSize', size);
+    });
+}
 
 langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
 loadLanguage(currentLang);
