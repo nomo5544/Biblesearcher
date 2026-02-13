@@ -1,14 +1,17 @@
 // --- 1. ОГОЛОШЕННЯ ЗМІННИХ ---
-const searchInput = document.getElementById('searchInput');
-const resultsDiv = document.getElementById('results');
-const countDisplay = document.getElementById('resultCount');
-const langToggle = document.getElementById('langToggle');
-const exactMatch = document.getElementById('exactMatch');
-const copyRefsBtn = document.getElementById('copyRefsBtn');
-const fontSizeRange = document.getElementById('fontSizeRange');
+(function() {
+    // 1. Оголошуємо змінні ТІЛЬКИ якщо вони не були оголошені раніше
+    const searchInput = document.getElementById('searchInput');
+    const resultsDiv = document.getElementById('results');
+    const countDisplay = document.getElementById('resultCount');
+    const langToggle = document.getElementById('langToggle');
+    const exactMatch = document.getElementById('exactMatch');
+    const copyRefsBtn = document.getElementById('copyRefsBtn');
+    const fontSizeRange = document.getElementById('fontSizeRange');
 
-let currentLang = localStorage.getItem('selectedLang') || 'ukr';
-let currentLangData = {};
+    // Використовуємо let тільки для тих, що змінюються
+    window.currentLang = localStorage.getItem('selectedLang') || 'ukr';
+    window.currentLangData = {};
 
 // --- СЛОВНИКИ ДЛЯ ОБОХ МОВ ---
 const maps = {
@@ -150,173 +153,154 @@ const maps = {
     }
 };
 
-// --- 2. ФУНКЦІЇ ЗАВАНТАЖЕННЯ ---
-function loadLanguage(langCode) {
-    const fileName = langCode === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
-    fetch(fileName)
-        .then(response => response.json())
-        .then(data => {
-            currentLangData = data;
-            // Якщо в полі вже щось є — шукаємо відразу
-            if (searchInput.value.trim().length >= 2) performSearch();
-        })
-        .catch(err => console.error("Файл не знайдено:", fileName));
-}
-
-// --- 3. ВІДОБРАЖЕННЯ РЕЗУЛЬТАТІВ ---
-function renderDirectResult(ref, text) {
-    const div = document.createElement('div');
-    div.className = 'verse';
-    // font-weight: normal (як ви просили)
-    div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer; font-weight: normal;">● ${ref}</span> ${text}`;
-    div.querySelector('.ref').addEventListener('click', () => {
-        window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
-    });
-    resultsDiv.appendChild(div);
-}
-
-function addVerseToFragment(fragment, ref, htmlContent) {
-    const div = document.createElement('div');
-    div.className = 'verse'; 
-    // font-weight: normal
-    div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; font-weight: normal;">${ref}</span> ${htmlContent}`;
-    
-    div.querySelector('.ref').addEventListener('click', () => {
-        window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
-    });
-    fragment.appendChild(div);
-}
-
-// --- 4. ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
-function performSearch() {
-    const query = searchInput.value.trim();
-    if (!resultsDiv) return;
-    resultsDiv.innerHTML = '';
-    
-    if (query.length < 2) { 
-        if (countDisplay) countDisplay.innerText = '0'; 
-        return; 
+    // --- 2. ФУНКЦІЇ ВІДОБРАЖЕННЯ (Без жирного шрифту) ---
+    function renderDirectResult(ref, text) {
+        if (!resultsDiv) return;
+        const div = document.createElement('div');
+        div.className = 'verse';
+        div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer; font-weight: normal;">● ${ref}</span> ${text}`;
+        div.querySelector('.ref').addEventListener('click', () => {
+            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+        });
+        resultsDiv.appendChild(div);
     }
 
-    // Регулярний вираз для посилань
-    const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
-    const match = query.match(refRegex);
+    function addVerseToFragment(fragment, ref, htmlContent) {
+        const div = document.createElement('div');
+        div.className = 'verse'; 
+        div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; font-weight: normal;">${ref}</span> ${htmlContent}`;
+        div.querySelector('.ref').addEventListener('click', () => {
+            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+        });
+        fragment.appendChild(div);
+    }
 
-    if (match && typeof maps !== 'undefined') {
-        const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
-        const chapter = match[2];
-        const vStart = parseInt(match[3] || "1");
-        const vEnd = match[4] ? parseInt(match[4]) : vStart;
+    // --- 3. ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
+    window.performSearch = function() {
+        const query = searchInput.value.trim();
+        if (!resultsDiv) return;
+        resultsDiv.innerHTML = '';
         
-        const currentMap = maps[currentLang];
-        const fullBookName = currentMap ? currentMap[bookInput] : null;
+        if (query.length < 2) { 
+            if (countDisplay) countDisplay.innerText = '0'; 
+            return; 
+        }
 
-        if (fullBookName) {
-            let combinedText = "";
-            let foundAny = false;
-            for (let v = vStart; v <= vEnd; v++) {
-                const ref = `${fullBookName} ${chapter}:${v}`;
-                const refPadded = `${fullBookName} ${chapter}:${String(v).padStart(2, '0')}`;
-                const text = currentLangData[ref] || currentLangData[refPadded];
-                if (text) {
-                    combinedText += `<b style="color: #888; font-size: 0.8em; margin-left: 5px;">${v}</b> ${text} `;
-                    foundAny = true;
+        const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
+        const match = query.match(refRegex);
+
+        if (match && typeof maps !== 'undefined') {
+            const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
+            const chapter = match[2];
+            const vStart = parseInt(match[3] || "1");
+            const vEnd = match[4] ? parseInt(match[4]) : vStart;
+            
+            const currentMap = maps[window.currentLang];
+            const fullBookName = currentMap ? currentMap[bookInput] : null;
+
+            if (fullBookName) {
+                let combinedText = "";
+                let foundAny = false;
+                for (let v = vStart; v <= vEnd; v++) {
+                    const ref = `${fullBookName} ${chapter}:${v}`;
+                    const refPadded = `${fullBookName} ${chapter}:${String(v).padStart(2, '0')}`;
+                    const text = window.currentLangData[ref] || window.currentLangData[refPadded];
+                    if (text) {
+                        combinedText += `<b style="color: #888; font-size: 0.8em; margin-left: 5px;">${v}</b> ${text} `;
+                        foundAny = true;
+                    }
+                }
+                if (foundAny) {
+                    let displayRef = `${fullBookName} ${chapter}:${vStart}`;
+                    if (match[4]) displayRef += `-${vEnd}`;
+                    renderDirectResult(displayRef, combinedText);
+                    if (countDisplay) countDisplay.innerText = '1';
+                    return; 
                 }
             }
-            if (foundAny) {
-                let displayRef = `${fullBookName} ${chapter}:${vStart}`;
-                if (match[4]) displayRef += `-${vEnd}`;
-                renderDirectResult(displayRef, combinedText);
-                if (countDisplay) countDisplay.innerText = '1';
-                return; 
+        }
+
+        let count = 0;
+        const isExact = exactMatch ? exactMatch.checked : false;
+        const fragment = document.createDocumentFragment();
+
+        if (isExact) {
+            let regex;
+            try {
+                const pattern = `(?<![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])${query}(?![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])`;
+                regex = new RegExp(pattern, 'gi');
+            } catch (e) { return; }
+
+            for (const ref in window.currentLangData) {
+                const text = window.currentLangData[ref];
+                if (text.match(regex)) {
+                    count++;
+                    addVerseToFragment(fragment, ref, text.replace(regex, '<mark>$&</mark>'));
+                    if (count >= 500) break;
+                }
+            }
+        } else {
+            const searchWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 1);
+            if (searchWords.length === 0) return;
+
+            for (const ref in window.currentLangData) {
+                const text = window.currentLangData[ref];
+                const textLower = text.toLowerCase();
+                const matchesAll = searchWords.every(word => textLower.includes(word));
+
+                if (matchesAll) {
+                    count++;
+                    let highlightedText = text;
+                    searchWords.forEach(word => {
+                        const cleanWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const highlightRegex = new RegExp(`(${cleanWord})`, 'gi');
+                        highlightedText = highlightedText.replace(highlightRegex, '<mark>$1</mark>');
+                    });
+                    addVerseToFragment(fragment, ref, highlightedText);
+                    if (count >= 500) break;
+                }
             }
         }
+        resultsDiv.appendChild(fragment);
+        if (countDisplay) countDisplay.innerText = count;
+    };
+
+    // --- 4. ЗАВАНТАЖЕННЯ ---
+    window.loadLanguage = function(langCode) {
+        const fileName = langCode === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
+        fetch(fileName)
+            .then(response => response.json())
+            .then(data => {
+                window.currentLangData = data;
+                if (searchInput.value.trim().length >= 2) window.performSearch();
+            })
+            .catch(err => console.error("Файл не знайдено:", fileName));
+    };
+
+    // --- 5. ОБРОБНИКИ ПОДІЙ ---
+    if (langToggle) {
+        langToggle.onclick = () => {
+            window.currentLang = (window.currentLang === 'ukr') ? 'ru' : 'ukr';
+            langToggle.innerText = window.currentLang === 'ukr' ? 'UA' : 'RU';
+            localStorage.setItem('selectedLang', window.currentLang);
+            window.loadLanguage(window.currentLang);
+        };
     }
 
-    let count = 0;
-    const isExact = exactMatch ? exactMatch.checked : false;
-    const fragment = document.createDocumentFragment();
+    if (searchInput) searchInput.oninput = window.performSearch;
+    if (exactMatch) exactMatch.onchange = window.performSearch;
 
-    if (isExact) {
-        let regex;
-        try {
-            const pattern = `(?<![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])${query}(?![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])`;
-            regex = new RegExp(pattern, 'gi');
-        } catch (e) { return; }
-
-        for (const ref in currentLangData) {
-            const text = currentLangData[ref];
-            if (text.match(regex)) {
-                count++;
-                addVerseToFragment(fragment, ref, text.replace(regex, '<mark>$&</mark>'));
-                if (count >= 500) break;
-            }
-        }
-    } else {
-        const searchWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 1);
-        if (searchWords.length === 0) return;
-
-        for (const ref in currentLangData) {
-            const text = currentLangData[ref];
-            const textLower = text.toLowerCase();
-            const matchesAll = searchWords.every(word => textLower.includes(word));
-
-            if (matchesAll) {
-                count++;
-                let highlightedText = text;
-                searchWords.forEach(word => {
-                    const cleanWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const highlightRegex = new RegExp(`(${cleanWord})`, 'gi');
-                    highlightedText = highlightedText.replace(highlightRegex, '<mark>$1</mark>');
-                });
-                addVerseToFragment(fragment, ref, highlightedText);
-                if (count >= 500) break;
-            }
-        }
+    if (fontSizeRange && resultsDiv) {
+        const savedSize = localStorage.getItem('searchFontSize') || '18';
+        fontSizeRange.value = savedSize;
+        resultsDiv.style.fontSize = savedSize + 'px';
+        fontSizeRange.oninput = () => {
+            resultsDiv.style.fontSize = fontSizeRange.value + 'px';
+            localStorage.setItem('searchFontSize', fontSizeRange.value);
+        };
     }
 
-    resultsDiv.appendChild(fragment);
-    if (countDisplay) countDisplay.innerText = count;
-}
-
-// --- 5. КОПІЮВАННЯ ---
-if (copyRefsBtn) {
-    copyRefsBtn.onclick = () => {
-        const refElements = resultsDiv.querySelectorAll('.ref');
-        if (refElements.length === 0) return;
-        const refsList = Array.from(refElements).map(el => el.innerText.replace(/[●]/g, '').trim());
-        navigator.clipboard.writeText(refsList.join(', ')).then(() => {
-            const oldIcon = copyRefsBtn.innerText;
-            copyRefsBtn.innerText = '✅';
-            setTimeout(() => copyRefsBtn.innerText = oldIcon, 1500);
-        });
-    };
-}
-
-// --- 6. ПОДІЇ ТА ШРИФТ ---
-if (langToggle) {
-    langToggle.onclick = () => {
-        currentLang = (currentLang === 'ukr') ? 'ru' : 'ukr';
-        langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
-        localStorage.setItem('selectedLang', currentLang);
-        loadLanguage(currentLang);
-    };
-}
-
-if (searchInput) searchInput.oninput = performSearch;
-if (exactMatch) exactMatch.onchange = performSearch;
-
-// Шрифт
-if (fontSizeRange && resultsDiv) {
-    const savedSize = localStorage.getItem('searchFontSize') || '18';
-    fontSizeRange.value = savedSize;
-    resultsDiv.style.fontSize = savedSize + 'px';
-    fontSizeRange.oninput = () => {
-        resultsDiv.style.fontSize = fontSizeRange.value + 'px';
-        localStorage.setItem('searchFontSize', fontSizeRange.value);
-    };
-}
-
-// Старт
-langToggle.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
-loadLanguage(currentLang);
+    // Запуск
+    if (langToggle) langToggle.innerText = window.currentLang === 'ukr' ? 'UA' : 'RU';
+    window.loadLanguage(window.currentLang);
+})();
