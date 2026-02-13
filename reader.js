@@ -210,14 +210,13 @@ function applyParallelState() {
 
     if (isParallel) {
         rows.forEach(row => row.classList.remove('single-mode'));
-        toggleBtn.style.background = 'var(--accent-color)'; // Чорний (активний)
+        toggleBtn.style.background = 'var(--accent-color)';
         toggleBtn.style.color = '#fff';
     } else {
         rows.forEach(row => row.classList.add('single-mode'));
-        toggleBtn.style.background = '#f4f4f4'; // Світлий (пасивний)
+        toggleBtn.style.background = '#f4f4f4';
         toggleBtn.style.color = 'var(--text-color)';
     }
-    // Текст || залишається незмінним, бо ми його тут не чіпаємо
 }
 
 // --- 3. ВІДОБРАЖЕННЯ ТЕКСТУ ---
