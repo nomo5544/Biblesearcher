@@ -79,12 +79,15 @@
 
         /* Спеціальна кнопка для перемикання мов */
         #toggleParallel {
-            width: 100%;
-            border-radius: 20px;
-            font-size: 12px;
+            width: 60px;          /* Фіксована ширина для симетрії */
+            height: 34px;         /* Висота, близька до круглих кнопок */
+            border-radius: 17px;  /* Овальні краї (половина висоти) */
+            font-size: 14px;
             font-weight: bold;
-            padding: 0 5px;
-            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;       /* Центрування в колонці */
         }
 
         /* Контейнер тексту */
