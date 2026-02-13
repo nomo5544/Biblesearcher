@@ -242,21 +242,15 @@ function renderContent() {
 
     keys.forEach((key, index) => {
         const vNum = key.split(':')[1];
-        const sideKey = `${sidePrefix}${vNum}`;
-
+        // ... ваш код розрахунку підсвічування ...
+    
         const row = document.createElement('div');
+        // Додаємо клас animate-verse для плавного відкривання
         row.className = `verse-row animate-verse ${isParallel ? '' : 'single-mode'}`;
-        row.style.animationDelay = `${index * 0.02}s`;
-
-        let isHighlighted = false;
-        if (targetVerseStart) {
-            const vInt = parseInt(vNum);
-            isHighlighted = targetVerseEnd ? (vInt >= targetVerseStart && vInt <= targetVerseEnd) : (vInt === targetVerseStart);
-        }
         
-        const hClass = isHighlighted ? 'highlight' : '';
-        const idAttr = (isHighlighted && vNum == targetVerseStart) ? 'id="target"' : '';
-
+        // Повертаємо ступінчасту затримку для ефекту "шторки"
+        row.style.animationDelay = `${index * 0.03}s`; 
+    
         row.innerHTML = `
             <div class="verse-cell primary-cell ${hClass}" ${idAttr}>
                 <span class="verse-num">${vNum}</span>${mainData[key]}
