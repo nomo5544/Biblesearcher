@@ -146,25 +146,25 @@ const maps = {
 // --- ДОДАЙТЕ ЦЕ ВІДРАЗУ ПІСЛЯ CONST MAPS ---
 
 const reverseMaps = {
-    ukr: Object.fromEntries(Object.entries(maps.ukr).map(([k, v]) => [v.toLowerCase(), k])),
-    ru: Object.fromEntries(Object.entries(maps.ru).map(([k, v]) => [v.toLowerCase(), k]))
+    ukr: {},
+    ru: {}
 };
+
+// Заповнюємо автоматично, щоб не робити помилок вручну
+Object.entries(maps.ukr).forEach(([key, val]) => { reverseMaps.ukr[val.toLowerCase()] = key; });
+Object.entries(maps.ru).forEach(([key, val]) => { reverseMaps.ru[val.toLowerCase()] = key; });
 
 // --- ТЕПЕР ОНОВІТЬ ФУНКЦІЮ getCrossLangBookName ---
 
 function getCrossLangBookName(name, fromLang) {
-    if (typeof maps === 'undefined' || !maps[fromLang]) return name;
-
-    // 1. Знаходимо "код" книги за її повною назвою (напр. "Буття" -> "бут")
+    // 1. Отримуємо ключ (код книги)
     const bookKey = reverseMaps[fromLang][name.toLowerCase()];
-    
-    if (!bookKey) return name;
+    if (!bookKey) return name; // Якщо не знайшли, повертаємо стару назву
 
-    // 2. Визначаємо мову, на яку хочемо перекласти
+    // 2. Визначаємо цільову мову
     const targetLang = fromLang === 'ukr' ? 'ru' : 'ukr';
 
-    // 3. Беремо назву з цільового словника за цим же кодом
-    // Тепер, навіть якщо "Бытие" стоїть на іншому місці в списку, ми його знайдемо за ключем "бут"
+    // 3. Повертаємо назву з цільового словника за кодом
     return maps[targetLang][bookKey] || name;
 }
 
