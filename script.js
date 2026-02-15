@@ -280,7 +280,7 @@ const maps = {
             // Копіюємо отриманий рядок у буфер обміну
             navigator.clipboard.writeText(refsText).then(() => {
                 const originalText = copyRefsBtn.innerText;
-                copyRefsBtn.innerText = 'Скопійовано!';
+                copyRefsBtn.innerText = '✅';
                 setTimeout(() => {
                     copyRefsBtn.innerText = originalText;
                 }, 2000);
