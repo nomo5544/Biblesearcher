@@ -146,45 +146,53 @@
         .single-mode .secondary-cell {
             display: none;
         }
-        
-        /* Мобільна адаптація */
-        @media (max-width: 600px) {
-            .ref-header-container {
-                grid-template-columns: 85px 1fr 85px;
-                padding: 0 8px;
-            }
-            
-            .nav-btn { width: 36px; height: 36px; font-size: 18px; }
-            .ref-header { font-size: 15px; }
-            
-            /* Змінюємо напрямок з рядка на стовпчик */
-            .verse-row {
-                flex-direction: column; 
-                gap: 10px; /* Зменшуємо відступ між віршами */
-                margin-bottom: 24px; /* Збільшуємо відступ між парами віршів для візуального розділення */
-            }
-        
-            .verse-cell { 
-                font-size: 18px; 
-                text-align: left; 
-                width: 100%; /* Займає всю ширину */
-            }
-        
-            /* Налаштування для паралельного тексту (другий переклад) */
-            .secondary-cell {
-                border-left: none; /* Прибираємо лінію збоку */
-                border-top: 1px solid rgba(0,0,0,0.05); /* Додаємо тонку лінію зверху для розділення */
-                padding-left: 0;
-                padding-top: 8px;
-                color: #666; /* Трохи світліший колір, щоб відрізнити від основного */
-                font-style: italic; /* Можна додати курсив для кращого розрізнення */
-            }
-        
-            /* Приховуємо номер вірша у другому перекладі, якщо він там дублюється */
-            .secondary-cell .verse-num {
-                display: none; 
-            }
-        }
+        /* ... попередні стилі залишаються ... */
+
+/* Нова структура для паралельного режиму */
+#reader-layout {
+    display: flex;
+    flex-direction: row; /* На десктопі — поруч */
+    gap: 0;
+    width: 100%;
+    height: calc(100vh - 70px); /* Висота на весь екран мінус шапка */
+    overflow: hidden;
+}
+
+.text-panel {
+    flex: 1;
+    overflow-y: auto; /* Власна прокрутка для кожної панелі */
+    padding: 20px;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+.secondary-panel {
+    border-left: 1px solid rgba(0,0,0,0.1);
+    background: #fafafa;
+}
+
+/* МОБІЛЬНА АДАПТАЦІЯ: Вікна одне на одному */
+@media (max-width: 600px) {
+    #reader-layout {
+        flex-direction: column; /* Панелі стають вертикально */
+    }
+    
+    .text-panel {
+        height: 50%; /* Кожне вікно займає рівно половину висоти */
+        border-left: none;
+    }
+    
+    .secondary-panel {
+        border-top: 2px solid var(--accent-color); /* Розділювач між мовами */
+    }
+}
+
+/* Вірші всередині панелей */
+.verse-item {
+    margin-bottom: 15px;
+    font-size: 19px;
+    line-height: 1.6;
+}
     </style>
 </head>
 <body>
