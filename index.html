@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Біблійний Пошук</title> <link rel="manifest" href="app.webmanifest.json"> <style>
         /* --- ГЛОБАЛЬНІ НАЛАШТУВАННЯ ТА ЗМІННІ --- */
         :root {
@@ -132,6 +133,20 @@
             gap: 5px;               /* Відступ */
         }
 
+        /* Стилі для комп'ютерів */
+        .container {
+          width: 80%;
+          display: flex;
+        }
+        
+        /* Стилі для телефонів (екран менше 768px) */
+        @media (max-width: 768px) {
+          .container {
+            width: 95%;
+            flex-direction: column; /* Стовпчик замість рядка */
+          }
+        }
+        
         h1 { 
             text-align: center;     /* Заголовок-цитата по центру */
             margin: 10px 0;         /* Відступи зверху/знизу */
