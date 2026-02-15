@@ -153,9 +153,37 @@
                 grid-template-columns: 85px 1fr 85px;
                 padding: 0 8px;
             }
+            
             .nav-btn { width: 36px; height: 36px; font-size: 18px; }
             .ref-header { font-size: 15px; }
-            .verse-cell { font-size: 18px; text-align: left; }
+            
+            /* Змінюємо напрямок з рядка на стовпчик */
+            .verse-row {
+                flex-direction: column; 
+                gap: 10px; /* Зменшуємо відступ між віршами */
+                margin-bottom: 24px; /* Збільшуємо відступ між парами віршів для візуального розділення */
+            }
+        
+            .verse-cell { 
+                font-size: 18px; 
+                text-align: left; 
+                width: 100%; /* Займає всю ширину */
+            }
+        
+            /* Налаштування для паралельного тексту (другий переклад) */
+            .secondary-cell {
+                border-left: none; /* Прибираємо лінію збоку */
+                border-top: 1px solid rgba(0,0,0,0.05); /* Додаємо тонку лінію зверху для розділення */
+                padding-left: 0;
+                padding-top: 8px;
+                color: #666; /* Трохи світліший колір, щоб відрізнити від основного */
+                font-style: italic; /* Можна додати курсив для кращого розрізнення */
+            }
+        
+            /* Приховуємо номер вірша у другому перекладі, якщо він там дублюється */
+            .secondary-cell .verse-num {
+                display: none; 
+            }
         }
     </style>
 </head>
