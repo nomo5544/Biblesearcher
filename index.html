@@ -1,168 +1,165 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Біблійний Пошук</title>
-    <link rel="manifest" href="app.webmanifest.json">
-    <style>
+    <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Біблійний Пошук</title> <link rel="manifest" href="app.webmanifest.json"> <style>
+        /* --- ГЛОБАЛЬНІ НАЛАШТУВАННЯ ТА ЗМІННІ --- */
         :root {
-            /* Глобальні колірні змінні */
-            --bg-color: #ffffff;
-            --header-bg: #f8f8f8;
-            --border-color: #ddd;
+            --bg-color: #ffffff;    /* Колір фону сторінки */
+            --header-bg: #f8f8f8;  /* Колір фону верхньої панелі */
+            --border-color: #ddd;  /* Колір ліній та меж */
         }
 
+        /* --- ОФОРМЛЕННЯ ОСНОВНОЇ СТОРІНКИ --- */
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            font-family: sans-serif;
-            background-color: var(--bg-color);
+            display: flex;          /* Включення гнучкої верстки */
+            flex-direction: column; /* Розташування елементів зверху вниз */
+            align-items: center;    /* Центрування вмісту по горизонталі */
+            min-height: 100vh;      /* Мінімальна висота на весь екран */
+            margin: 0;              /* Видалення стандартних відступів браузера */
+            font-family: sans-serif; /* Вибір шрифту без засічок */
+            background-color: var(--bg-color); /* Застосування кольору фону зі змінної */
         }
 
+        /* --- ВЕРХНЯ ФІКСОВАНА ПАНЕЛЬ (HEADER) --- */
         .header { 
-            position: sticky; 
-            top: 0; 
-            background: var(--header-bg); 
-            padding: 10px; 
-            border-bottom: 1px solid var(--border-color); 
-            z-index: 1000;
-            width: 100%;
-            display: flex;
-            justify-content: center;
+            position: sticky;       /* Прилипання панелі до верху при прокрутці */
+            top: 0;                 /* Точка прилипання - самий верх */
+            background: var(--header-bg); /* Фон панелі */
+            padding: 10px;          /* Внутрішні відступи */
+            border-bottom: 1px solid var(--border-color); /* Лінія знизу панелі */
+            z-index: 1000;          /* Пріоритет шару, щоб бути поверх тексту */
+            width: 100%;            /* Ширина на весь екран */
+            display: flex;          /* Гнучка верстка для внутрішніх елементів */
+            justify-content: center; /* Центрування вмісту панелі */
+            box-sizing: border-box; /* ПЕРЕВІРТЕ: це не дасть внутрішнім відступам роздувати панель */
         }
 
-        .main-container {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 20px 0;
-        }
-
+        /* --- КОНТЕЙНЕР ДЛЯ ПОШУКОВИХ ЕЛЕМЕНТІВ --- */
         .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 10px;
-            box-sizing: border-box;
+            display: flex;          /* Розташування кнопок в один ряд */
+            justify-content: space-between; /* Рівномірний розподіл між краями */
+            align-items: center;    /* Вирівнювання кнопок по вертикальному центру */
+            gap: 10px;              /* Відстань між кнопками */
+            width: 100%;            /* Ширина контенту всередині панелі */
+            max-width: 900px;       /* Максимальна ширина для великих моніторів */
+            margin: 0 auto;         /* Центрування блоку */
+            padding: 10px;          /* Внутрішній відступ */
+            box-sizing: border-box; /* Включення padding у загальну ширину */
         }
 
+        /* --- ПОЛЕ ВВОДУ ТЕКСТУ --- */
         input#searchInput { 
-            flex-grow: 1; 
-            height: 100%; 
-            padding: 0 12px; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-            font-size: 16px; 
-            box-sizing: border-box;
+            flex-grow: 1;           /* Поле займає все доступне місце в ряду */
+            height: 100%;           /* Висота на всю доступну область */
+            padding: 0 12px;        /* Відступи тексту всередині поля */
+            border: 1px solid #ccc; /* Колір та товщина рамки */
+            border-radius: 4px;     /* Скруглення кутів */
+            font-size: 16px;        /* Розмір тексту при введенні */
+            box-sizing: border-box; /* Правильний розрахунок розмірів */
         }
 
+        /* --- ЗАГАЛЬНИЙ СТИЛЬ КНОПОК ТА ПЕРЕМИКАЧІВ --- */
         .btn-ui, .lang-button, .toggle-label {
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            height: 36px; 
-            width: 36px; 
-            background: #ececec; 
-            border: 1px solid #ccc;
-            border-radius: 4px; 
-            cursor: pointer; 
-            user-select: none; 
-            font-size: 18px;
-            box-sizing: border-box;
-            color: #333;
+            display: flex;          /* Центрування іконки/тексту всередині */
+            align-items: center;    /* Вертикальне центрування */
+            justify-content: center; /* Горизонтальне центрування */
+            height: 36px;           /* Фіксована висота кнопок */
+            width: 36px;            /* Фіксована ширина (квадрат) */
+            background: #ececec;    /* Світло-сірий фон */
+            border: 1px solid #ccc; /* Рамка навколо кнопок */
+            border-radius: 4px;     /* Скруглення кутів */
+            cursor: pointer;        /* Вигляд курсору "палець" */
+            user-select: none;      /* Заборона виділяти текст на кнопках */
+            font-size: 18px;        /* Розмір іконок або тексту на кнопках */
+            box-sizing: border-box; /* Облік рамок у розмірі */
+            color: #333;            /* Колір тексту кнопок */
         }
 
+        /* --- СПЕЦИФІЧНІ СТИЛІ ЕЛЕМЕНТІВ --- */
         #langToggle {
-            font-size: 20px;
-            cursor: pointer;
+            font-size: 20px;        /* Трохи більший розмір тексту для мови */
+            cursor: pointer;        /* Курсор натискання */
         }
 
         #results { 
-            width: 100%;
-            padding: 10px 0;
+            width: 100%;            /* Список результатів на всю ширину */
+            padding: 10px 0;        /* Відступи зверху та знизу */
         }
 
+        .main-container {
+            width: 100%;            /* Контейнер контенту на всю ширину */
+            max-width: 900px;       /* Обмеження ширини для тексту */
+            display: flex;          /* Вертикальне розташування */
+            flex-direction: column; /* Елементи в стовпчик */
+            gap: 15px;              /* Проміжок між цитатою та результатами */
+            padding: 20px 0;        /* Зовнішні відступи */
+        }
+
+        /* --- СТИЛІЗАЦІЯ ВІРШІВ (РЕЗУЛЬТАТІВ) --- */
         .verse { 
-            display: block; 
-            margin-bottom: 0px; 
-            line-height: 1.6; 
-            border-bottom: none !important; 
-            padding-bottom: 0; 
-            text-align: left;
+            display: block;         /* Кожен вірш окремим блоком */
+            margin-bottom: 0px;     /* Відступ знизу (зараз 0) */
+            line-height: 1.6;       /* Висота рядка тексту (інтервал) */
+            border-bottom: none !important; /* Відсутність лінії під віршем */
+            padding-bottom: 0;      /* Відсутність відступу знизу */
+            text-align: left;       /* Текст по лівому краю */
         }
 
         .ref { 
-            font-weight: bold; 
-            color: #0000EE; 
-            cursor: pointer; 
-            text-decoration: none; 
-            margin-right: 8px; 
+            font-weight: bold;      /* Жирний шрифт для посилання (назви) */
+            color: #0000EE;         /* Колір посилання */
+            cursor: pointer;        /* Курсор переходу */
+            text-decoration: none;  /* Відсутність підкреслення */
+            margin-right: 8px;      /* Відступ від назви до тексту */
         }
 
-        #exactMatch { display: none; }
-        
-        /* Стиль активованого перемикача точного пошуку */
+        /* --- ЛОГІКА ПЕРЕМИКАЧА (ТОЧНИЙ ПОШУК) --- */
+        #exactMatch { display: none; } /* Приховати стандартну галочку */
+
         #exactMatch:checked + .toggle-label { 
-            background: #1E90FF; 
-            color: white; 
-            border-color: #1E90FF; 
+            background: #1E90FF;    /* Колір при натиснутому стані */
+            color: white;           /* Колір іконки при натиснутому стані */
+            border-color: #1E90FF;  /* Колір рамки при натисканні */
         }
 
-        /* Підсвічування знайденого тексту */
-        mark { background-color: #ffeb3b; }
+        /* --- ПІДСВІЧУВАННЯ ТА ШРИФТИ --- */
+        mark { background-color: #ffeb3b; } /* Жовтий колір фону знайдених слів */
 
-        .font-controls { display: flex; align-items: center; gap: 5px; }
+        .font-controls { 
+            display: flex;          /* Ряд для повзунка */
+            align-items: center;    /* Центрування */
+            gap: 5px;               /* Відступ */
+        }
 
-        h1 { text-align: center; margin: 10px 0; font-size: 24px; }
+        h1 { 
+            text-align: center;     /* Заголовок-цитата по центру */
+            margin: 10px 0;         /* Відступи зверху/знизу */
+            font-size: 24px;        /* Розмір шрифту заголовка */
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="top-bar">
-            <button id="copyRefsBtn" class="btn-ui" title="Копіювати посилання">📌</button>
-            
-            <input type="text" id="searchInput" placeholder="Введи слово чи посилання..." autofocus>
-            
-            <div id="resultCount" title="Лічильник результатів">0</div>
-            
-            <div id="langToggle" class="lang-button" title="Зміна мови">UA</div>       
-            
-            <label class="toggle-container">
-                <input type="checkbox" id="exactMatch">
-                <span class="toggle-label" title="Повна або часткова відповідність">📚</span>
-            </label>
+            <button id="copyRefsBtn" class="btn-ui" title="Копіювати посилання">📌</button> <input type="text" id="searchInput" placeholder="Введи слово чи посилання..." autofocus> <div id="resultCount" title="Лічильник результатів">0</div> <div id="langToggle" class="lang-button" title="Зміна мови">UA</div> <label class="toggle-container">
+                <input type="checkbox" id="exactMatch"> <span class="toggle-label" title="Повна або часткова відповідність">📚</span> </label>
 
             <div class="font-controls" title="Розмір шрифту">
-               <input type="range" id="fontSizeRange" min="12" max="30" value="20" style="width: 60px;">
-            </div>
+               <input type="range" id="fontSizeRange" min="12" max="30" value="20" style="width: 60px;"> </div>
         </div>
     </div>
 
     <div class="main-container">
-        <h1>Я кохаю всіх тих, хто кохає мене, хто ж шукає мене мене знайде!</h1>
-        <div id="results"></div>
-    </div>
+        <h1>Я кохаю всіх тих, хто кохає мене, хто ж шукає мене мене знайде!</h1> <div id="results"></div> </div>
 
-    <script src="script.js"></script>
-    
-    <script>
-        /** Реєстрація Service Worker для роботи PWA (офлайн доступ) **/
+    <script src="script.js"></script> <script>
+        /* Перевірка підтримки сервіс-воркера для офлайн-роботи */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA Ready'))
-                    .catch(err => console.log('Error:', err));
+                navigator.serviceWorker.register('sw.js') /* Реєстрація файлу sw.js */
+                    .then(reg => console.log('PWA Ready')) /* Повідомлення про успіх */
+                    .catch(err => console.log('Error:', err)); /* Повідомлення про помилку */
             });
         }
     </script>
