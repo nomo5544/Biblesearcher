@@ -142,6 +142,32 @@ const maps = {
         "откр": "Откровение", "откровение": "Откроение", "отк": "Откровение"
     }
 };
+
+// --- ДОДАЙТЕ ЦЕ ВІДРАЗУ ПІСЛЯ CONST MAPS ---
+
+const reverseMaps = {
+    ukr: Object.fromEntries(Object.entries(maps.ukr).map(([k, v]) => [v.toLowerCase(), k])),
+    ru: Object.fromEntries(Object.entries(maps.ru).map(([k, v]) => [v.toLowerCase(), k]))
+};
+
+// --- ТЕПЕР ОНОВІТЬ ФУНКЦІЮ getCrossLangBookName ---
+
+function getCrossLangBookName(name, fromLang) {
+    if (typeof maps === 'undefined' || !maps[fromLang]) return name;
+
+    // 1. Знаходимо "код" книги за її повною назвою (напр. "Буття" -> "бут")
+    const bookKey = reverseMaps[fromLang][name.toLowerCase()];
+    
+    if (!bookKey) return name;
+
+    // 2. Визначаємо мову, на яку хочемо перекласти
+    const targetLang = fromLang === 'ukr' ? 'ru' : 'ukr';
+
+    // 3. Беремо назву з цільового словника за цим же кодом
+    // Тепер, навіть якщо "Бытие" стоїть на іншому місці в списку, ми його знайдемо за ключем "бут"
+    return maps[targetLang][bookKey] || name;
+}
+
 let bibleDataUA = null;
 let bibleDataRU = null;
 let isParallel = localStorage.getItem('parallelMode') === 'true';
@@ -196,7 +222,12 @@ function renderContent() {
 
     // Фільтруємо вірші розділу
     const keys = Object.keys(mainData).filter(k => k.startsWith(mainPrefix));
-    keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
+    // Замініть ваш рядок сортування на цей:
+    keys.sort((a, b) => {
+        const vA = parseInt(a.split(':')[1]);
+        const vB = parseInt(b.split(':')[1]);
+        return vA - vB;
+    });
 
     if (keys.length === 0) {
         layout.innerHTML = `<div style="padding:40px; text-align:center; opacity:0.5;">Розділ "${fullRef}" не знайдено.</div>`;
