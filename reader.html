@@ -21,7 +21,7 @@
             line-height: 1.6;
         }
 
-        /* Шапка */
+        /* --- ШАПКА --- */
         .header-wrapper {
             position: sticky;
             top: 0;
@@ -31,20 +31,6 @@
             padding: 8px 0;
         }
 
-        .highlight {
-            background-color: #FFE5B4 !important; /* Ніжно-оранжевий */
-            border-radius: 4px;
-            transition: background 0.3s ease;
-            display: inline-block;
-            width: 100%;
-        }
-        
-        /* Додатково: підсвічуємо і текст у паралельному перекладі, якщо потрібно */
-        .primary-cell.highlight, .secondary-cell.highlight {
-            background-color: #FFE5B4 !important;
-        }
-        
-        /* Сітка: 3 колонки (боки по 100px, центр вільний) */
         .ref-header-container {
             display: grid;
             grid-template-columns: 100px 1fr 100px; 
@@ -54,32 +40,6 @@
             padding: 0 15px;
             height: 50px;
             box-sizing: border-box;
-        }
-
-        /* Групування кнопок для Grid */
-        .nav-group-left {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-start;
-        }
-
-        .nav-group-right {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .ref-header { 
-            font-family: 'Times New Roman', serif;
-            font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-color);
-            font-weight: 600;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .nav-btn { 
@@ -93,18 +53,10 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s ease;
             color: var(--text-color);
-            text-decoration: none;
-            flex-shrink: 0;
         }
 
-        .nav-btn:hover { 
-            background: var(--accent-color); 
-            color: #fff; 
-        }
-
-        /* Контейнер тексту */
+        /* --- КОНТЕЙНЕР ТЕКСТУ (ДЕСКТОП) --- */
         .book-container { 
             width: 100%; 
             max-width: 900px; 
@@ -118,131 +70,77 @@
             gap: 25px;
             margin-bottom: 12px;
             align-items: flex-start;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            padding-bottom: 10px;
         }
 
-        .verse-cell {
+        .primary-cell, .secondary-cell {
             flex: 1;
             font-size: 20px;
             text-align: justify;
-            line-height: 1.5;
-        }
-
-        .verse-num { 
-            font-size: 0.6em; 
-            font-weight: bold; 
-            color: var(--accent-color); 
-            margin-right: 8px; 
-            vertical-align: super;
-            opacity: 0.5;
         }
 
         .secondary-cell {
             border-left: 1px solid rgba(0,0,0,0.1);
             padding-left: 20px;
             color: #555;
-            flex: 1;
         }
 
-        .single-mode .secondary-cell {
-            display: none;
+        /* --- МОБІЛЬНА АДАПТАЦІЯ (РОЗДІЛЕНИЙ ЕКРАН) --- */
+        @media (max-width: 600px) {
+            body, html {
+                overflow: hidden; /* Щоб не горталася вся сторінка */
+                height: 100%;
+            }
+
+            .book-container {
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 70px); /* Висота під шапкою */
+                margin: 0;
+                padding: 0;
+                max-width: none;
+            }
+
+            #primary-window, #secondary-window {
+                flex: 1;
+                overflow-y: auto; /* Власна прокрутка для кожного вікна */
+                padding: 15px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            #secondary-window {
+                border-top: 2px solid var(--accent-color);
+                background-color: #f9f9f9;
+            }
+
+            /* Приховуємо "чужі" колонки у вікнах на мобілці */
+            #primary-window .secondary-cell { display: none; }
+            #secondary-window .primary-cell { display: none; }
+            
+            .verse-row {
+                display: block; /* У вікні мобілки вірш на всю ширину */
+                gap: 0;
+            }
         }
-        /* ... попередні стилі залишаються ... */
-
-/* Нова структура для паралельного режиму */
-/* --- СТИЛЬ ДЛЯ ДЕСКТОПА (Ваш початковий підхід) --- */
-.book-container { 
-    width: 100%; 
-    max-width: 900px; 
-    margin: 20px auto; 
-    padding: 0 20px;
-    box-sizing: border-box;
-}
-
-.verse-row {
-    display: flex;
-    gap: 25px;
-    margin-bottom: 12px;
-    align-items: flex-start;
-    border-bottom: 1px solid rgba(0,0,0,0.03); /* Легке розділення рядків */
-    padding-bottom: 10px;
-}
-
-.primary-cell, .secondary-cell {
-    flex: 1;
-    font-size: 20px;
-    text-align: justify;
-    line-height: 1.5;
-}
-
-.secondary-cell {
-    border-left: 1px solid rgba(0,0,0,0.1);
-    padding-left: 20px;
-    color: #555;
-}
-
-/* --- МОБІЛЬНА АДАПТАЦІЯ (Розділений екран) --- */
-@media (max-width: 600px) {
-    body, html {
-        overflow: hidden; /* Вимикаємо загальну прокрутку сторінки */
-        height: 100%;
-    }
-
-    .book-container {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 70px); /* Висота під шапкою */
-        margin: 0;
-        padding: 0;
-        max-width: none;
-    }
-
-    /* Створюємо два незалежних вікна прокрутки */
-    #primary-window, #secondary-window {
-        flex: 1;
-        overflow-y: auto;
-        padding: 15px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    #secondary-window {
-        border-top: 2px solid var(--accent-color);
-        background-color: #f9f9f9;
-    }
-
-    /* У мобільному режимі вірші в ряду стають невидимими в "чужому" вікні */
-    .verse-row {
-        display: block; /* Перетворюємо рядок на звичайний блок */
-        gap: 0;
-        border-bottom: none;
-    }
-
-    /* Спеціальний клас для синхронізації */
-    .mobile-hidden {
-        display: none;
-    }
-}
     </style>
 </head>
 <body>
     <div class="header-wrapper">
         <div class="ref-header-container">
-            
             <div class="nav-group-left">
-                <button class="nav-btn" id="prevBtn" title="Попередній розділ">‹</button>
-                <button onclick="window.location.href='index.html'" class="nav-btn" title="До пошуку">🔍</button>
+                <button class="nav-btn" id="prevBtn">‹</button>
+                <button onclick="window.location.href='index.html'" class="nav-btn">🔍</button>
             </div>
-            
             <div class="ref-header" id="refHeader"></div>
-            
             <div class="nav-group-right">
                 <button id="toggleParallel" class="nav-btn">||</button>
-                <button class="nav-btn" id="nextBtn" title="Наступний розділ">›</button>
+                <button class="nav-btn" id="nextBtn">›</button>
             </div>
-
         </div>
     </div>
 
-    <div class="book-container">
+    <div class="book-container" id="main-reader-container">
         <div id="primary-window">
             <div id="reader-layout-primary"></div>
         </div>
@@ -251,7 +149,51 @@
             <div id="reader-layout-secondary"></div>
         </div>
     </div>
-    <script src="mapping.js"></script> <script src="reader.js"></script>
+
+    <script src="mapping.js"></script>
     <script src="reader.js"></script>
+
+    <script>
+        // --- ВИПРАВЛЕННЯ ДЛЯ ВІДОБРАЖЕННЯ ТЕКСТУ ---
+        // Оскільки reader.js шукає старий ID, ми просто копіюємо результат
+        window.addEventListener('load', () => {
+            const checkContent = setInterval(() => {
+                // Шукаємо, куди ваш скрипт reader.js міг вставити текст
+                // Зазвичай це елемент з ID 'reader-layout'
+                const originalLayout = document.getElementById('reader-layout');
+                
+                if (originalLayout && originalLayout.innerHTML !== "") {
+                    document.getElementById('reader-layout-primary').innerHTML = originalLayout.innerHTML;
+                    document.getElementById('reader-layout-secondary').innerHTML = originalLayout.innerHTML;
+                    clearInterval(checkContent);
+                    initSyncScroll(); // Запускаємо синхронізацію
+                }
+            }, 100);
+        });
+
+        // --- ЛОГІКА СИНХРОННОЇ ПРОКРУТКИ ---
+        function initSyncScroll() {
+            const win1 = document.getElementById('primary-window');
+            const win2 = document.getElementById('secondary-window');
+
+            let isSyncing = false;
+
+            function sync(source, target) {
+                source.onscroll = () => {
+                    if (!isSyncing) {
+                        isSyncing = true;
+                        const percentage = source.scrollTop / (source.scrollHeight - source.clientHeight);
+                        target.scrollTop = percentage * (target.scrollHeight - target.clientHeight);
+                        setTimeout(() => { isSyncing = false; }, 10);
+                    }
+                };
+            }
+
+            if (window.innerWidth <= 600) {
+                sync(win1, win2);
+                sync(win2, win1);
+            }
+        }
+    </script>
 </body>
 </html>
