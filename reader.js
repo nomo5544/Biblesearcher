@@ -1,6 +1,6 @@
 // --- ПАРАМЕТРИ ТА ЗМІННІ ---
 const urlParams = new URLSearchParams(window.location.search);
-// ВИПРАВЛЕННЯ 1: Декодуємо URL повністю, щоб замінити "+" на пробіли
+// 1. На десктопі пробіли часто стають "+", додаємо заміну для стабільності
 let fullRef = decodeURIComponent(urlParams.get('ref') || "").replace(/\+/g, ' ');
 let currentLang = urlParams.get('lang') || 'ukr';
 
@@ -39,8 +39,9 @@ function getTranslatedBookName(name, toLang) {
     }
 }
 
+// Розбір посилання
 let bookName = "", chapterNum = "1", targetVerse = null;
-// ВИПРАВЛЕННЯ 2: Більш гнучкий регулярний вираз для десктопних браузерів
+// 2. Більш надійний Regex (додано trim() та виправлено захоплення групи)
 const match = fullRef.trim().match(/^(.+?)\s+(\d+)(?::(\d+))?$/);
 if (match) {
     bookName = match[1];
@@ -60,7 +61,7 @@ function loadBible() {
             renderContent();
         })
         .catch(err => {
-            console.error("Помилка завантаження:", err);
+            console.error("Помилка:", err);
             const layout = document.getElementById('reader-layout');
             if(layout) layout.innerHTML = "Помилка завантаження тексту.";
         });
@@ -80,11 +81,11 @@ function renderContent() {
     keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
 
     if (keys.length === 0) {
+        // Якщо на десктопі порожньо — виведемо технічну назву, яку шукав скрипт
         layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Розділ не знайдено (${bookName} ${chapterNum}).</div>`;
         return;
     }
 
-    const fragment = document.createDocumentFragment();
     keys.forEach(key => {
         const vNum = key.split(':')[1];
         const isTarget = parseInt(vNum) === targetVerse;
@@ -92,9 +93,8 @@ function renderContent() {
         div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
         if (isTarget) div.id = "target";
         div.innerHTML = `<span class="verse-num">${vNum}</span>${bibleData[key]}`;
-        fragment.appendChild(div);
+        layout.appendChild(div);
     });
-    layout.appendChild(fragment);
 
     if (targetVerse) {
         setTimeout(() => {
