@@ -143,36 +143,14 @@ const maps = {
     }
 };
 
-// --- ДОДАЙТЕ ЦЕ ВІДРАЗУ ПІСЛЯ CONST MAPS ---
-
-const reverseMaps = {
-    ukr: {},
-    ru: {}
-};
-
-// Заповнюємо автоматично, щоб не робити помилок вручну
-Object.entries(maps.ukr).forEach(([key, val]) => { reverseMaps.ukr[val.toLowerCase()] = key; });
-Object.entries(maps.ru).forEach(([key, val]) => { reverseMaps.ru[val.toLowerCase()] = key; });
-
-// --- ТЕПЕР ОНОВІТЬ ФУНКЦІЮ getCrossLangBookName ---
-
-function getCrossLangBookName(name, fromLang) {
-    // 1. Отримуємо ключ (код книги)
-    const bookKey = reverseMaps[fromLang][name.toLowerCase()];
-    if (!bookKey) return name; // Якщо не знайшли, повертаємо стару назву
-
-    // 2. Визначаємо цільову мову
-    const targetLang = fromLang === 'ukr' ? 'ru' : 'ukr';
-
-    // 3. Повертаємо назву з цільового словника за кодом
-    return maps[targetLang][bookKey] || name;
-}
+// Словники maps залишаються вашими (пропускаю для стислості в цій відповіді)
+// ... [ВАШІ СЛОВНИКИ MAPS ТУТ] ...
 
 let bibleDataUA = null;
 let bibleDataRU = null;
 let isParallel = localStorage.getItem('parallelMode') === 'true';
 
-// Розбір посилання
+// Розбір посилання (ваша логіка)
 let bookName = "", chapterNum = "1", targetVerseStart = null, targetVerseEnd = null;
 const rangeMatch = fullRef.match(/^(.+)\s(\d+):(\d+)-(\d+)$/);
 const singleMatch = fullRef.match(/^(.+)\s(\d+):(\d+)$/);
@@ -187,30 +165,30 @@ if (rangeMatch) {
     [ , bookName, chapterNum] = chapterMatch;
 }
 
-// --- 2. ФУНКЦІЇ ---
+// --- ФУНКЦІЇ ---
 
 function getCrossLangBookName(name, fromLang) {
-    // Якщо об'єкт maps не знайдено, повертаємо назву як є, щоб не "класти" скрипт
     if (typeof maps === 'undefined' || !maps[fromLang]) return name;
-    
     const currentMaps = maps[fromLang];
     const targetLang = fromLang === 'ukr' ? 'ru' : 'ukr';
     const targetMaps = maps[targetLang];
-
-    // Шукаємо ключ книги
     const bookKey = Object.keys(currentMaps).find(key => 
         currentMaps[key].toLowerCase() === name.toLowerCase()
     );
-
     return (bookKey && targetMaps[bookKey]) ? targetMaps[bookKey] : name;
 }
 
 function renderContent() {
-    const layout = document.getElementById('reader-layout');
+    // ВАЖЛИВО: Отримуємо нові контейнери
+    const layoutPrimary = document.getElementById('reader-layout-primary');
+    const layoutSecondary = document.getElementById('reader-layout-secondary');
     const refHeader = document.getElementById('refHeader');
-    if (!layout || !bibleDataUA || !bibleDataRU) return;
+    
+    // Якщо елементів немає, виходимо
+    if (!layoutPrimary || !bibleDataUA || !bibleDataRU) return;
 
-    layout.innerHTML = "";
+    layoutPrimary.innerHTML = "";
+    if (layoutSecondary) layoutSecondary.innerHTML = "";
     if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
 
     const parallelBookName = getCrossLangBookName(bookName, lang);
@@ -220,59 +198,53 @@ function renderContent() {
     const mainPrefix = `${bookName} ${chapterNum}:`;
     const sidePrefix = `${parallelBookName} ${chapterNum}:`;
 
-    // Фільтруємо вірші розділу
     const keys = Object.keys(mainData).filter(k => k.startsWith(mainPrefix));
-    // Замініть ваш рядок сортування на цей:
-    keys.sort((a, b) => {
-        const vA = parseInt(a.split(':')[1]);
-        const vB = parseInt(b.split(':')[1]);
-        return vA - vB;
-    });
+    keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
 
     if (keys.length === 0) {
-        layout.innerHTML = `<div style="padding:40px; text-align:center; opacity:0.5;">Розділ "${fullRef}" не знайдено.</div>`;
+        layoutPrimary.innerHTML = `<div style="padding:40px; text-align:center; opacity:0.5;">Розділ "${fullRef}" не знайдено.</div>`;
         return;
     }
 
-    const fragment = document.createDocumentFragment();
-keys.forEach((key, index) => {
-    const vNum = key.split(':')[1];
-    const vInt = parseInt(vNum);
-    const sideKey = `${sidePrefix}${vNum}`;
+    keys.forEach((key) => {
+        const vNum = key.split(':')[1];
+        const vInt = parseInt(vNum);
+        const sideKey = `${sidePrefix}${vNum}`;
 
-    // Перевірка: чи входить цей вірш у діапазон підсвічування
-    let isHighlighted = false;
-    if (targetVerseStart !== null) {
-        if (targetVerseEnd !== null) {
-            // Якщо є діапазон (напр. 1:1-5)
-            isHighlighted = (vInt >= targetVerseStart && vInt <= targetVerseEnd);
-        } else {
-            // Якщо тільки один вірш (напр. 1:1)
-            isHighlighted = (vInt === targetVerseStart);
+        let isHighlighted = false;
+        if (targetVerseStart !== null) {
+            isHighlighted = (targetVerseEnd !== null) 
+                ? (vInt >= targetVerseStart && vInt <= targetVerseEnd)
+                : (vInt === targetVerseStart);
         }
-    }
-    
-    const hClass = isHighlighted ? 'highlight' : '';
-    const idAttr = (isHighlighted && vInt === targetVerseStart) ? 'id="target"' : '';
+        
+        const hClass = isHighlighted ? 'highlight' : '';
+        const idAttr = (isHighlighted && vInt === targetVerseStart) ? 'id="target"' : '';
 
-    const row = document.createElement('div');
-    row.className = `verse-row ${isParallel ? '' : 'single-mode'}`;
-    row.id = `v${vNum}`;
+        // Створюємо вірш для ПЕРШОГО вікна
+        const rowP = document.createElement('div');
+        rowP.className = `verse-row`;
+        rowP.innerHTML = `
+            <div class="verse-cell primary-cell ${hClass}" ${idAttr}>
+                <span class="verse-num">${vNum}</span>${mainData[key]}
+            </div>
+        `;
+        layoutPrimary.appendChild(rowP);
 
-    row.innerHTML = `
-        <div class="verse-cell primary-cell ${hClass}" ${idAttr}>
-            <span class="verse-num">${vNum}</span>${mainData[key]}
-        </div>
-        <div class="verse-cell secondary-cell ${hClass}">
-            <span class="verse-num">${vNum}</span>${sideData[sideKey] || "—"}
-        </div>
-    `;
-    layout.appendChild(row);
-});
+        // Створюємо вірш для ДРУГОГО вікна (якщо воно є)
+        if (layoutSecondary) {
+            const rowS = document.createElement('div');
+            rowS.className = `verse-row`;
+            rowS.innerHTML = `
+                <div class="verse-cell secondary-cell ${hClass}">
+                    <span class="verse-num">${vNum}</span>${sideData[sideKey] || "—"}
+                </div>
+            `;
+            layoutSecondary.appendChild(rowS);
+        }
+    });
 
-    layout.appendChild(fragment);
-
-    // Прокрутка
+    // Прокрутка до цілі
     if (targetVerseStart) {
         setTimeout(() => {
             const targetEl = document.getElementById('target');
@@ -281,7 +253,7 @@ keys.forEach((key, index) => {
     }
 }
 
-// --- 3. ПОДІЇ ТА ЗАВАНТАЖЕННЯ ---
+// --- ПОДІЇ ТА ЗАВАНТАЖЕННЯ ---
 
 function navigate(dir) {
     const newChap = parseInt(chapterNum) + dir;
@@ -291,10 +263,13 @@ function navigate(dir) {
 
 document.getElementById('prevBtn').onclick = () => navigate(-1);
 document.getElementById('nextBtn').onclick = () => navigate(1);
+
 document.getElementById('toggleParallel').onclick = function() {
     isParallel = !isParallel;
     localStorage.setItem('parallelMode', isParallel);
-    document.querySelectorAll('.verse-row').forEach(r => r.classList.toggle('single-mode'));
+    // На мобілках просто ховаємо/показуємо друге вікно
+    const secWin = document.getElementById('secondary-window');
+    if (secWin) secWin.style.display = isParallel ? 'block' : 'none';
     this.style.background = isParallel ? 'var(--accent-color)' : '#f4f4f4';
     this.style.color = isParallel ? '#fff' : 'var(--text-color)';
 };
@@ -308,6 +283,7 @@ Promise.all([
     bibleDataRU = ru;
     renderContent();
 }).catch(err => {
-    document.getElementById('reader-layout').innerHTML = "Помилка завантаження JSON файлів.";
+    const lp = document.getElementById('reader-layout-primary');
+    if (lp) lp.innerHTML = "Помилка завантаження JSON файлів.";
     console.error(err);
 });
