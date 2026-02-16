@@ -285,9 +285,14 @@ if (savedResults) {
                 }
             }
         }
-        resultsDiv.appendChild(fragment);
-        if (countDisplay) countDisplay.innerText = count;
-    };
+        resultsDiv.appendChild(fragment); 
+    if (countDisplay) countDisplay.innerText = count;
+
+    // ЗБЕРЕЖЕННЯ (додайте це сюди):
+    sessionStorage.setItem('lastQuery', query);
+    sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
+    sessionStorage.setItem('lastCount', countDisplay ? countDisplay.innerText : '0');
+};
 
 // --- ФУНКЦІЯ КОПІЮВАННЯ ПОСИЛАНЬ ---
     if (copyRefsBtn) {
@@ -345,23 +350,27 @@ if (savedResults) {
     }
     
     // --- ЗБЕРЕЖЕННЯ РЕЗУЛЬТАТІВ (SessionStorage) ---
-    // Цей код відновить результати після повернення зі сторінки reader.html
     window.addEventListener('DOMContentLoaded', () => {
         const savedResults = sessionStorage.getItem('lastResults');
         const savedQuery = sessionStorage.getItem('lastQuery');
+        const savedCount = sessionStorage.getItem('lastCount');
+        
         const resultsContainer = document.getElementById('results');
         const inputField = document.getElementById('searchInput');
-    
+        const countDisp = document.getElementById('resultCount');
+
         if (savedResults && resultsContainer && inputField) {
+            // Відновлюємо дані
             resultsContainer.innerHTML = savedResults;
-            inputField.value = savedQuery;
+            inputField.value = savedQuery || '';
+            if (countDisp) countDisp.innerText = savedCount || '0';
             
-            // Переприв'язуємо кліки до посилань після відновлення HTML
+            // "Оживляємо" всі посилання після відновлення
             resultsContainer.querySelectorAll('.ref').forEach(el => {
-                el.addEventListener('click', () => {
+                el.onclick = () => { // Використовуємо .onclick для надійності
                     const ref = el.innerText.replace('● ', '').trim();
                     window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
-                });
+                };
             });
         }
     });
