@@ -151,7 +151,6 @@ const maps = {
 };
 
     // --- 2. ФУНКЦІЇ ВІДОБРАЖЕННЯ ---
-    /** Відображає результат прямого пошуку за посиланням **/
     function renderDirectResult(ref, text) {
         if (!resultsDiv) return;
         const div = document.createElement('div');
@@ -163,7 +162,6 @@ const maps = {
         resultsDiv.appendChild(div);
     }
 
-    /** Додає окремий вірш до фрагмента списку результатів **/
     function addVerseToFragment(fragment, ref, htmlContent) {
         const div = document.createElement('div');
         div.className = 'verse'; 
@@ -172,30 +170,9 @@ const maps = {
             window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
         });
         fragment.appendChild(div);
-        // Коли сторінка завантажилася:
-const savedResults = sessionStorage.getItem('lastSearchResults');
-const savedQuery = sessionStorage.getItem('lastSearchQuery');
-const savedCount = sessionStorage.getItem('lastResultCount');
-
-if (savedResults) {
-    resultsDiv.innerHTML = savedResults;
-    searchInput.value = savedQuery || '';
-    countDisplay.innerText = savedCount || '0';
-    
-    // Важливо: переприв'язати кліки до посилань .ref, 
-    // бо після відновлення з HTML старі обробники зникають
-    resultsDiv.querySelectorAll('.ref').forEach(el => {
-        el.addEventListener('click', () => {
-            const ref = el.innerText.replace('● ', '').trim();
-            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
-        });
-    });
-}
-    
     }
 
     // --- 3. ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
-    /** Аналізує ввід та виконує пошук за посиланням або словами **/
     window.performSearch = function() {
         const query = searchInput.value.trim();
         if (!resultsDiv) return;
@@ -235,13 +212,14 @@ if (savedResults) {
                     if (match[4]) displayRef += `-${vEnd}`;
                     renderDirectResult(displayRef, combinedText);
                     if (countDisplay) countDisplay.innerText = '1';
+                    
+                    // Збереження результату прямого пошуку
+                    sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
+                    sessionStorage.setItem('lastQuery', query);
+                    sessionStorage.setItem('lastCount', '1');
                     return; 
                 }
             }
-            // Після того, як результати виведені на екран:
-                sessionStorage.setItem('lastSearchResults', resultsDiv.innerHTML);
-                sessionStorage.setItem('lastSearchQuery', searchInput.value);
-                sessionStorage.setItem('lastResultCount', countDisplay.innerText);
         }
 
         let count = 0;
@@ -285,100 +263,67 @@ if (savedResults) {
                 }
             }
         }
-        resultsDiv.appendChild(fragment); 
-    if (countDisplay) countDisplay.innerText = count;
+        resultsDiv.appendChild(fragment);
+        if (countDisplay) countDisplay.innerText = count;
 
-    // ЗБЕРЕЖЕННЯ (додайте це сюди):
-    sessionStorage.setItem('lastQuery', query);
-    sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
-    sessionStorage.setItem('lastCount', countDisplay ? countDisplay.innerText : '0');
-};
+        // Збереження результатів пошуку за словами
+        sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
+        sessionStorage.setItem('lastQuery', query);
+        sessionStorage.setItem('lastCount', count.toString());
+    };
 
-// --- ФУНКЦІЯ КОПІЮВАННЯ ПОСИЛАНЬ ---
+    // --- 4. КОПІЮВАННЯ ТА ЗАВАНТАЖЕННЯ ---
     if (copyRefsBtn) {
         copyRefsBtn.onclick = () => {
-            // Знаходимо всі елементи з класом .ref у результатах
             const refElements = resultsDiv.querySelectorAll('.ref');
             if (refElements.length === 0) return;
-
-            // Збираємо текст посилань, видаляючи зайві символи (наприклад, маркер ●)
-            const refsText = Array.from(refElements)
-                .map(el => el.innerText.replace('● ', '').trim())
-                .join(', ');
-
-            // Копіюємо отриманий рядок у буфер обміну
+            const refsText = Array.from(refElements).map(el => el.innerText.replace('● ', '').trim()).join(', ');
             navigator.clipboard.writeText(refsText).then(() => {
                 const originalText = copyRefsBtn.innerText;
                 copyRefsBtn.innerText = '✅';
-                setTimeout(() => {
-                    copyRefsBtn.innerText = originalText;
-                }, 2000);
-            }).catch(err => {
-                console.error('Помилка копіювання:', err);
+                setTimeout(() => { copyRefsBtn.innerText = originalText; }, 2000);
             });
         };
     }
-    
-    // --- 4. ЗАВАНТАЖЕННЯ ---
-    /** Завантажує відповідний JSON файл Біблії **/
+
     window.loadLanguage = function(langCode) {
         const fileName = langCode === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
         fetch(fileName)
             .then(response => response.json())
             .then(data => {
                 window.currentLangData = data;
-                if (searchInput.value.trim().length >= 2) window.performSearch();
+                // Спершу перевіряємо, чи є збережені результати в сесії
+                const savedResults = sessionStorage.getItem('lastResults');
+                if (savedResults) {
+                    restoreResults();
+                } else if (searchInput.value.trim().length >= 2) {
+                    window.performSearch();
+                }
             })
             .catch(err => console.error("Файл не знайдено:", fileName));
     };
-    // --- ЛОГІКА ВЕРСІЇ ТА ОНОВЛЕННЯ ---
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').then(reg => {
-                // Якщо знайдено оновлення Service Worker
-                reg.onupdatefound = () => {
-                    const installingWorker = reg.installing;
-                    installingWorker.onstatechange = () => {
-                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Повідомляємо користувача, що додаток оновлено (опціонально)
-                            console.log('Нова версія готова. Будь ласка, перезавантажте сторінку.');
-                        }
-                    };
-                };
-            });
-        });
-    }
-    
-    // --- ЗБЕРЕЖЕННЯ РЕЗУЛЬТАТІВ (SessionStorage) ---
-    window.addEventListener('DOMContentLoaded', () => {
+
+    // --- 5. ВІДНОВЛЕННЯ СТАНУ ---
+    function restoreResults() {
         const savedResults = sessionStorage.getItem('lastResults');
         const savedQuery = sessionStorage.getItem('lastQuery');
         const savedCount = sessionStorage.getItem('lastCount');
-        
-        const resultsContainer = document.getElementById('results');
-        const inputField = document.getElementById('searchInput');
-        const countDisp = document.getElementById('resultCount');
 
-        if (savedResults && resultsContainer && inputField) {
-            // Відновлюємо дані
-            resultsContainer.innerHTML = savedResults;
-            inputField.value = savedQuery || '';
-            if (countDisp) countDisp.innerText = savedCount || '0';
+        if (savedResults && resultsDiv && searchInput) {
+            resultsDiv.innerHTML = savedResults;
+            searchInput.value = savedQuery || '';
+            if (countDisplay) countDisplay.innerText = savedCount || '0';
             
-            // "Оживляємо" всі посилання після відновлення
-            resultsContainer.querySelectorAll('.ref').forEach(el => {
-                el.onclick = () => { // Використовуємо .onclick для надійності
+            resultsDiv.querySelectorAll('.ref').forEach(el => {
+                el.onclick = () => {
                     const ref = el.innerText.replace('● ', '').trim();
                     window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
                 };
             });
         }
-    });
-    
-    // Додайте цей рядок у вашу основну функцію performSearch, де ви отримуєте результати:
-    sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
-    sessionStorage.setItem('lastQuery', searchInput.value);
-    // --- 5. ОБРОБНИКИ ПОДІЙ ---
+    }
+
+    // --- 6. ОБРОБНИКИ ПОДІЙ ---
     if (langToggle) {
         langToggle.onclick = () => {
             window.currentLang = (window.currentLang === 'ukr') ? 'ru' : 'ukr';
@@ -401,31 +346,26 @@ if (savedResults) {
         };
     }
 
+    // Запуск ініціалізації
     if (langToggle) langToggle.innerText = window.currentLang === 'ukr' ? 'UA' : 'RU';
     window.loadLanguage(window.currentLang);
 
     if (searchInput) {
-        /** Обробляє натискання Enter для переходу в режим читання **/
         searchInput.onkeydown = (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault(); 
                 const query = searchInput.value.trim();
-                
                 const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
                 const match = query.match(refRegex);
-
-                if (match && typeof maps !== 'undefined') {
+                if (match) {
                     const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
-                    const currentMap = maps[window.currentLang];
-                    const fullBookName = currentMap ? currentMap[bookInput] : null;
-
+                    const fullBookName = maps[window.currentLang][bookInput];
                     if (fullBookName) {
                         const chapter = match[2];
                         const vStart = match[3] || "1";
                         const vEnd = match[4];
                         let finalRef = `${fullBookName} ${chapter}:${vStart}`;
                         if (vEnd) finalRef += `-${vEnd}`;
-                        
                         window.location.href = `reader.html?ref=${encodeURIComponent(finalRef)}&lang=${window.currentLang}`;
                         return;
                     }
