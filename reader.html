@@ -149,49 +149,77 @@
         /* ... попередні стилі залишаються ... */
 
 /* Нова структура для паралельного режиму */
-#reader-layout {
-    display: flex;
-    flex-direction: row; /* На десктопі — поруч */
-    gap: 0;
-    width: 100%;
-    height: calc(100vh - 70px); /* Висота на весь екран мінус шапка */
-    overflow: hidden;
-}
-
-.text-panel {
-    flex: 1;
-    overflow-y: auto; /* Власна прокрутка для кожної панелі */
-    padding: 20px;
+/* --- СТИЛЬ ДЛЯ ДЕСКТОПА (Ваш початковий підхід) --- */
+.book-container { 
+    width: 100%; 
+    max-width: 900px; 
+    margin: 20px auto; 
+    padding: 0 20px;
     box-sizing: border-box;
-    scroll-behavior: smooth;
 }
 
-.secondary-panel {
+.verse-row {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(0,0,0,0.03); /* Легке розділення рядків */
+    padding-bottom: 10px;
+}
+
+.primary-cell, .secondary-cell {
+    flex: 1;
+    font-size: 20px;
+    text-align: justify;
+    line-height: 1.5;
+}
+
+.secondary-cell {
     border-left: 1px solid rgba(0,0,0,0.1);
-    background: #fafafa;
+    padding-left: 20px;
+    color: #555;
 }
 
-/* МОБІЛЬНА АДАПТАЦІЯ: Вікна одне на одному */
+/* --- МОБІЛЬНА АДАПТАЦІЯ (Розділений екран) --- */
 @media (max-width: 600px) {
-    #reader-layout {
-        flex-direction: column; /* Панелі стають вертикально */
+    body, html {
+        overflow: hidden; /* Вимикаємо загальну прокрутку сторінки */
+        height: 100%;
     }
-    
-    .text-panel {
-        height: 50%; /* Кожне вікно займає рівно половину висоти */
-        border-left: none;
-    }
-    
-    .secondary-panel {
-        border-top: 2px solid var(--accent-color); /* Розділювач між мовами */
-    }
-}
 
-/* Вірші всередині панелей */
-.verse-item {
-    margin-bottom: 15px;
-    font-size: 19px;
-    line-height: 1.6;
+    .book-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 70px); /* Висота під шапкою */
+        margin: 0;
+        padding: 0;
+        max-width: none;
+    }
+
+    /* Створюємо два незалежних вікна прокрутки */
+    #primary-window, #secondary-window {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #secondary-window {
+        border-top: 2px solid var(--accent-color);
+        background-color: #f9f9f9;
+    }
+
+    /* У мобільному режимі вірші в ряду стають невидимими в "чужому" вікні */
+    .verse-row {
+        display: block; /* Перетворюємо рядок на звичайний блок */
+        gap: 0;
+        border-bottom: none;
+    }
+
+    /* Спеціальний клас для синхронізації */
+    .mobile-hidden {
+        display: none;
+    }
 }
     </style>
 </head>
