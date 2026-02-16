@@ -87,41 +87,20 @@
         }
 
         /* --- МОБІЛЬНА АДАПТАЦІЯ (РОЗДІЛЕНИЙ ЕКРАН) --- */
-        @media (max-width: 600px) {
-            body, html {
-                overflow: hidden; /* Щоб не горталася вся сторінка */
-                height: 100%;
-            }
-
-            .book-container {
-                display: flex;
-                flex-direction: column;
-                height: calc(100vh - 70px); /* Висота під шапкою */
-                margin: 0;
-                padding: 0;
-                max-width: none;
-            }
-
-            #primary-window, #secondary-window {
-                flex: 1;
-                overflow-y: auto; /* Власна прокрутка для кожного вікна */
-                padding: 15px;
-                -webkit-overflow-scrolling: touch;
-            }
-
+        /* Виправлення відображення на великих екранах */
+        @media (min-width: 601px) {
             #secondary-window {
-                border-top: 2px solid var(--accent-color);
-                background-color: #f9f9f9;
+                display: block; /* Показуємо друге вікно */
             }
-
-            /* Приховуємо "чужі" колонки у вікнах на мобілці */
-            #primary-window .secondary-cell { display: none; }
-            #secondary-window .primary-cell { display: none; }
+            /* Якщо ваш reader.js генерує стандартні verse-row, 
+               нам потрібно, щоб вони займали всю ширину */
+            #reader-layout-primary, #reader-layout-secondary {
+                width: 100%;
+            }
             
-            .verse-row {
-                display: block; /* У вікні мобілки вірш на всю ширину */
-                gap: 0;
-            }
+            /* Якщо ви хочете залишити старий дизайн на десктопі (текст поруч), 
+               приховаємо друге вікно і використаємо лише перше */
+            #secondary-window { display: none; }
         }
     </style>
 </head>
