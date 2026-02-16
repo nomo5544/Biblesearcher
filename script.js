@@ -238,6 +238,10 @@ if (savedResults) {
                     return; 
                 }
             }
+            // Після того, як результати виведені на екран:
+                sessionStorage.setItem('lastSearchResults', resultsDiv.innerHTML);
+                sessionStorage.setItem('lastSearchQuery', searchInput.value);
+                sessionStorage.setItem('lastResultCount', countDisplay.innerText);
         }
 
         let count = 0;
