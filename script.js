@@ -150,15 +150,14 @@ const maps = {
     }
 };
 
-    // --- 2. ФУНКЦІЇ ВІДОБРАЖЕННЯ ---
     function renderDirectResult(ref, text) {
         if (!resultsDiv) return;
         const div = document.createElement('div');
         div.className = 'verse';
         div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer; font-weight: normal;">● ${ref}</span> ${text}`;
-        div.querySelector('.ref').addEventListener('click', () => {
+        div.querySelector('.ref').onclick = () => {
             window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
-        });
+        };
         resultsDiv.appendChild(div);
     }
 
@@ -166,18 +165,16 @@ const maps = {
         const div = document.createElement('div');
         div.className = 'verse'; 
         div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; font-weight: normal;">${ref}</span> ${htmlContent}`;
-        div.querySelector('.ref').addEventListener('click', () => {
+        div.querySelector('.ref').onclick = () => {
             window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
-        });
+        };
         fragment.appendChild(div);
     }
 
-    // --- 3. ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
     window.performSearch = function() {
         const query = searchInput.value.trim();
         if (!resultsDiv) return;
         resultsDiv.innerHTML = '';
-        
         if (query.length < 2) { 
             if (countDisplay) countDisplay.innerText = '0'; 
             return; 
@@ -186,12 +183,11 @@ const maps = {
         const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
         const match = query.match(refRegex);
 
-        if (match && typeof maps !== 'undefined') {
+        if (match) {
             const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
             const chapter = match[2];
             const vStart = parseInt(match[3] || "1");
             const vEnd = match[4] ? parseInt(match[4]) : vStart;
-            
             const currentMap = maps[window.currentLang];
             const fullBookName = currentMap ? currentMap[bookInput] : null;
 
@@ -212,11 +208,7 @@ const maps = {
                     if (match[4]) displayRef += `-${vEnd}`;
                     renderDirectResult(displayRef, combinedText);
                     if (countDisplay) countDisplay.innerText = '1';
-                    
-                    // Збереження результату прямого пошуку
-                    sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
-                    sessionStorage.setItem('lastQuery', query);
-                    sessionStorage.setItem('lastCount', '1');
+                    saveState();
                     return; 
                 }
             }
@@ -229,10 +221,8 @@ const maps = {
         if (isExact) {
             let regex;
             try {
-                const pattern = `(?<![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])${query}(?![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])`;
-                regex = new RegExp(pattern, 'gi');
+                regex = new RegExp(`(?<![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])${query}(?![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])`, 'gi');
             } catch (e) { return; }
-
             for (const ref in window.currentLangData) {
                 const text = window.currentLangData[ref];
                 if (text.match(regex)) {
@@ -244,19 +234,15 @@ const maps = {
         } else {
             const searchWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 1);
             if (searchWords.length === 0) return;
-
             for (const ref in window.currentLangData) {
                 const text = window.currentLangData[ref];
                 const textLower = text.toLowerCase();
-                const matchesAll = searchWords.every(word => textLower.includes(word));
-
-                if (matchesAll) {
+                if (searchWords.every(word => textLower.includes(word))) {
                     count++;
                     let highlightedText = text;
                     searchWords.forEach(word => {
                         const cleanWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const highlightRegex = new RegExp(`(${cleanWord})`, 'gi');
-                        highlightedText = highlightedText.replace(highlightRegex, '<mark>$1</mark>');
+                        highlightedText = highlightedText.replace(new RegExp(`(${cleanWord})`, 'gi'), '<mark>$1</mark>');
                     });
                     addVerseToFragment(fragment, ref, highlightedText);
                     if (count >= 500) break;
@@ -265,65 +251,41 @@ const maps = {
         }
         resultsDiv.appendChild(fragment);
         if (countDisplay) countDisplay.innerText = count;
-
-        // Збереження результатів пошуку за словами
-        sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
-        sessionStorage.setItem('lastQuery', query);
-        sessionStorage.setItem('lastCount', count.toString());
+        saveState();
     };
 
-    // --- 4. КОПІЮВАННЯ ТА ЗАВАНТАЖЕННЯ ---
-    if (copyRefsBtn) {
-        copyRefsBtn.onclick = () => {
-            const refElements = resultsDiv.querySelectorAll('.ref');
-            if (refElements.length === 0) return;
-            const refsText = Array.from(refElements).map(el => el.innerText.replace('● ', '').trim()).join(', ');
-            navigator.clipboard.writeText(refsText).then(() => {
-                const originalText = copyRefsBtn.innerText;
-                copyRefsBtn.innerText = '✅';
-                setTimeout(() => { copyRefsBtn.innerText = originalText; }, 2000);
-            });
-        };
+    function saveState() {
+        sessionStorage.setItem('lastSearchResults', resultsDiv.innerHTML);
+        sessionStorage.setItem('lastSearchQuery', searchInput.value);
+        sessionStorage.setItem('lastResultCount', countDisplay ? countDisplay.innerText : '0');
     }
 
     window.loadLanguage = function(langCode) {
         const fileName = langCode === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
         fetch(fileName)
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 window.currentLangData = data;
-                // Спершу перевіряємо, чи є збережені результати в сесії
-                const savedResults = sessionStorage.getItem('lastResults');
-                if (savedResults) {
-                    restoreResults();
-                } else if (searchInput.value.trim().length >= 2) {
+                // Відновлюємо тільки ПРИ першому завантаженні, якщо є дані
+                const savedHTML = sessionStorage.getItem('lastSearchResults');
+                if (savedHTML && resultsDiv.innerHTML === "") {
+                    resultsDiv.innerHTML = savedHTML;
+                    searchInput.value = sessionStorage.getItem('lastSearchQuery') || '';
+                    if (countDisplay) countDisplay.innerText = sessionStorage.getItem('lastResultCount') || '0';
+                    // Переприв'язка кліків
+                    resultsDiv.querySelectorAll('.ref').forEach(el => {
+                        el.onclick = () => {
+                            const ref = el.innerText.replace('● ', '').trim();
+                            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+                        };
+                    });
+                } else if (searchInput.value.length >= 2) {
                     window.performSearch();
                 }
             })
-            .catch(err => console.error("Файл не знайдено:", fileName));
+            .catch(err => console.error(err));
     };
 
-    // --- 5. ВІДНОВЛЕННЯ СТАНУ ---
-    function restoreResults() {
-        const savedResults = sessionStorage.getItem('lastResults');
-        const savedQuery = sessionStorage.getItem('lastQuery');
-        const savedCount = sessionStorage.getItem('lastCount');
-
-        if (savedResults && resultsDiv && searchInput) {
-            resultsDiv.innerHTML = savedResults;
-            searchInput.value = savedQuery || '';
-            if (countDisplay) countDisplay.innerText = savedCount || '0';
-            
-            resultsDiv.querySelectorAll('.ref').forEach(el => {
-                el.onclick = () => {
-                    const ref = el.innerText.replace('● ', '').trim();
-                    window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
-                };
-            });
-        }
-    }
-
-    // --- 6. ОБРОБНИКИ ПОДІЙ ---
     if (langToggle) {
         langToggle.onclick = () => {
             window.currentLang = (window.currentLang === 'ukr') ? 'ru' : 'ukr';
@@ -331,12 +293,32 @@ const maps = {
             localStorage.setItem('selectedLang', window.currentLang);
             window.loadLanguage(window.currentLang);
         };
+        langToggle.innerText = window.currentLang === 'ukr' ? 'UA' : 'RU';
     }
 
-    if (searchInput) searchInput.oninput = window.performSearch;
-    if (exactMatch) exactMatch.onchange = window.performSearch;
+    if (searchInput) {
+        searchInput.oninput = window.performSearch;
+        searchInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                const match = query.match(/^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/);
+                if (match) {
+                    const book = maps[window.currentLang][match[1].trim().toLowerCase().replace(/\.$/, "")];
+                    if (book) {
+                        let r = `${book} ${match[2]}:${match[3] || "1"}`;
+                        if (match[4]) r += `-${match[4]}`;
+                        window.location.href = `reader.html?ref=${encodeURIComponent(r)}&lang=${window.currentLang}`;
+                        return;
+                    }
+                }
+                window.performSearch();
+            }
+        };
+    }
 
-    if (fontSizeRange && resultsDiv) {
+    if (exactMatch) exactMatch.onchange = window.performSearch;
+    if (fontSizeRange) {
         const savedSize = localStorage.getItem('searchFontSize') || '18';
         fontSizeRange.value = savedSize;
         resultsDiv.style.fontSize = savedSize + 'px';
@@ -346,32 +328,17 @@ const maps = {
         };
     }
 
-    // Запуск ініціалізації
-    if (langToggle) langToggle.innerText = window.currentLang === 'ukr' ? 'UA' : 'RU';
-    window.loadLanguage(window.currentLang);
-
-    if (searchInput) {
-        searchInput.onkeydown = (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault(); 
-                const query = searchInput.value.trim();
-                const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
-                const match = query.match(refRegex);
-                if (match) {
-                    const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
-                    const fullBookName = maps[window.currentLang][bookInput];
-                    if (fullBookName) {
-                        const chapter = match[2];
-                        const vStart = match[3] || "1";
-                        const vEnd = match[4];
-                        let finalRef = `${fullBookName} ${chapter}:${vStart}`;
-                        if (vEnd) finalRef += `-${vEnd}`;
-                        window.location.href = `reader.html?ref=${encodeURIComponent(finalRef)}&lang=${window.currentLang}`;
-                        return;
-                    }
-                }
-                window.performSearch();
-            }
+    if (copyRefsBtn) {
+        copyRefsBtn.onclick = () => {
+            const refs = Array.from(resultsDiv.querySelectorAll('.ref')).map(el => el.innerText.replace('● ', '').trim()).join(', ');
+            if (!refs) return;
+            navigator.clipboard.writeText(refs).then(() => {
+                const old = copyRefsBtn.innerText;
+                copyRefsBtn.innerText = '✅';
+                setTimeout(() => copyRefsBtn.innerText = old, 2000);
+            });
         };
     }
+
+    window.loadLanguage(window.currentLang);
 })();
