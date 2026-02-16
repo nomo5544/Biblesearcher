@@ -376,8 +376,8 @@ if (savedResults) {
     });
     
     // Додайте цей рядок у вашу основну функцію performSearch, де ви отримуєте результати:
-    // sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
-    // sessionStorage.setItem('lastQuery', searchInput.value);
+    sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
+    sessionStorage.setItem('lastQuery', searchInput.value);
     // --- 5. ОБРОБНИКИ ПОДІЙ ---
     if (langToggle) {
         langToggle.onclick = () => {
