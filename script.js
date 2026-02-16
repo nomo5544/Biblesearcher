@@ -172,6 +172,26 @@ const maps = {
             window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
         });
         fragment.appendChild(div);
+        // Коли сторінка завантажилася:
+const savedResults = sessionStorage.getItem('lastSearchResults');
+const savedQuery = sessionStorage.getItem('lastSearchQuery');
+const savedCount = sessionStorage.getItem('lastResultCount');
+
+if (savedResults) {
+    resultsDiv.innerHTML = savedResults;
+    searchInput.value = savedQuery || '';
+    countDisplay.innerText = savedCount || '0';
+    
+    // Важливо: переприв'язати кліки до посилань .ref, 
+    // бо після відновлення з HTML старі обробники зникають
+    resultsDiv.querySelectorAll('.ref').forEach(el => {
+        el.addEventListener('click', () => {
+            const ref = el.innerText.replace('● ', '').trim();
+            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+        });
+    });
+}
+    
     }
 
     // --- 3. ГОЛОВНА ФУНКЦІЯ ПОШУКУ ---
