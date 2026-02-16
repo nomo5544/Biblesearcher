@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bible-searcher-v1.02';
+const CACHE_NAME = 'bible-searcher-v1.03';
 const ASSETS = [
   'index.html',
   'reader.html',
@@ -24,6 +24,21 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
+    })
+  );
+});
+// Очищення старих версій кешу
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Видаляємо старий кеш:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
     })
   );
 });
