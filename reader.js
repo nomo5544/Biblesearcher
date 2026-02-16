@@ -121,3 +121,11 @@ document.getElementById('prevBtn').onclick = () => navigate(-1);
 document.getElementById('nextBtn').onclick = () => navigate(1);
 
 loadBible();
+// --- ОБРОБКА КЛАВІАТУРИ ---
+document.addEventListener('keydown', (e) => {
+    if (e.key === "ArrowLeft") {
+        navigate(-1); // Попередній розділ
+    } else if (e.key === "ArrowRight") {
+        navigate(1);  // Наступний розділ
+    }
+});
