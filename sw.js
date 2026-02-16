@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bible-searcher-v1.020';
+const CACHE_NAME = 'bible-searcher-v1.032'; // Оновив версію тут
 const ASSETS = [
   'index.html',
   'reader.html',
@@ -10,51 +10,55 @@ const ASSETS = [
   'icon-512.png'
 ];
 
-// 1. Встановлення: кешуємо файли та змушуємо новий SW активуватися негайно
+// 1. Встановлення
 self.addEventListener('install', (event) => {
-  console.log(`[Service Worker] Встановлення версії: ${CACHE_NAME}`);
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
-    }).then(() => {
-      // skipWaiting() дозволяє новому SW стати активним, не чекаючи закриття вкладок
-      return self.skipWaiting();
-    })
+    }).then(() => self.skipWaiting())
   );
 });
 
-// 2. Активація: очищаємо старий кеш та беремо керування сторінками на себе
+// 2. Активація (очищення старих версій)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log(`[Service Worker] Видалення старого кешу: ${cache}`);
             return caches.delete(cache);
           }
         })
       );
-    }).then(() => {
-      // Змушує SW негайно почати контролювати всі відкриті вкладки
-      return self.clients.claim();
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// 3. Обробка запитів: спочатку кеш, потім мережа
+// 3. Стратегія "Stale-While-Revalidate" (найкраща для таких додатків)
+// Видає файл із кешу миттєво, але у фоні йде в мережу, перевіряє оновлення 
+// і тихо оновлює кеш для наступного разу.
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        return response; // Повертаємо з кешу, якщо є
-      }
-      return fetch(event.request); // Або йдемо в інтернет
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          // Якщо відповідь від мережі успішна, зберігаємо її копію в кеш
+          if (networkResponse && networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
+        }).catch(() => {
+            // Якщо мережі немає, ми просто нічого не оновлюємо
+        });
+
+        // Повертаємо кеш негайно, якщо він є, інакше чекаємо на мережу
+        return cachedResponse || fetchPromise;
+      });
     })
   );
 });
 
-// 4. Подія для отримання версії (щоб ви могли вивести її в консоль браузера)
+// 4. Подія для отримання версії
 self.addEventListener('message', (event) => {
   if (event.data.action === 'getVersion') {
     event.source.postMessage({
