@@ -326,7 +326,49 @@ if (savedResults) {
             })
             .catch(err => console.error("Файл не знайдено:", fileName));
     };
-
+    // --- ЛОГІКА ВЕРСІЇ ТА ОНОВЛЕННЯ ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                // Якщо знайдено оновлення Service Worker
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Повідомляємо користувача, що додаток оновлено (опціонально)
+                            console.log('Нова версія готова. Будь ласка, перезавантажте сторінку.');
+                        }
+                    };
+                };
+            });
+        });
+    }
+    
+    // --- ЗБЕРЕЖЕННЯ РЕЗУЛЬТАТІВ (SessionStorage) ---
+    // Цей код відновить результати після повернення зі сторінки reader.html
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedResults = sessionStorage.getItem('lastResults');
+        const savedQuery = sessionStorage.getItem('lastQuery');
+        const resultsContainer = document.getElementById('results');
+        const inputField = document.getElementById('searchInput');
+    
+        if (savedResults && resultsContainer && inputField) {
+            resultsContainer.innerHTML = savedResults;
+            inputField.value = savedQuery;
+            
+            // Переприв'язуємо кліки до посилань після відновлення HTML
+            resultsContainer.querySelectorAll('.ref').forEach(el => {
+                el.addEventListener('click', () => {
+                    const ref = el.innerText.replace('● ', '').trim();
+                    window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+                });
+            });
+        }
+    });
+    
+    // Додайте цей рядок у вашу основну функцію performSearch, де ви отримуєте результати:
+    // sessionStorage.setItem('lastResults', resultsDiv.innerHTML);
+    // sessionStorage.setItem('lastQuery', searchInput.value);
     // --- 5. ОБРОБНИКИ ПОДІЙ ---
     if (langToggle) {
         langToggle.onclick = () => {
