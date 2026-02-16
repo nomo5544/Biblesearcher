@@ -129,3 +129,31 @@ document.addEventListener('keydown', (e) => {
         navigate(1);  // Наступний розділ
     }
 });
+// --- ОБРОБКА СВАЙПІВ (Мобільні) ---
+let touchStartX = 0;
+let touchEndX = 0;
+
+// Мінімальна відстань для розпізнавання свайпу (у пікселях)
+const minSwipeDistance = 70; 
+
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, false);
+
+document.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+}, false);
+
+function handleSwipe() {
+    const distance = touchEndX - touchStartX;
+    
+    // Якщо свайп вправо (палець рухається зліва направо) — попередній розділ
+    if (distance > minSwipeDistance) {
+        navigate(-1);
+    } 
+    // Якщо свайп вліво (палець рухається справа наліво) — наступний розділ
+    else if (distance < -minSwipeDistance) {
+        navigate(1);
+    }
+}
