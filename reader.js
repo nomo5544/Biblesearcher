@@ -129,38 +129,23 @@ document.addEventListener('keydown', (e) => {
     }
 });
 // --- ОБРОБКА СВАЙПІВ (Мобільні) ---
-// ПРЯМИЙ ТА НАДІЙНИЙ СВАЙП БЕЗ АНІМАЦІЙ
-let xDown = null;                                                        
-let yDown = null;
+let xDown = null;
 
-document.addEventListener('touchstart', (evt) => {
-    xDown = evt.touches[0].clientX;                                      
-    yDown = evt.touches[0].clientY;                                      
+document.addEventListener('touchstart', (e) => {
+    xDown = e.touches[0].clientX;
 }, { passive: true });
 
-document.addEventListener('touchend', (evt) => {
-    if (!xDown || !yDown) return;
-
-    let xUp = evt.changedTouches[0].clientX;                                    
-    let yUp = evt.changedTouches[0].clientY;
-
+document.addEventListener('touchend', (e) => {
+    if (!xDown) return;
+    let xUp = e.changedTouches[0].clientX;
     let xDiff = xDown - xUp;
-    let yDiff = yDown - yUp;
 
-    // Якщо рух по горизонталі більший, ніж по вертикалі (захист від випадкового спрацювання при скролі)
-    if (Math.abs(xDiff) > Math.abs(yDiff)) {
-        if (Math.abs(xDiff) > 70) { // Поріг чутливості
-            if (xDiff > 0) {
-                navigate(1);  // Свайп вліво -> Наступний
-            } else {
-                navigate(-1); // Свайп вправо -> Попередній
-            }
-        }
+    // Тільки якщо палець пройшов більше 100 пікселів
+    if (Math.abs(xDiff) > 100) {
+        if (xDiff > 0) navigate(1);  // Наступний
+        else navigate(-1);           // Попередній
     }
-    
-    // Скидаємо значення
     xDown = null;
-    yDown = null;                                             
-}, false);
+}, { passive: true });
 
 loadBible();
