@@ -1,9 +1,7 @@
-// --- ПАРАМЕТРИ ТА ЗМІННІ ---
+// Перенесемо ініціалізацію змінних на початок
 const urlParams = new URLSearchParams(window.location.search);
-// 1. На десктопі пробіли часто стають "+", додаємо заміну для стабільності
 let fullRef = decodeURIComponent(urlParams.get('ref') || "").replace(/\+/g, ' ');
 let currentLang = urlParams.get('lang') || 'ukr';
-
 let bibleData = null;
 
 const bookMap = {
@@ -32,16 +30,11 @@ const bookMap = {
 };
 
 function getTranslatedBookName(name, toLang) {
-    if (toLang === 'rus') {
-        return bookMap[name] || name;
-    } else {
-        return Object.keys(bookMap).find(key => bookMap[key] === name) || name;
-    }
+    if (toLang === 'rus') return bookMap[name] || name;
+    return Object.keys(bookMap).find(key => bookMap[key] === name) || name;
 }
 
-// Розбір посилання
 let bookName = "", chapterNum = "1", targetVerse = null;
-// 2. Більш надійний Regex (додано trim() та виправлено захоплення групи)
 const match = fullRef.trim().match(/^(.+?)\s+(\d+)(?::(\d+))?$/);
 if (match) {
     bookName = match[1];
@@ -59,9 +52,9 @@ function loadBible() {
         .then(data => {
             bibleData = data;
             renderContent();
+            initTouchLogic(); // Активуємо свайпи ТІЛЬКИ після завантаження даних
         })
         .catch(err => {
-            console.error("Помилка:", err);
             const layout = document.getElementById('reader-layout');
             if(layout) layout.innerHTML = "Помилка завантаження тексту.";
         });
@@ -77,12 +70,10 @@ function renderContent() {
 
     const prefix = `${bookName} ${chapterNum}:`;
     const keys = Object.keys(bibleData).filter(k => k.startsWith(prefix));
-    
     keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
 
     if (keys.length === 0) {
-        // Якщо на десктопі порожньо — виведемо технічну назву, яку шукав скрипт
-        layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Розділ не знайдено (${bookName} ${chapterNum}).</div>`;
+        layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Розділ не знайдено.</div>`;
         return;
     }
 
@@ -104,12 +95,49 @@ function renderContent() {
     }
 }
 
-document.getElementById('langBtn').onclick = () => {
-    const nextLang = currentLang === 'ukr' ? 'rus' : 'ukr';
-    const translatedBook = getTranslatedBookName(bookName, nextLang);
-    const newRef = `${translatedBook} ${chapterNum}${targetVerse ? ':' + targetVerse : ''}`;
-    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
-};
+// --- ЛОГІКА СВАЙПІВ (ВИДІЛЕНА В ОКРЕМУ ФУНКЦІЮ) ---
+function initTouchLogic() {
+    const layout = document.getElementById('reader-layout');
+    if (!layout) return;
+
+    let touchStartX = 0;
+    let currentTranslate = 0;
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    if (!isTouchDevice) return;
+
+    // Використовуємо обробники безпосередньо на layout для кращого відгуку
+    layout.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        layout.classList.add('no-transition');
+    }, { passive: true });
+
+    layout.addEventListener('touchmove', (e) => {
+        const touchX = e.touches[0].clientX;
+        const diffX = touchX - touchStartX;
+
+        if (Math.abs(diffX) < 160) {
+            currentTranslate = diffX;
+            layout.style.transform = `translateX(${currentTranslate}px)`;
+            layout.style.opacity = 1 - Math.abs(currentTranslate) / 450;
+        }
+    }, { passive: true });
+
+    layout.addEventListener('touchend', () => {
+        layout.classList.remove('no-transition');
+        const threshold = 100;
+
+        if (currentTranslate > threshold) {
+            navigate(-1);
+        } else if (currentTranslate < -threshold) {
+            navigate(1);
+        } else {
+            layout.style.transform = 'translateX(0)';
+            layout.style.opacity = '1';
+        }
+        currentTranslate = 0;
+    });
+}
 
 function navigate(step) {
     const nextChap = parseInt(chapterNum) + step;
@@ -117,67 +145,20 @@ function navigate(step) {
     window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + nextChap)}&lang=${currentLang}`;
 }
 
+// Кнопки навігації
 document.getElementById('prevBtn').onclick = () => navigate(-1);
 document.getElementById('nextBtn').onclick = () => navigate(1);
+document.getElementById('langBtn').onclick = () => {
+    const nextLang = currentLang === 'ukr' ? 'rus' : 'ukr';
+    const translatedBook = getTranslatedBookName(bookName, nextLang);
+    const newRef = `${translatedBook} ${chapterNum}${targetVerse ? ':' + targetVerse : ''}`;
+    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
+};
 
-loadBible();
-// --- ОБРОБКА КЛАВІАТУРИ ---
-document.addEventListener('keydown', (e) => {
-    if (e.key === "ArrowLeft") {
-        navigate(-1); // Попередній розділ
-    } else if (e.key === "ArrowRight") {
-        navigate(1);  // Наступний розділ
-    }
-});
-// --- ОБРОБКА СВАЙПІВ (Мобільні) ---
-// --- НАЛАШТУВАННЯ ТАЧ-ЕФЕКТІВ (Тільки мобільні) ---
-let touchStartX = 0;
-let currentTranslate = 0;
-const layout = document.getElementById('reader-layout');
-
-// Перевірка: чи підтримує пристрій тач (мобільний/планшет)
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-if (isTouchDevice && layout) {
-    document.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        layout.classList.add('no-transition'); // Вимикаємо анімацію під час руху пальця
-    }, { passive: true });
-
-    document.addEventListener('touchmove', (e) => {
-        const touchX = e.touches[0].clientX;
-        const diffX = touchX - touchStartX;
-
-        // Обмежуємо візуальний зсув для плавності (наприклад, до 120px)
-        if (Math.abs(diffX) < 150) {
-            currentTranslate = diffX;
-            // Рухаємо контент за пальцем
-            layout.style.transform = `translateX(${currentTranslate}px)`;
-            // Додаємо легке згасання
-            layout.style.opacity = 1 - Math.abs(currentTranslate) / 400;
-        }
-    }, { passive: true });
-
-    document.addEventListener('touchend', (e) => {
-        layout.classList.remove('no-transition'); // Повертаємо плавність для фінального руху
-        
-        const threshold = 100; // Поріг у 100px для спрацювання переходу
-
-        if (currentTranslate > threshold) {
-            navigate(-1); // Свайп вправо -> назад
-        } else if (currentTranslate < -threshold) {
-            navigate(1);  // Свайп вліво -> вперед
-        } else {
-            // Пружинимо назад у центр, якщо свайп був коротким
-            layout.style.transform = 'translateX(0)';
-            layout.style.opacity = '1';
-        }
-        currentTranslate = 0;
-    }, false);
-}
-
-// --- КЛАВІАТУРА (Залишається активною для всіх) ---
+// Обробка клавіатури
 document.addEventListener('keydown', (e) => {
     if (e.key === "ArrowLeft") navigate(-1);
     if (e.key === "ArrowRight") navigate(1);
 });
+
+loadBible();
