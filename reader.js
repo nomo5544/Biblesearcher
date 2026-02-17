@@ -130,30 +130,54 @@ document.addEventListener('keydown', (e) => {
     }
 });
 // --- ОБРОБКА СВАЙПІВ (Мобільні) ---
+// --- НАЛАШТУВАННЯ ТАЧ-ЕФЕКТІВ (Тільки мобільні) ---
 let touchStartX = 0;
-let touchEndX = 0;
+let currentTranslate = 0;
+const layout = document.getElementById('reader-layout');
 
-// Мінімальна відстань для розпізнавання свайпу (у пікселях)
-const minSwipeDistance = 70; 
+// Перевірка: чи підтримує пристрій тач (мобільний/планшет)
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-document.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-}, false);
+if (isTouchDevice && layout) {
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        layout.classList.add('no-transition'); // Вимикаємо анімацію під час руху пальця
+    }, { passive: true });
 
-document.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-}, false);
+    document.addEventListener('touchmove', (e) => {
+        const touchX = e.touches[0].clientX;
+        const diffX = touchX - touchStartX;
 
-function handleSwipe() {
-    const distance = touchEndX - touchStartX;
-    
-    // Якщо свайп вправо (палець рухається зліва направо) — попередній розділ
-    if (distance > minSwipeDistance) {
-        navigate(-1);
-    } 
-    // Якщо свайп вліво (палець рухається справа наліво) — наступний розділ
-    else if (distance < -minSwipeDistance) {
-        navigate(1);
-    }
+        // Обмежуємо візуальний зсув для плавності (наприклад, до 120px)
+        if (Math.abs(diffX) < 150) {
+            currentTranslate = diffX;
+            // Рухаємо контент за пальцем
+            layout.style.transform = `translateX(${currentTranslate}px)`;
+            // Додаємо легке згасання
+            layout.style.opacity = 1 - Math.abs(currentTranslate) / 400;
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        layout.classList.remove('no-transition'); // Повертаємо плавність для фінального руху
+        
+        const threshold = 100; // Поріг у 100px для спрацювання переходу
+
+        if (currentTranslate > threshold) {
+            navigate(-1); // Свайп вправо -> назад
+        } else if (currentTranslate < -threshold) {
+            navigate(1);  // Свайп вліво -> вперед
+        } else {
+            // Пружинимо назад у центр, якщо свайп був коротким
+            layout.style.transform = 'translateX(0)';
+            layout.style.opacity = '1';
+        }
+        currentTranslate = 0;
+    }, false);
 }
+
+// --- КЛАВІАТУРА (Залишається активною для всіх) ---
+document.addEventListener('keydown', (e) => {
+    if (e.key === "ArrowLeft") navigate(-1);
+    if (e.key === "ArrowRight") navigate(1);
+});
