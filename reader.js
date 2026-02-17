@@ -29,126 +29,155 @@ const bookMap = {
     "3 Івана": "3 Иоанна", "Юди": "Иуды", "Об'явлення": "Откровение"
 };
 
+
 function getTranslatedBookName(name, toLang) {
-    if (toLang === 'rus') return bookMap[name] || name;
-    return Object.keys(bookMap).find(key => bookMap[key] === name) || name;
+    if (toLang === 'rus') {
+        return bookMap[name] || name;
+    } else {
+        return Object.keys(bookMap).find(key => bookMap[key] === name) || name;
+    }
 }
 
+// Розбір посилання
 let bookName = "", chapterNum = "1", targetVerse = null;
+// 2. Більш надійний Regex (додано trim() та виправлено захоплення групи)
 const match = fullRef.trim().match(/^(.+?)\s+(\d+)(?::(\d+))?$/);
 if (match) {
-    bookName = match[1];
-    chapterNum = match[2];
-    targetVerse = match[3] ? parseInt(match[3]) : null;
+    bookName = match[1];
+    chapterNum = match[2];
+    targetVerse = match[3] ? parseInt(match[3]) : null;
 }
 
 function loadBible() {
-    const fileName = currentLang === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
-    const btn = document.getElementById('langBtn');
-    if(btn) btn.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
+    const fileName = currentLang === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
+    const btn = document.getElementById('langBtn');
+    if(btn) btn.innerText = currentLang === 'ukr' ? 'UA' : 'RU';
 
-    fetch(fileName)
-        .then(r => r.json())
-        .then(data => {
-            bibleData = data;
-            renderContent();
-            initTouchLogic(); // Активуємо свайпи ТІЛЬКИ після завантаження даних
-        })
-        .catch(err => {
-            const layout = document.getElementById('reader-layout');
-            if(layout) layout.innerHTML = "Помилка завантаження тексту.";
-        });
+    fetch(fileName)
+        .then(r => r.json())
+        .then(data => {
+            bibleData = data;
+            renderContent();
+        })
+        .catch(err => {
+            console.error("Помилка:", err);
+            const layout = document.getElementById('reader-layout');
+            if(layout) layout.innerHTML = "Помилка завантаження тексту.";
+        });
 }
 
 function renderContent() {
-    const layout = document.getElementById('reader-layout');
-    const refHeader = document.getElementById('refHeader');
-    if (!layout || !bibleData) return;
+    const layout = document.getElementById('reader-layout');
+    const refHeader = document.getElementById('refHeader');
+    if (!layout || !bibleData) return;
 
-    layout.innerHTML = "";
-    if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
+    layout.innerHTML = "";
+    if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
 
-    const prefix = `${bookName} ${chapterNum}:`;
-    const keys = Object.keys(bibleData).filter(k => k.startsWith(prefix));
-    keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
+    const prefix = `${bookName} ${chapterNum}:`;
+    const keys = Object.keys(bibleData).filter(k => k.startsWith(prefix));
+    
+    keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
 
-    if (keys.length === 0) {
-        layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Розділ не знайдено.</div>`;
-        return;
-    }
+    if (keys.length === 0) {
+        // Якщо на десктопі порожньо — виведемо технічну назву, яку шукав скрипт
+        layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Розділ не знайдено (${bookName} ${chapterNum}).</div>`;
+        return;
+    }
 
-    keys.forEach(key => {
-        const vNum = key.split(':')[1];
-        const isTarget = parseInt(vNum) === targetVerse;
-        const div = document.createElement('div');
-        div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
-        if (isTarget) div.id = "target";
-        div.innerHTML = `<span class="verse-num">${vNum}</span>${bibleData[key]}`;
-        layout.appendChild(div);
-    });
+    keys.forEach(key => {
+        const vNum = key.split(':')[1];
+        const isTarget = parseInt(vNum) === targetVerse;
+        const div = document.createElement('div');
+        div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
+        if (isTarget) div.id = "target";
+        div.innerHTML = `<span class="verse-num">${vNum}</span>${bibleData[key]}`;
+        layout.appendChild(div);
+    });
 
-    if (targetVerse) {
-        setTimeout(() => {
-            const el = document.getElementById('target');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
-    }
+    if (targetVerse) {
+        setTimeout(() => {
+            const el = document.getElementById('target');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    }
 }
 
-// --- ЕТАЛОННИЙ МОБІЛЬНИЙ СВАЙП ---
+document.getElementById('langBtn').onclick = () => {
+    const nextLang = currentLang === 'ukr' ? 'rus' : 'ukr';
+    const translatedBook = getTranslatedBookName(bookName, nextLang);
+    const newRef = `${translatedBook} ${chapterNum}${targetVerse ? ':' + targetVerse : ''}`;
+    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
+};
+
+function navigate(step) {
+    const nextChap = parseInt(chapterNum) + step;
+    if (nextChap < 1) return;
+    window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + nextChap)}&lang=${currentLang}`;
+}
+
+document.getElementById('prevBtn').onclick = () => navigate(-1);
+document.getElementById('nextBtn').onclick = () => navigate(1);
+
+loadBible();
+// --- ОБРОБКА КЛАВІАТУРИ ---
+document.addEventListener('keydown', (e) => {
+    if (e.key === "ArrowLeft") {
+        navigate(-1); // Попередній розділ
+    } else if (e.key === "ArrowRight") {
+        navigate(1);  // Наступний розділ
+    }
+});
+// --- ОБРОБКА СВАЙПІВ (Мобільні) ---
+// --- НАЛАШТУВАННЯ ТАЧ-ЕФЕКТІВ (Тільки мобільні) ---
 let touchStartX = 0;
-let currentX = 0;
-let isMoving = false;
+let currentTranslate = 0;
 const layout = document.getElementById('reader-layout');
 
-window.addEventListener('touchstart', (e) => {
-    // Беремо початкову точку з будь-якого місця екрану
-    touchStartX = e.touches[0].clientX;
-    isMoving = true;
-    if (layout) layout.classList.add('no-transition');
-}, { passive: true });
+// Перевірка: чи підтримує пристрій тач (мобільний/планшет)
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-window.addEventListener('touchmove', (e) => {
-    if (!isMoving || !layout) return;
+if (isTouchDevice && layout) {
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        layout.classList.add('no-transition'); // Вимикаємо анімацію під час руху пальця
+    }, { passive: true });
 
-    const touchX = e.touches[0].clientX;
-    currentX = touchX - touchStartX;
+    document.addEventListener('touchmove', (e) => {
+        const touchX = e.touches[0].clientX;
+        const diffX = touchX - touchStartX;
 
-    // Рух стає важчим, чим далі ми тягнемо (ефект гуми)
-    const resistance = 0.85; 
-    const translate = currentX * resistance;
+        // Обмежуємо візуальний зсув для плавності (наприклад, до 120px)
+        if (Math.abs(diffX) < 150) {
+            currentTranslate = diffX;
+            // Рухаємо контент за пальцем
+            layout.style.transform = `translateX(${currentTranslate}px)`;
+            // Додаємо легке згасання
+            layout.style.opacity = 1 - Math.abs(currentTranslate) / 400;
+        }
+    }, { passive: true });
 
-    // Використовуємо requestAnimationFrame для максимальної плавності
-    requestAnimationFrame(() => {
-        layout.style.transform = `translateX(${translate}px)`;
-        layout.style.opacity = 1 - Math.abs(translate) / 600;
-    });
-}, { passive: true });
+    document.addEventListener('touchend', (e) => {
+        layout.classList.remove('no-transition'); // Повертаємо плавність для фінального руху
+        
+        const threshold = 100; // Поріг у 100px для спрацювання переходу
 
-window.addEventListener('touchend', (e) => {
-    if (!isMoving || !layout) return;
-    isMoving = false;
-    
-    layout.classList.remove('no-transition');
-    
-    const threshold = window.innerWidth * 0.25; // Поріг — 25% ширини екрану
+        if (currentTranslate > threshold) {
+            navigate(-1); // Свайп вправо -> назад
+        } else if (currentTranslate < -threshold) {
+            navigate(1);  // Свайп вліво -> вперед
+        } else {
+            // Пружинимо назад у центр, якщо свайп був коротким
+            layout.style.transform = 'translateX(0)';
+            layout.style.opacity = '1';
+        }
+        currentTranslate = 0;
+    }, false);
+}
 
-    if (Math.abs(currentX) > threshold) {
-        // Додаємо фінальну анімацію вильоту за екран
-        const direction = currentX > 0 ? 1 : -1;
-        layout.style.transform = `translateX(${direction * 100}vw)`;
-        layout.style.opacity = '0';
-        
-        // Переходимо до нового розділу після короткої паузи
-        setTimeout(() => {
-            navigate(direction === 1 ? -1 : 1);
-        }, 200);
-    } else {
-        // Плавне повернення на місце
-        layout.style.transform = 'translateX(0)';
-        layout.style.opacity = '1';
-    }
-    currentX = 0;
+// --- КЛАВІАТУРА (Залишається активною для всіх) ---
+document.addEventListener('keydown', (e) => {
+    if (e.key === "ArrowLeft") navigate(-1);
+    if (e.key === "ArrowRight") navigate(1);
 });
-
 loadBible();
