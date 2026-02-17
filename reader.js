@@ -70,7 +70,12 @@ function renderContent() {
     const layout = document.getElementById('reader-layout');
     const refHeader = document.getElementById('refHeader');
     if (!layout || !bibleData) return;
-
+    
+    // СИЛОВЕ СКИНУТИ СТИЛІВ (щоб текст не зависав)
+    layout.style.transform = "none";
+    layout.style.opacity = "1";
+    layout.classList.remove('no-transition');
+    
     layout.innerHTML = "";
     if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
 
