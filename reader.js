@@ -129,34 +129,38 @@ document.addEventListener('keydown', (e) => {
     }
 });
 // --- ОБРОБКА СВАЙПІВ (Мобільні) ---
-// --- ПРОСТИЙ ТА НАДІЙНИЙ СВАЙП ---
-let touchStartX = 0;
-let touchEndX = 0;
+// ПРЯМИЙ ТА НАДІЙНИЙ СВАЙП БЕЗ АНІМАЦІЙ
+let xDown = null;                                                        
+let yDown = null;
 
-// Мінімальна відстань для спрацювання (наприклад, 80 пікселів)
-const minSwipeDistance = 80; 
-
-document.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
+document.addEventListener('touchstart', (evt) => {
+    xDown = evt.touches[0].clientX;                                      
+    yDown = evt.touches[0].clientY;                                      
 }, { passive: true });
 
-document.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-}, { passive: true });
+document.addEventListener('touchend', (evt) => {
+    if (!xDown || !yDown) return;
 
-function handleSwipe() {
-    const distance = touchEndX - touchStartX;
-    
-    // Перевірка: чи не є рух занадто малим (захист від випадкових торкань)
-    if (Math.abs(distance) < minSwipeDistance) return;
+    let xUp = evt.changedTouches[0].clientX;                                    
+    let yUp = evt.changedTouches[0].clientY;
 
-    if (distance > minSwipeDistance) {
-        // Свайп вправо (палець рухається ->)
-        navigate(-1);
-    } else if (distance < -minSwipeDistance) {
-        // Свайп вліво (палець рухається <-)
-        navigate(1);
+    let xDiff = xDown - xUp;
+    let yDiff = yDown - yUp;
+
+    // Якщо рух по горизонталі більший, ніж по вертикалі (захист від випадкового спрацювання при скролі)
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        if (Math.abs(xDiff) > 70) { // Поріг чутливості
+            if (xDiff > 0) {
+                navigate(1);  // Свайп вліво -> Наступний
+            } else {
+                navigate(-1); // Свайп вправо -> Попередній
+            }
+        }
     }
-}
+    
+    // Скидаємо значення
+    xDown = null;
+    yDown = null;                                             
+}, false);
+
 loadBible();
