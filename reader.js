@@ -129,55 +129,34 @@ document.addEventListener('keydown', (e) => {
     }
 });
 // --- ОБРОБКА СВАЙПІВ (Мобільні) ---
-// --- НАЛАШТУВАННЯ ТАЧ-ЕФЕКТІВ (Тільки мобільні) ---
+// --- ПРОСТИЙ ТА НАДІЙНИЙ СВАЙП ---
 let touchStartX = 0;
-let currentTranslate = 0;
-const layout = document.getElementById('reader-layout');
+let touchEndX = 0;
 
-// Перевірка: чи підтримує пристрій тач (мобільний/планшет)
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+// Мінімальна відстань для спрацювання (наприклад, 80 пікселів)
+const minSwipeDistance = 80; 
 
-if (isTouchDevice && layout) {
-    document.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        layout.classList.add('no-transition'); // Вимикаємо анімацію під час руху пальця
-    }, { passive: true });
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
 
-    document.addEventListener('touchmove', (e) => {
-        const touchX = e.touches[0].clientX;
-        const diffX = touchX - touchStartX;
+document.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+}, { passive: true });
 
-        // Обмежуємо візуальний зсув для плавності (наприклад, до 120px)
-        if (Math.abs(diffX) < 150) {
-            currentTranslate = diffX;
-            // Рухаємо контент за пальцем
-            layout.style.transform = `translateX(${currentTranslate}px)`;
-            // Додаємо легке згасання
-            layout.style.opacity = 1 - Math.abs(currentTranslate) / 400;
-        }
-    }, { passive: true });
+function handleSwipe() {
+    const distance = touchEndX - touchStartX;
+    
+    // Перевірка: чи не є рух занадто малим (захист від випадкових торкань)
+    if (Math.abs(distance) < minSwipeDistance) return;
 
-    document.addEventListener('touchend', (e) => {
-        layout.classList.remove('no-transition'); // Повертаємо плавність для фінального руху
-        
-        const threshold = 100; // Поріг у 100px для спрацювання переходу
-
-        if (currentTranslate > threshold) {
-            navigate(-1); // Свайп вправо -> назад
-        } else if (currentTranslate < -threshold) {
-            navigate(1);  // Свайп вліво -> вперед
-        } else {
-            // Пружинимо назад у центр, якщо свайп був коротким
-            layout.style.transform = 'translateX(0)';
-            layout.style.opacity = '1';
-        }
-        currentTranslate = 0;
-    }, false);
+    if (distance > minSwipeDistance) {
+        // Свайп вправо (палець рухається ->)
+        navigate(-1);
+    } else if (distance < -minSwipeDistance) {
+        // Свайп вліво (палець рухається <-)
+        navigate(1);
+    }
 }
-
-// --- КЛАВІАТУРА (Залишається активною для всіх) ---
-document.addEventListener('keydown', (e) => {
-    if (e.key === "ArrowLeft") navigate(-1);
-    if (e.key === "ArrowRight") navigate(1);
-});
 loadBible();
