@@ -95,70 +95,60 @@ function renderContent() {
     }
 }
 
-// --- ЛОГІКА СВАЙПІВ (ВИДІЛЕНА В ОКРЕМУ ФУНКЦІЮ) ---
-function initTouchLogic() {
-    const layout = document.getElementById('reader-layout');
-    if (!layout) return;
+// --- ЕТАЛОННИЙ МОБІЛЬНИЙ СВАЙП ---
+let touchStartX = 0;
+let currentX = 0;
+let isMoving = false;
+const layout = document.getElementById('reader-layout');
 
-    let touchStartX = 0;
-    let currentTranslate = 0;
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+window.addEventListener('touchstart', (e) => {
+    // Беремо початкову точку з будь-якого місця екрану
+    touchStartX = e.touches[0].clientX;
+    isMoving = true;
+    if (layout) layout.classList.add('no-transition');
+}, { passive: true });
 
-    if (!isTouchDevice) return;
+window.addEventListener('touchmove', (e) => {
+    if (!isMoving || !layout) return;
 
-    // Використовуємо обробники безпосередньо на layout для кращого відгуку
-    layout.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        layout.classList.add('no-transition');
-    }, { passive: true });
+    const touchX = e.touches[0].clientX;
+    currentX = touchX - touchStartX;
 
-    layout.addEventListener('touchmove', (e) => {
-        const touchX = e.touches[0].clientX;
-        const diffX = touchX - touchStartX;
+    // Рух стає важчим, чим далі ми тягнемо (ефект гуми)
+    const resistance = 0.85; 
+    const translate = currentX * resistance;
 
-        if (Math.abs(diffX) < 160) {
-            currentTranslate = diffX;
-            layout.style.transform = `translateX(${currentTranslate}px)`;
-            layout.style.opacity = 1 - Math.abs(currentTranslate) / 450;
-        }
-    }, { passive: true });
-
-    layout.addEventListener('touchend', () => {
-        layout.classList.remove('no-transition');
-        const threshold = 100;
-
-        if (currentTranslate > threshold) {
-            navigate(-1);
-        } else if (currentTranslate < -threshold) {
-            navigate(1);
-        } else {
-            layout.style.transform = 'translateX(0)';
-            layout.style.opacity = '1';
-        }
-        currentTranslate = 0;
+    // Використовуємо requestAnimationFrame для максимальної плавності
+    requestAnimationFrame(() => {
+        layout.style.transform = `translateX(${translate}px)`;
+        layout.style.opacity = 1 - Math.abs(translate) / 600;
     });
-}
+}, { passive: true });
 
-function navigate(step) {
-    const nextChap = parseInt(chapterNum) + step;
-    if (nextChap < 1) return;
-    window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + nextChap)}&lang=${currentLang}`;
-}
+window.addEventListener('touchend', (e) => {
+    if (!isMoving || !layout) return;
+    isMoving = false;
+    
+    layout.classList.remove('no-transition');
+    
+    const threshold = window.innerWidth * 0.25; // Поріг — 25% ширини екрану
 
-// Кнопки навігації
-document.getElementById('prevBtn').onclick = () => navigate(-1);
-document.getElementById('nextBtn').onclick = () => navigate(1);
-document.getElementById('langBtn').onclick = () => {
-    const nextLang = currentLang === 'ukr' ? 'rus' : 'ukr';
-    const translatedBook = getTranslatedBookName(bookName, nextLang);
-    const newRef = `${translatedBook} ${chapterNum}${targetVerse ? ':' + targetVerse : ''}`;
-    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
-};
-
-// Обробка клавіатури
-document.addEventListener('keydown', (e) => {
-    if (e.key === "ArrowLeft") navigate(-1);
-    if (e.key === "ArrowRight") navigate(1);
+    if (Math.abs(currentX) > threshold) {
+        // Додаємо фінальну анімацію вильоту за екран
+        const direction = currentX > 0 ? 1 : -1;
+        layout.style.transform = `translateX(${direction * 100}vw)`;
+        layout.style.opacity = '0';
+        
+        // Переходимо до нового розділу після короткої паузи
+        setTimeout(() => {
+            navigate(direction === 1 ? -1 : 1);
+        }, 200);
+    } else {
+        // Плавне повернення на місце
+        layout.style.transform = 'translateX(0)';
+        layout.style.opacity = '1';
+    }
+    currentX = 0;
 });
 
 loadBible();
