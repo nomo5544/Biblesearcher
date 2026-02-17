@@ -98,6 +98,25 @@
             .verse-item { font-size: 18px; text-align: justify; }
             .ref-header { font-size: 15px; }
         }
+        /* --- СТИЛІ ДЛЯ ПЛАВНОГО СВАЙПУ (Додати сюди) --- */
+
+        #reader-layout {
+            /* Плавне повернення контенту в центр, коли палець відпущено */
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
+            will-change: transform, opacity;
+        }
+        
+        .no-transition {
+            /* Вимикає плавність, поки палець рухає текст (щоб не було затримки) */
+            transition: none !important;
+        }
+        
+        body {
+            /* Забороняє браузеру виконувати свої жести "назад/вперед", 
+               але дозволяє гортати текст вгору/вниз */
+            touch-action: pan-y;
+            overflow-x: hidden; /* Захист від появи горизонтальної полоси прокрутки */
+        }
     </style>
 </head>
 <body>
