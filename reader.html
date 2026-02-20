@@ -24,42 +24,69 @@
             overflow-x: hidden;
         }
 
-        /* ШАПКА — ОНОВЛЕНІ СТИЛІ */
+        :root {
+            --bg-color: #ffffff;
+            /* Колір з першого варіанту */
+            --header-bg: #f8f8f8; 
+            --border-color: #ddd;
+            --text-color: #1a1a1a;
+            --accent-color: #1E90FF;
+            --highlight-color: #FFE5B4;
+            --btn-bg: #ececec; /* Колір кнопок з першого варіанту */
+            --line-height: 1.3;
+            --verse-spacing: 6px;
+        }
+        
+        /* ШАПКА — ПОВНА ВІЗУАЛЬНА ВІДПОВІДНІСТЬ */
         .header-wrapper {
             position: sticky;
             top: 0;
-            background: var(--bg-color);
+            background: var(--header-bg); /* Світло-сірий фон */
             z-index: 1000;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-            /* Видаляємо padding тут, щоб контролювати висоту через внутрішній контейнер */
-            padding: 0; 
+            border-bottom: 1px solid var(--border-color);
+            /* Тінь точно як у першому варіанті */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            padding: 0;
         }
         
         .ref-header-container {
             display: grid;
-            grid-template-columns: 100px 1fr 100px; /* Трохи збільшив боки для стабільності */
+            grid-template-columns: 100px 1fr 100px;
             align-items: center;
             max-width: 900px;
             margin: 0 auto;
             padding: 0 10px;
-            /* ВИРАХОВУЄМО ВИСОТУ: 
-               65px (ціль) - 1px (border-bottom) = 64px
-            */
-            height: 64px; 
+            height: 64px; /* Загальна висота вийде 65px з border-bottom */
             box-sizing: border-box;
         }
-        .nav-group { display: flex; gap: 8px; }
-        .right { justify-content: flex-end; }
-
-        /* Центрування тексту в шапці */
+        
+        /* Налаштування кнопок, щоб вони були як у першому варіанті */
+        .nav-btn {
+            border: 1px solid #ccc; /* Додано рамку */
+            background: var(--btn-bg);
+            width: 44px;  /* Розмір з першого варіанту */
+            height: 44px;
+            border-radius: 8px; /* Скруглення як у першому варіанті */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-color);
+            transition: background 0.2s;
+        }
+        
+        .nav-btn:active {
+            background: #ddd;
+        }
+        
         .ref-header {
             font-size: 18px;
             text-transform: uppercase;
             font-weight: 600;
             text-align: center;
-            white-space: nowrap; /* Щоб назва книги не розривала висоту */
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: var(--text-color);
+            font-family: 'Georgia', serif;
         }
 
         .nav-btn {
