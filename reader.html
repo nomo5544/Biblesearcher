@@ -24,34 +24,40 @@
             overflow-x: hidden;
         }
 
-        /* ШАПКА */
+        /* ШАПКА — ОНОВЛЕНІ СТИЛІ */
         .header-wrapper {
             position: sticky;
             top: 0;
             background: var(--bg-color);
             z-index: 1000;
             border-bottom: 1px solid rgba(0,0,0,0.08);
-            padding: 15px 0;
+            /* Видаляємо padding тут, щоб контролювати висоту через внутрішній контейнер */
+            padding: 0; 
         }
-
+        
         .ref-header-container {
             display: grid;
-            grid-template-columns: 80px 1fr 80px;
+            grid-template-columns: 100px 1fr 100px; /* Трохи збільшив боки для стабільності */
             align-items: center;
             max-width: 900px;
             margin: 0 auto;
-            padding: 0 15px;
-            height: 50px;
+            padding: 0 10px;
+            /* ВИРАХОВУЄМО ВИСОТУ: 
+               65px (ціль) - 1px (border-bottom) = 64px
+            */
+            height: 64px; 
+            box-sizing: border-box;
         }
-
-        .nav-group { display: flex; gap: 8px; }
-        .right { justify-content: flex-end; }
-
+        
+        /* Центрування тексту в шапці */
         .ref-header {
             font-size: 18px;
             text-transform: uppercase;
             font-weight: 600;
             text-align: center;
+            white-space: nowrap; /* Щоб назва книги не розривала висоту */
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .nav-btn {
