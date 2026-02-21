@@ -4,191 +4,109 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Біблійний Пошук</title>
-    <link rel="manifest" href="app.webmanifest.json">
     <style>
-        /* --- ГЛОБАЛЬНІ НАЛАШТУВАННЯ ТА ЗМІННІ --- */
         :root {
-            --bg-color: #ffffff;    /* Колір фону сторінки */
-            --header-bg: #f8f8f8;  /* Колір фону верхньої панелі */
-            --border-color: #ddd;  /* Колір ліній та меж */
-            --accent-color: #1E90FF; /* Акцентний колір (синій) */
+            --bg-color: #ffffff;
+            --header-bg: #f8f8f8;
+            --border-color: #ddd;
+            --btn-bg: #ececec;
+            --accent-color: #1E90FF;
         }
 
-        /* --- ОФОРМЛЕННЯ ОСНОВНОЇ СТОРІНКИ --- */
         body {
-            display: flex;          /* Включення гнучкої верстки */
-            flex-direction: column; /* Розташування елементів зверху вниз */
-            align-items: center;    /* Центрування вмісту по горизонталі */
-            min-height: 100vh;      /* Мінімальна висота на весь екран */
-            margin: 0;              /* Видалення стандартних відступів браузера */
-            /* Використання системних шрифтів для кращого вигляду на iOS/Android */
-            font-family: 'Georgia', 'Times New Roman', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color); /* Застосування кольору фону зі змінної */
-            -webkit-tap-highlight-color: transparent; /* Видаляє підсвітку при натисканні на мобілці */
+            margin: 0;
+            font-family: 'Georgia', serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* --- ВЕРХНЯ ФІКСОВАНА ПАНЕЛЬ (HEADER) --- */
         .header { 
-            position: sticky;       /* Прилипання панелі до верху при прокрутці */
-            top: 0;                 /* Точка прилипання - самий верх */
-            background: var(--header-bg); /* Фон панелі */
-            border-bottom: 1px solid var(--border-color); /* Лінія знизу панелі */
-            z-index: 1000;          /* Пріоритет шару, щоб бути поверх тексту */
-            width: 100%;            /* Ширина на весь екран */
-            display: flex;          /* Гнучка верстка для внутрішніх елементів */
-            justify-content: center; /* Центрування вмісту панелі */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Легка тінь для мобільного інтерфейсу */
-        }
-
-        /* --- КОНТЕЙНЕР ДЛЯ ПОШУКОВИХ ЕЛЕМЕНТІВ --- */
-        .top-bar {
-            display: flex;          /* Гнучке розташування елементів */
-            flex-wrap: nowrap;        /* Дозволяє елементам переноситися на мобільних */
-            justify-content: space-between; /* Розподіл між краями */
-            align-items: center;    /* Вирівнювання по вертикалі */
-            gap: 8px;               /* Відстань між кнопками (зменшено для мобільних) */
-            width: 100%;            /* Ширина контенту */
-            max-width: 900px;       /* Максимальна ширина для великих моніторів */
-            padding: 8px;          /* Внутрішній відступ */
-            box-sizing: border-box; /* Включення padding у загальну ширину */
-        }
-
-        /* --- ПОЛЕ ВВОДУ ТЕКСТУ --- */
-        input#searchInput { 
-            flex: 1;           /* Поле займає все доступне місце */
-            min-width: 50px;       /* Мінімальна ширина, щоб не "схлопувалось" */
-            height: 40px;           /* Збільшена висота (стандарт Apple для тач-зон) */
-            padding: 0 8px;        /* Відступи тексту всередині */
-            border: 1px solid #ccc; /* Колір рамки */
-            border-radius: 8px;     /* Скруглення */
-            font-size: 18px;        /* 16px запобігає авто-зуму в Safari iOS */
-            box-sizing: border-box; 
-            outline: none;
-        }
-
-        /* --- ЗАГАЛЬНИЙ СТИЛЬ КНОПОК ТА ПЕРЕМИКАЧІВ --- */
-        .btn-ui, .lang-button, .toggle-label {
-            display: flex;          /* Центрування вмісту */
-            align-items: center; 
+            position: sticky;
+            top: 0;
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            width: 100%;
+            display: flex;
             justify-content: center;
-            height: 40px;           /* Оптимальний розмір для натискання пальцем */
-            width: 40px;
-            background: #ececec;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            cursor: pointer;
-            flex-shrink: 0;         /* Кнопки не стискаються при нестачі місця */
-            user-select: none;      /* Заборона виділяти текст */
-            font-size: 18px;
-            font-family: Arial, sans-serif !important;
-        }
-        
-        /* --- КОНТЕЙНЕР ЛІЧИЛЬНИКА --- */
-        #resultCount {
-            min-width: 40px;      /* Фіксоване місце для 3-4 цифр */
-            text-align: center;   /* Число завжди по центру своєї області */
-            font-size: 22px;
-            flex-shrink: 0;       /* Забороняє лічильнику стискатися менше 40px */
-            display: inline-block;
-            /* color: var(--accent-color); */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            height: 57px; /* Фіксована висота */
         }
 
-        /* --- КОНТЕЙНЕР МОВИ --- */
-        #langToggle {
-            font-size: 19px;
-        }
-        
-        /* --- КОНТЕЙНЕР РЕЗУЛЬТАТІВ ТА ЦИТАТИ --- */
-        .main-container {
-            width: 100%;            /* На всю ширину мобільного */
-            max-width: 900px;       /* Обмеження для десктопа */
-            padding: 15px;          /* Бокові відступи для тексту */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 900px;
+            padding: 0 8px;
+            height: 100%;
             box-sizing: border-box;
         }
 
-        h1 { 
-            text-align: center;     /* Заголовок по центру */
-            margin: 20px 0;
-            font-size: 1.4rem;      /* Адаптивний розмір заголовка */
-            line-height: 1.3;
+        input#searchInput { 
+            flex: 1;
+            min-width: 50px;
+            height: 40px;
+            padding: 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 18px;
+            outline: none;
+            box-sizing: border-box;
         }
 
-        .verse { 
-            display: block;         /* Кожен вірш окремим блоком */
-            margin-bottom: 6px;    /* Відступ між віршами */
-            line-height: 1.3;       /* Читабельний інтервал */
-            text-align: justify;
+        .btn-ui, .lang-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 40px;
+            background: var(--btn-bg);
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 18px;
+            font-family: Arial, sans-serif !important;
+            box-sizing: border-box;
         }
 
-        /* --- ЛОГІКА ПЕРЕМИКАЧА (ТОЧНИЙ ПОШУК) --- */
-        #exactMatch { display: none; } /* Приховати стандартний чекбокс */
-
-        #exactMatch:checked + .toggle-label { 
-            background: var(--accent-color); /* Синій при активації */
-            color: white;
-            border-color: var(--accent-color);
+        /* Фіксована область лічильника */
+        #resultCount {
+            min-width: 38px;
+            text-align: center;
+            font-size: 20px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-variant-numeric: tabular-nums;
         }
 
-        /* --- ПІДСВІЧУВАННЯ ТА ШРИФТИ --- */
-        mark { background-color: #ffeb3b; } /* Жовтий маркер */
-
-        /* --- МЕДІА-ЗАПИТ ДЛЯ ДУЖЕ МАЛИХ ЕКРАНІВ --- */
-        @media (max-width: 480px) {
-            .font-controls { display: none; } /* Ховаємо повзунок, щоб не перевантажувати шапку */
-            #copyRefsBtn { display: none; }
-            h1 { font-size: 1.1rem; }         /* Зменшуємо цитату на малих пристроях */
-        }
+        #langToggle { font-size: 18px; font-weight: bold; }
+        #exactMatch { display: none; }
+        #exactMatch:checked + .btn-ui { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+        
+        .main-container { width: 100%; max-width: 900px; padding: 15px; box-sizing: border-box; }
+        @media (max-width: 480px) { .font-controls, #copyRefsBtn { display: none; } }
     </style>
 </head>
 <body>
-
     <div class="header">
         <div class="top-bar">
-            <button id="copyRefsBtn" class="btn-ui" title="Копіювати посилання">📌</button>
-            <div id="resultCount" title="Лічильник">0</div>
-            <input type="text" id="searchInput" placeholder="Введи слово чи посилання..." autocomplete="off" autofocus>
-            <div class="font-controls" title="Розмір шрифту">
-                <input type="range" id="fontSizeRange" min="14" max="30" value="21" style="width: 50px;">
-            </div>            
-            <div id="langToggle" class="lang-button" title="Зміна мови">UA</div>
-            <label>
-                <input type="checkbox" id="exactMatch">
-                <span class="toggle-label" title="Точний пошук">📚</span>
-            </label>
-
+            <button id="copyRefsBtn" class="btn-ui">📌</button>
+            <div id="resultCount">0</div>
+            <input type="text" id="searchInput" placeholder="Пошук..." autocomplete="off" autofocus>
+            <div class="font-controls"><input type="range" id="fontSizeRange" min="16" max="40" value="21" style="width: 50px;"></div>
+            <div id="langToggle" class="lang-button">UA</div>
+            <label><input type="checkbox" id="exactMatch"><span class="btn-ui">📚</span></label>
         </div>
     </div>
-
     <div class="main-container">
-        <h1>«Блаженний, хто читає і хто слухає слова пророцтва цього та зберігає написане в ньому…»</h1>
         <div id="results"></div>
     </div>
-
     <script src="script.js"></script>
-<script>
-    /* Логіка повзунка шрифту */
-    const range = document.getElementById('fontSizeRange');
-    const results = document.getElementById('results');
-
-    // Встановлюємо розмір шрифту відповідно до значення 'value' при завантаженні
-    results.style.fontSize = range.value + 'px';
-
-    // Оновлюємо розмір при кожному русі повзунка
-    range.addEventListener('input', (e) => {
-        results.style.fontSize = e.target.value + 'px';
-    });
-
-    /* Перевірка підтримки сервіс-воркера для офлайн-роботи */
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('PWA Ready'))
-                .catch(err => console.log('Error:', err));
-        });
-    }
-</script>
-    <div style="text-align: center; padding: 20px; opacity: 0.3; font-size: 12px; font-family: sans-serif;">
-    Версія: <span id="app-version">v1.013</span>
-</div>
 </body>
 </html>
