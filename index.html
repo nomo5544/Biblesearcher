@@ -129,16 +129,17 @@
     <div class="header">
         <div class="top-bar">
             <button id="copyRefsBtn" class="btn-ui" title="Копіювати посилання">📌</button>
-            <input type="text" id="searchInput" placeholder="Введи слово чи посилання..." autocomplete="off" autofocus>
             <div id="resultCount" title="Лічильник">0</div>
+            <input type="text" id="searchInput" placeholder="Введи слово чи посилання..." autocomplete="off" autofocus>
+            <div class="font-controls" title="Розмір шрифту">
+                <input type="range" id="fontSizeRange" min="14" max="30" value="21" style="width: 50px;">
+            </div>            
             <div id="langToggle" class="lang-button" title="Зміна мови">UA</div>
             <label>
                 <input type="checkbox" id="exactMatch">
                 <span class="toggle-label" title="Точний пошук">📚</span>
             </label>
-            <div class="font-controls" title="Розмір шрифту">
-                <input type="range" id="fontSizeRange" min="14" max="30" value="21" style="width: 50px;">
-            </div>
+
         </div>
     </div>
 
