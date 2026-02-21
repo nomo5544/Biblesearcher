@@ -82,6 +82,15 @@
             font-size: 18px;
         }
 
+        #resultCount {
+            min-width: 40px;      /* Фіксоване місце для 3-4 цифр */
+            text-align: center;   /* Число завжди по центру своєї області */
+            font-weight: bold;
+            flex-shrink: 0;       /* Забороняє лічильнику стискатися менше 40px */
+            display: inline-block;
+            color: var(--accent-color);
+        }
+        
         /* --- КОНТЕЙНЕР РЕЗУЛЬТАТІВ ТА ЦИТАТИ --- */
         .main-container {
             width: 100%;            /* На всю ширину мобільного */
