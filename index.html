@@ -120,12 +120,31 @@
         }
 
         mark { background-color: #ffeb3b; }
+        /* --- СТИЛІ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ (екран менше 768px) --- */
+    @media (max-width: 768px) {
+    body {
+        /* Змінюємо шрифт на без засічок для чіткості */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased; /* Покращене згладжування для iOS */
+    }
 
-        @media (max-width: 600px) {
-            .font-controls, #copyRefsBtn { display: none; }
-            font-family: sans-serif;
-            h1 { font-size: 1.1rem; }
-        }
+    .verse, .verse-item {
+        line-height: 1.5;      /* Трохи збільшуємо інтервал для зручності очей */
+        letter-spacing: -0.01em; /* Робимо текст трохи щільнішим, як у професійних читалках */
+        margin-bottom: 12px;   /* Більший відступ між віршами на тач-екранах */
+    }
+
+    h1 {
+        font-size: 1.1rem;
+        font-weight: 800;
+        padding: 0 10px;
+    }
+
+    /* Приховуємо повзунок та кнопку копіювання на дуже вузьких екранах */
+    @media (max-width: 430px) {
+        .font-controls, #copyRefsBtn {display: none;}
+    }
+}
     </style>
 </head>
 <body>
