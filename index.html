@@ -149,23 +149,28 @@
     </div>
 
     <script src="script.js"></script>
-    <script>
-        /* Логіка повзунка шрифту */
-        const range = document.getElementById('fontSizeRange');
-        const results = document.getElementById('results');
-        range.addEventListener('input', (e) => {
-            results.style.fontSize = e.target.value + 'px';
-        });
+<script>
+    /* Логіка повзунка шрифту */
+    const range = document.getElementById('fontSizeRange');
+    const results = document.getElementById('results');
 
-        /* Перевірка підтримки сервіс-воркера для офлайн-роботи */
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA Ready'))
-                    .catch(err => console.log('Error:', err));
-            });
-        }
-    </script>
+    // Встановлюємо розмір шрифту відповідно до значення 'value' при завантаженні
+    results.style.fontSize = range.value + 'px';
+
+    // Оновлюємо розмір при кожному русі повзунка
+    range.addEventListener('input', (e) => {
+        results.style.fontSize = e.target.value + 'px';
+    });
+
+    /* Перевірка підтримки сервіс-воркера для офлайн-роботи */
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('PWA Ready'))
+                .catch(err => console.log('Error:', err));
+        });
+    }
+</script>
     <div style="text-align: center; padding: 20px; opacity: 0.3; font-size: 12px; font-family: sans-serif;">
     Версія: <span id="app-version">v1.01</span>
 </div>
