@@ -85,6 +85,24 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* Робимо label частиною flex-ряду без зайвих відступів */
+        .top-bar label {
+            display: flex;
+            flex-shrink: 0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Переконуємося, що span всередині label ідентичний іншим кнопкам */
+        #exactMatch + .btn-ui {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box; /* Важливо для однакового розміру з рамкою */
+        }
+        
         #langToggle { font-size: 18px; font-weight: bold; }
         #exactMatch { display: none; }
         #exactMatch:checked + .btn-ui { background: var(--accent-color); color: white; border-color: var(--accent-color); }
