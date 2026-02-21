@@ -3,64 +3,59 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🕇 Біблія говорить</title>
+    <title>Біблія - Читання</title>
     <style>
         :root {
             --bg-color: #ffffff;
+            --header-bg: #f8f8f8;
+            --border-color: #ddd;
+            --btn-bg: #ececec;
             --text-color: #1a1a1a;
-            --accent-color: #000000;
-            --highlight-color: #FFE5B4;
-            --btn-bg: #f4f4f4;
-            --line-height: 1.3;      /* Відступ між рядками (коефіцієнт) */
-            --verse-spacing: 6px;   /* Відступ між віршами */
         }
 
         body {
-            font-family: 'Georgia', 'Times New Roman', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg-color);
             margin: 0;
-            color: var(--text-color);
-            line-height: var(--line-height);
-            overflow-x: hidden;
+            font-family: 'Georgia', serif;
+            background: var(--bg-color);
         }
 
-        :root {
-            --bg-color: #ffffff;
-            /* Колір з першого варіанту */
-            --header-bg: #f8f8f8; 
-            --border-color: #ddd;
-            --text-color: #1a1a1a;
-            --accent-color: #1E90FF;
-            --highlight-color: #FFE5B4;
-            --btn-bg: #ececec; /* Колір кнопок з першого варіанту */
-            --line-height: 1.3;
-            --verse-spacing: 6px;
-        }
-        
-        /* ШАПКА — ПОВНА ВІЗУАЛЬНА ВІДПОВІДНІСТЬ */
         .header-wrapper {
             position: sticky;
             top: 0;
-            background: var(--header-bg); /* Світло-сірий фон */
-            z-index: 1000;
+            background: var(--header-bg);
             border-bottom: 1px solid var(--border-color);
-            /* Тінь точно як у першому варіанті */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            padding: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            height: 57px; /* Така ж як на першій сторінці */
         }
-        
+
         .ref-header-container {
-            display: grid;
-            grid-template-columns: 100px 1fr 100px;
+            display: flex;
             align-items: center;
+            width: 100%;
             max-width: 900px;
-            margin: 0 auto;
-            padding: 0 7px;
-            height: 60px; /* Загальна висота вийде 65px з border-bottom */
+            padding: 0 8px;
+            height: 100%;
             box-sizing: border-box;
+            gap: 8px;
         }
-        
-        /* Налаштування кнопок, щоб вони були як у першому варіанті */
+
+        /* Центр шапки (Книга/Розділ) */
+        .ref-header {
+            flex: 1;
+            font-size: 18px;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Кнопки - ідентичні за розміром (40x40) */
         .nav-btn {
             width: 40px;
             height: 40px;
@@ -72,72 +67,29 @@
             justify-content: center;
             cursor: pointer;
             box-sizing: border-box;
-        }
-        
-        /* Окремий розмір для стрілок */
-       .nav-btn.arrow {
-            font-size: 28px; 
-        }
-        
-        /* Окремий розмір для лупи */
-        .nav-btn.search-icon {
-            font-size: 22px;
-        }
-        
-        /* Стиль для кнопки мови (UA) */
-        #langBtn {
-            font-family: sans-serif; 
-            font-size: 19px;
-            text-transform: uppercase;
-        }
-        
-        .nav-btn:active {
-            background: #ddd;
-        }
-        
-        .ref-header {
-            font-size: 18px;
-            text-transform: uppercase;
-            font-weight: 600;
-            text-align: center;
-            color: var(--text-color);
-            /* font-family: 'Georgia', serif; */
-        }
-       
-        .nav-group { display: flex; gap: 8px; }
-        .right { justify-content: flex-end; }
-        
-
-        /* КОНТЕНТ */
-        .book-container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 0 20px;
+            flex-shrink: 0;
+            color: black;
+            text-decoration: none;
         }
 
-        .verse-item {
-            margin-bottom: var(--verse-spacing);
-            font-size: 22px;
-            text-align: justify;
+        .nav-btn.arrow { font-size: 24px; }
+        .nav-btn.search-icon { font-size: 20px; }
+        
+        #langBtn { 
+            font-family: Arial, sans-serif !important; 
+            font-size: 18px; 
+            font-weight: bold; 
         }
 
-        .verse-num {
-            font-size: 0.6em;
-            font-weight: bold;
-            /* color: var(--accent-color); */
-            margin-right: 8px;
-            vertical-align: super;
-            opacity: 0.5;
-        }
+        .nav-group { display: flex; gap: 8px; align-items: center; }
 
-        .highlight {
-            background-color: var(--highlight-color);
-            border-radius: 4px;
-        }
+        .book-container { max-width: 900px; margin: 20px auto; padding: 0 20px; }
+        .verse-item { margin-bottom: 8px; font-size: 22px; text-align: justify; line-height: 1.4; }
+        .verse-num { font-size: 0.6em; font-weight: bold; margin-right: 8px; vertical-align: super; opacity: 0.5; }
 
         @media (max-width: 600px) {
-            .verse-item { font-size: 18px; text-align: justify; }
             .ref-header { font-size: 15px; }
+            .verse-item { font-size: 19px; }
         }
     </style>
 </head>
@@ -147,15 +99,13 @@
         <div class="ref-header-container">
             <div class="nav-group">
                 <button class="nav-btn arrow" id="prevBtn">◄</button>
-                
                 <button onclick="window.location.href='index.html'" class="nav-btn search-icon">🔍</button>
             </div>
 
             <div class="ref-header" id="refHeader"></div>
-            
-            <div class="nav-group right">
+
+            <div class="nav-group">
                 <button id="langBtn" class="nav-btn">UA</button>
-                
                 <button class="nav-btn arrow" id="nextBtn">►</button>
             </div>
         </div>
@@ -163,7 +113,7 @@
 
     <div class="book-container">
         <div id="reader-layout"></div>
-    </div>
+    </div>
     <script src="reader.js"></script>
 </body>
 </html>
