@@ -40,7 +40,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.match(event.request).then((cachedResponse) => {
+      return cache.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+    // ignoreSearch: true ігнорує все, що йде після "?" в URL
+    // тепер reader.html?ref=... завжди буде братися з кешу як reader.html
         const fetchPromise = fetch(event.request).then((networkResponse) => {
           // Якщо відповідь від мережі успішна, зберігаємо її копію в кеш
           if (networkResponse && networkResponse.status === 200) {
