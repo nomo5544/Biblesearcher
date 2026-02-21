@@ -319,7 +319,7 @@ const maps = {
 
     if (exactMatch) exactMatch.onchange = window.performSearch;
     if (fontSizeRange) {
-        const savedSize = localStorage.getItem('searchFontSize') || '18';
+        const savedSize = localStorage.getItem('searchFontSize') || '21';
         fontSizeRange.value = savedSize;
         resultsDiv.style.fontSize = savedSize + 'px';
         fontSizeRange.oninput = () => {
