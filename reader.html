@@ -104,10 +104,21 @@
             border-radius: 4px; 
         }
 
-        @media (max-width: 600px) {
-            .verse-item { font-size: 18px; }
-            .ref-header { font-size: 15px; }
-        }
+    /* --- АДАПТАЦІЯ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ --- */
+    @media (max-width: 768px) {
+    body {
+        /* Змінюємо шрифт на системний без засічок для чіткості на екранах */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .verse-item {
+        font-size: 19px;          /* Трохи більший для режиму читання розділу */
+        line-height: 1.2; 
+        margin-bottom: 10px;
+        letter-spacing: -0.01em;  /* Легке ущільнення для кращого вигляду */
+    .ref-header { font-size: 15px; }
+    }
+}
     </style>
 </head>
 <body>
