@@ -26,31 +26,22 @@
 
         
         /* Встановлюємо колір для всіх станів посилання (звичайне, відвідане, активне) */
-        /* 1. БАЗОВИЙ СТАН (Синє посилання) */
-        .ref, .ref:link {
-            color: #0000EE !important; /* Класичний синій */
-            text-decoration: none !important; /* ПРИМУСОВО прибираємо підкреслення */
-            font-weight: normal;
+        /* Базовий колір (Синій) */
+        .ref {
+            color: #0000EE !important;
+            text-decoration: none !important;
             cursor: pointer;
         }
         
-        /* 2. ВІДВІДАНЕ ПОСИЛАННЯ (Залишається коричневим/фіолетовим після кліку) */
-        .ref:visited {
-            color: #A52A2A !important; /* Ваш коричневий колір */
-            text-decoration: none !important; /* ПРИМУСОВО прибираємо підкреслення */
-        }
-        
-        /* 3. НАВЕДЕННЯ КУРСОРУ */
+        /* Справжній ТЕМНИЙ колір при наведенні */
         .ref:hover {
-            color: #0056b3 !important; /* Темніший синій при наведенні */
-            text-decoration: none !important; /* ПРИМУСОВО прибираємо підкреслення при наведенні */
+            color: #000055 !important; /* Глибокий темно-синій */
+            text-decoration: none !important;
         }
         
-        /* 4. ВИДАЛЯЄМО ЗАЙВЕ */
-        /* Оскільки в скрипті ми тепер створюємо посилання всередині .verse, 
-           приберемо будь-які інші втручання */
-        #results a {
-            text-decoration: none !important;
+        /* Колір для відвіданого посилання (тільки поки сесія активна) */
+        .ref.clicked {
+            color: #A52A2A !important;
         }
 
         /* ІДЕНТИЧНИЙ ХЕДЕР */
