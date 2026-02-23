@@ -21,9 +21,6 @@
             margin: 0;
             color: var(--text-color);
             line-height: var(--line-height);
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Центрування для однакового вигляду з index */
         }
 
         /* ХЕДЕР */
@@ -37,14 +34,13 @@
             height: 57px;
             display: flex;
             justify-content: center;
-            width: 100%;
         }
 
         .ref-header-container {
             display: flex;
             align-items: center;
             width: 100%;
-            max-width: 930px; /* Синхронізовано з max-width контенту */
+            max-width: 930px; /* СИНХРОНІЗОВАНО */
             padding: 0 7px;
             height: 100%;
             box-sizing: border-box;
@@ -85,10 +81,10 @@
 
         .nav-group { display: flex; gap: 8px; align-items: center; }
 
-        /* КОНТЕНТ — СИНХРОНІЗАЦІЯ З INDEX.HTML */
+        /* СТИЛІ КОНТЕНТУ */
         .book-container { 
             width: 100%;
-            max-width: 930px; /* Рівно 930px як в індексі */
+            max-width: 930px; /* ВСТАНОВЛЕНО 930px */
             margin: 0 auto; 
             padding: 0 20px; 
             box-sizing: border-box;
@@ -103,7 +99,6 @@
             font-size: 22px; 
             text-align: justify; 
         }
-
         .verse-num { 
             font-size: 0.6em; 
             font-weight: bold; 
@@ -112,19 +107,20 @@
             opacity: 0.5; 
         }
 
-        /* ПІДСВІЧУВАННЯ — ТЕПЕР ПРАЦЮВАТИМЕ */
+        /* ПІДСВІЧУВАННЯ — ПРАВИЛЬНИЙ КОЛІР ТА СИНТАКСИС */
         mark, .highlight { 
-            background-color: #fff176; /* Світло-жовтий як в індексі */
-            color: #000;
+            background-color: #FFFACD; /* ВАШ ОРИГІНАЛЬНИЙ КОЛІР */
             border-radius: 4px; 
             padding: 0 2px;
+            color: inherit;
         }
 
-        /* АДАПТАЦІЯ ДЛЯ МОБІЛЬНИХ */
+        /* АДАПТАЦІЯ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ */
         @media (max-width: 768px) {
             body {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             }
+
             .verse-item {
                 font-size: 19px; 
                 line-height: 1.2; 
