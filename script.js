@@ -1,3 +1,12 @@
+// ПЕРШИЙ РЯДОК ФАЙЛУ script.js
+const urlParams = new URLSearchParams(window.location.search);
+if (!urlParams.has('fromSearch')) {
+    const lastRef = localStorage.getItem('lastBibleRef');
+    const lastLang = localStorage.getItem('lastBibleLang');
+    if (lastRef) {
+        window.location.href = `reader.html?ref=${encodeURIComponent(lastRef)}&lang=${lastLang || 'ukr'}`;
+    }
+}
 // --- 1. ОГОЛОШЕННЯ ЗМІННИХ ---
 (function() {
     const searchInput = document.getElementById('searchInput');
