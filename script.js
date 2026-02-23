@@ -150,25 +150,21 @@ const maps = {
     }
 };
 
-    function renderDirectResult(ref, text) {
-        if (!resultsDiv) return;
-        const div = document.createElement('div');
-        div.className = 'verse';
-        div.innerHTML = `<a href="reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}" class="ref">${ref}</a> ${text}`;
-            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
-        };
-        resultsDiv.appendChild(div);
-    }
-
-    function addVerseToFragment(fragment, ref, htmlContent) {
-        const div = document.createElement('div');
-        div.className = 'verse'; 
-        div.innerHTML = `<a href="reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}" class="ref">${ref}</a> ${htmlContent}`;
-        div.querySelector('.ref').onclick = () => {
-            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
-        };
-        fragment.appendChild(div);
-    }
+        function renderDirectResult(ref, text) {
+            if (!resultsDiv) return;
+            const div = document.createElement('div');
+            div.className = 'verse';
+            // Використовуємо <a> для стандартної поведінки синій/фіолетовий
+            div.innerHTML = `<a href="reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}" class="ref">${ref}</a> ${text}`;
+            resultsDiv.appendChild(div);
+        }
+        
+        function addVerseToFragment(fragment, ref, htmlContent) {
+            const div = document.createElement('div');
+            div.className = 'verse'; 
+            div.innerHTML = `<a href="reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}" class="ref">${ref}</a> ${htmlContent}`;
+            fragment.appendChild(div);
+        }
 
     window.performSearch = function() {
         const query = searchInput.value.trim();
