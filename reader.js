@@ -113,15 +113,26 @@ function renderContent() {
         return;
     }
 
-    keys.forEach(key => {
-        const vNum = key.split(':')[1];
-        const isTarget = parseInt(vNum) === targetVerse;
-        const div = document.createElement('div');
-        div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
-        if (isTarget) div.id = "target";
-        div.innerHTML = `<span class="verse-num">${vNum}</span>${bibleData[key]}`;
-        layout.appendChild(div);
-    });
+keys.forEach(key => {
+    const vNum = key.split(':')[1];
+    const isTarget = parseInt(vNum) === targetVerse;
+    const div = document.createElement('div');
+    div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
+    if (isTarget) div.id = "target";
+    
+    // Додаємо номер вірша та текст
+    div.innerHTML = `<span class="verse-num">${vNum}</span>${bibleData[key]}`;
+
+    // --- ДОДАЄМО ЦЕЙ ОБРОБНИК (Клік для поширення) ---
+    div.onclick = () => {
+        const text = bibleData[key];
+        const ref = `${bookName} ${chapterNum}:${vNum}`;
+        shareVerse(text, ref);
+    };
+    // ------------------------------------------------
+
+    layout.appendChild(div);
+});
 
     if (targetVerse) {
         setTimeout(() => {
