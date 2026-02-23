@@ -191,8 +191,6 @@ const maps = {
             };
             fragment.appendChild(div);
         }
-            fragment.appendChild(div);
-        }
 
     window.performSearch = function() {
         const query = searchInput.value.trim();
