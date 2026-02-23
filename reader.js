@@ -53,6 +53,24 @@ if (match) {
     targetVerse = match[3] ? parseInt(match[3]) : null;
 }
 
+async function shareVerse(text, ref) {
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Біблія говорить',
+                text: `«${text}» (${ref})`,
+                url: window.location.href // посилання на цей розділ
+            });
+        } catch (err) {
+            console.log("Скасовано");
+        }
+    } else {
+        // Якщо браузер не підтримує Share API (наприклад, старі ПК)
+        navigator.clipboard.writeText(`«${text}» (${ref})`);
+        alert("Текст скопійовано в буфер обміну!");
+    }
+}
+
 function loadBible() {
     const fileName = currentLang === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
     const btn = document.getElementById('langBtn');
