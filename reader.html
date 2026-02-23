@@ -169,7 +169,13 @@
         <div class="ref-header-container">
             <div class="nav-group">
                 <button class="nav-btn arrow" id="prevBtn">◄</button>
-                <button onclick="window.location.href='index.html?fromSearch=true'" class="nav-btn search-icon">🔍</button>
+                <button onclick="clearLastRead()" class="nav-btn search-icon">🔍</button>
+                    <script>
+                    function clearLastRead() {
+                        localStorage.removeItem('lastBibleRef');
+                        window.location.href = 'index.html?fromSearch=true';
+                    }
+                    </script>
             </div>
             <div class="ref-header" id="refHeader"></div>
             <div class="nav-group">
