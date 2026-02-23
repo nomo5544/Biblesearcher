@@ -40,11 +40,11 @@
             display: flex;
             align-items: center;
             width: 100%;
-            max-width: 900px; /* СУВОРО ЯК У TOP-BAR */
-            padding: 0 7px; /* ІДЕНТИЧНО INDEX */
+            max-width: 900px; /* Суворо як в index */
+            padding: 0 7px;
             height: 100%;
             box-sizing: border-box;
-            gap: 8px; /* ТАКИЙ ЖЕ GAP ЯК У TOP-BAR */
+            justify-content: space-between; /* Розносить елементи по краях */
         }
 
         .nav-btn {
@@ -83,7 +83,12 @@
             text-overflow: ellipsis;
         }
 
-        .nav-group { display: flex; gap: 8px; align-items: center; }
+        .nav-group { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center;
+            flex-shrink: 0; 
+        }
 
         /* СТИЛІ КОНТЕНТУ */
         .book-container { 
