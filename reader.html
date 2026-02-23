@@ -23,7 +23,7 @@
             line-height: var(--line-height);
         }
 
-        /* ХЕДЕР */
+        /* ХЕДЕР — ПОВНА СИНХРОНІЗАЦІЯ З INDEX.HTML */
         .header-wrapper {
             position: sticky;
             top: 0;
@@ -40,11 +40,11 @@
             display: flex;
             align-items: center;
             width: 100%;
-            max-width: 920px; /* СИНХРОНІЗОВАНО */
-            padding: 0 7px;
+            max-width: 900px; /* СУВОРО ЯК У TOP-BAR */
+            padding: 0 7px; /* ІДЕНТИЧНО INDEX */
             height: 100%;
             box-sizing: border-box;
-            gap: 8px;
+            gap: 8px; /* ТАКИЙ ЖЕ GAP ЯК У TOP-BAR */
         }
 
         .nav-btn {
@@ -77,6 +77,10 @@
             font-weight: 600;
             text-align: center;
             font-family: Arial, sans-serif;
+            /* Щоб текст не зміщувався, якщо він занадто довгий */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .nav-group { display: flex; gap: 8px; align-items: center; }
@@ -84,7 +88,7 @@
         /* СТИЛІ КОНТЕНТУ */
         .book-container { 
             width: 100%;
-            max-width: 920px; /* ВСТАНОВЛЕНО 930px */
+            max-width: 920px; /* СИНХРОНІЗОВАНО З MAIN-CONTAINER */
             margin: 0 auto; 
             padding: 0 20px; 
             box-sizing: border-box;
@@ -107,9 +111,9 @@
             opacity: 0.5; 
         }
 
-        /* ПІДСВІЧУВАННЯ — ПРАВИЛЬНИЙ КОЛІР ТА СИНТАКСИС */
+        /* ПІДСВІЧУВАННЯ */
         mark, .highlight { 
-            background-color: #FFFACD; /* ВАШ ОРИГІНАЛЬНИЙ КОЛІР */
+            background-color: #FFFACD;
             border-radius: 4px; 
             padding: 0 2px;
             color: inherit;
@@ -120,12 +124,10 @@
             body {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             }
-
             .verse-item {
                 font-size: 19px; 
                 line-height: 1.2; 
                 margin-bottom: 8px;
-                letter-spacing: -0.01em; 
             }
             .ref-header { font-size: 15px; }
         }
