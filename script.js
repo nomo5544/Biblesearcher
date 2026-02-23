@@ -154,7 +154,7 @@ const maps = {
         if (!resultsDiv) return;
         const div = document.createElement('div');
         div.className = 'verse';
-        div.innerHTML = `<span class="ref" style="color: #CD00CD; cursor:pointer; font-weight: normal;">● ${ref}</span> ${text}`;
+        div.innerHTML = `<span class="ref" style="color: #0000EE; cursor:pointer; font-weight: normal;">${ref}</span> ${text}`;
         div.querySelector('.ref').onclick = () => {
             window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
         };
