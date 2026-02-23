@@ -54,7 +54,7 @@ if (match) {
 }
 
 async function shareVerse(text, ref) {
-    const shareText = `«${text}» (${ref})\n\nДодаток: Біблія говорить`;
+    const shareText = `«${text}» (${ref})\n\nБіблія`;
     
     if (navigator.share) {
         try {
