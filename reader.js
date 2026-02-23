@@ -54,20 +54,22 @@ if (match) {
 }
 
 async function shareVerse(text, ref) {
+    const shareText = `«${text}» (${ref})\n\nДодаток: Біблія говорить`;
+    
     if (navigator.share) {
         try {
             await navigator.share({
                 title: 'Біблія говорить',
-                text: `«${text}» (${ref})`,
-                url: window.location.href // посилання на цей розділ
+                text: shareText,
+                // Якщо хочете замість посилання просто назву, 
+                // можна видалити рядок url або залишити порожнім
             });
         } catch (err) {
             console.log("Скасовано");
         }
     } else {
-        // Якщо браузер не підтримує Share API (наприклад, старі ПК)
-        navigator.clipboard.writeText(`«${text}» (${ref})`);
-        alert("Текст скопійовано в буфер обміну!");
+        navigator.clipboard.writeText(shareText);
+        alert("Текст скопійовано!");
     }
 }
 
