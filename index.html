@@ -24,16 +24,19 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Встановлюємо колір для всіх посилань */
-        a {
+        
+        /* Встановлюємо колір для всіх станів посилання (звичайне, відвідане, активне) */
+        #results a, 
+        #results a:visited {
             color: var(--accent-color);
-            text-decoration: none; /* Прибирає підкреслення, якщо воно не потрібне */
+            text-decoration: none; /* Прибираємо підкреслення */
+            transition: color 0.2s ease; /* Плавна зміна кольору */
         }
         
-        /* Колір при наведенні курсору */
-        a:hover {
-            text-decoration: underline;
-            filter: brightness(0.8); /* Трохи темнішає при наведенні */
+        /* Ефект при наведенні курсору */
+        #results a:hover {
+            color: #0056b3; /* Колір стає темнішим синім */
+            text-decoration: underline; /* З'являється підкреслення */
         }
 
         /* ІДЕНТИЧНИЙ ХЕДЕР */
@@ -171,8 +174,24 @@
     /* Ховаємо другорядні елементи на вузьких екранах (<430px) */
     @media (max-width: 430px) {
         .font-controls, #copyRefsBtn { display: none; }
+        }
     }
-}
+        /* Додайте це в кінець блоку <style> */
+
+    #results ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    #results a, #results a:visited {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
+    
+    #results a:hover {
+        color: #0056b3; /* Темніший відтінок вашого синього */
+        text-decoration: underline;
+    }
     </style>
 </head>
 <body>
