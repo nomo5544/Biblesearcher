@@ -24,6 +24,18 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Встановлюємо колір для всіх посилань */
+        a {
+            color: var(--accent-color);
+            text-decoration: none; /* Прибирає підкреслення, якщо воно не потрібне */
+        }
+        
+        /* Колір при наведенні курсору */
+        a:hover {
+            text-decoration: underline;
+            filter: brightness(0.8); /* Трохи темнішає при наведенні */
+        }
+
         /* ІДЕНТИЧНИЙ ХЕДЕР */
         .header { 
             position: sticky;
