@@ -117,13 +117,17 @@
         }
 
         /* ПІДСВІЧУВАННЯ */
+/* ПІДСВІЧУВАННЯ БЕЗ ЗМІЩЕННЯ ТЕКСТУ */
         mark, .highlight { 
-            background-color: #FFFF99;
+            background-color: #FFFACD;
             border-radius: 4px; 
-            padding: 0 4px;      /* Трохи збільшив для видимості */
+            padding: 0 4px;      /* Розширюємо підсвітку */
+            margin: 0 -4px;      /* ПОВЕРТАЄМО текст на місце за рахунок від'ємного margin */
             color: inherit;
-            display: inline-block; /* ЦЕ КЛЮЧОВИЙ РЯДОК */
-            line-height: 1;      /* Щоб не розсувало рядки по вертикалі */
+            display: inline;     /* Повертаємо inline, щоб не ламати структуру рядка */
+            /* Ця властивість робить так, щоб фон малювався правильно навіть при переносі рядка */
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
         }
 
         /* АДАПТАЦІЯ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ */
