@@ -117,7 +117,6 @@
         }
 
         /* ПІДСВІЧУВАННЯ */
-/* ПІДСВІЧУВАННЯ БЕЗ ЗМІЩЕННЯ ТЕКСТУ */
         mark, .highlight { 
             background-color: #FFFACD;
             border-radius: 4px; 
@@ -129,7 +128,28 @@
             box-decoration-break: clone;
             -webkit-box-decoration-break: clone;
         }
-
+        /* ПІДСВІЧУВАННЯ ТЕКСТУ для пересилання */
+        .verse-item {
+            padding: 6px 8px;
+            border-radius: 8px;
+            transition: background-color 0.6s ease; /* Швидкість "наповнення" кольором */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* Стан, коли ми затиснули палець */
+        .verse-item.pressing {
+            background-color: rgba(255, 215, 0, 0.3) !important; /* Напівпрозорий золотистий */
+            transition: background-color 0.6s ease; 
+        }
+        
+        /* Стан після спрацювання (спалах) */
+        .verse-item.shared-flash {
+            background-color: rgba(255, 215, 0, 0.6);
+            transition: background-color 0.1s;
+        }
+        
         /* АДАПТАЦІЯ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ */
         @media (max-width: 768px) {
             body {
