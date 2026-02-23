@@ -82,11 +82,20 @@
         .nav-group { display: flex; gap: 8px; align-items: center; }
 
         /* СТИЛІ КОНТЕНТУ */
+        /* СИНХРОНІЗОВАНА ШИРИНА ТА ВІДСТУПИ */
         .book-container { 
+            width: 100%;
             max-width: 900px; 
-            margin: 20px auto; 
-            padding: 0 20px; 
+            margin: 0 auto;  /* Центрування, прибрано 20px зверху */
+            padding: 0 20px; /* Тепер ідентично index.html */
+            box-sizing: border-box;
         }
+
+        /* Додайте цей відступ для заголовка (назва книги), щоб вона не липла до хедера */
+        #reader-layout {
+            padding-top: 20px; 
+        }
+        
         .verse-item { 
             margin-bottom: var(--verse-spacing); 
             font-size: 22px; 
