@@ -275,7 +275,7 @@ const maps = {
                     // Переприв'язка кліків
                     resultsDiv.querySelectorAll('.ref').forEach(el => {
                         el.onclick = () => {
-                            const ref = el.innerText.replace('● ', '').trim();
+                            const ref = el.innerText.replace('', '').trim();
                             window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
                         };
                     });
