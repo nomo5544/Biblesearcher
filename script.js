@@ -150,15 +150,31 @@ const maps = {
     }
 };
 
+        // Допоміжна функція для обробки кліку та збереження стану
+        function handleRefClick(el, ref) {
+            // 1. Зберігаємо в пам'ять сесії, що це посилання натиснуте
+            let clickedRefs = JSON.parse(sessionStorage.getItem('clickedRefs') || '[]');
+            if (!clickedRefs.includes(ref)) {
+                clickedRefs.push(ref);
+                sessionStorage.setItem('clickedRefs', JSON.stringify(clickedRefs));
+            }
+            // 2. Додаємо клас візуально
+            el.classList.add('clicked');
+            // 3. Переходимо
+            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+        }
+        
         function renderDirectResult(ref, text) {
             if (!resultsDiv) return;
             const div = document.createElement('div');
             div.className = 'verse';
-            // Використовуємо span замість a, щоб керувати історією вручну
-            div.innerHTML = `<span class="ref">${ref}</span> ${text}`;
+            // Перевіряємо, чи було натиснуто раніше
+            const clickedRefs = JSON.parse(sessionStorage.getItem('clickedRefs') || '[]');
+            const isClicked = clickedRefs.includes(ref) ? 'clicked' : '';
+            
+            div.innerHTML = `<span class="ref ${isClicked}">${ref}</span> ${text}`;
             div.querySelector('.ref').onclick = function() {
-                this.classList.add('clicked'); // Фарбуємо в коричневий при кліку
-                window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+                handleRefClick(this, ref);
             };
             resultsDiv.appendChild(div);
         }
@@ -166,11 +182,15 @@ const maps = {
         function addVerseToFragment(fragment, ref, htmlContent) {
             const div = document.createElement('div');
             div.className = 'verse'; 
-            div.innerHTML = `<span class="ref">${ref}</span> ${htmlContent}`;
+            const clickedRefs = JSON.parse(sessionStorage.getItem('clickedRefs') || '[]');
+            const isClicked = clickedRefs.includes(ref) ? 'clicked' : '';
+        
+            div.innerHTML = `<span class="ref ${isClicked}">${ref}</span> ${htmlContent}`;
             div.querySelector('.ref').onclick = function() {
-                this.classList.add('clicked'); // Фарбуємо в коричневий при кліку
-                window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+                handleRefClick(this, ref);
             };
+            fragment.appendChild(div);
+        }
             fragment.appendChild(div);
         }
 
