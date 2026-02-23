@@ -26,17 +26,22 @@
 
         
         /* Встановлюємо колір для всіх станів посилання (звичайне, відвідане, активне) */
-        #results a, 
-        #results a:visited {
-            color: var(--accent-color);
-            text-decoration: none; /* Прибираємо підкреслення */
+        .ref {
+            color: #0000EE !important; /* Стандартний синій */
+            text-decoration: none;
+            font-weight: normal;
             transition: color 0.2s ease; /* Плавна зміна кольору */
         }
         
+        /* ВІДВІДАНЕ (ФІОЛЕТОВЕ) */
+        .ref:visited {
+            color: #551A8B !important; /* Стандартний фіолетовий */
+            text-decoration: none; /* Прибираємо підкреслення */
+        }
         /* Ефект при наведенні курсору */
         #results a:hover {
             color: #0056b3; /* Колір стає темнішим синім */
-            text-decoration: underline; /* З'являється підкреслення */
+            text-decoration: none; /* З'являється підкреслення */
         }
 
         /* ІДЕНТИЧНИЙ ХЕДЕР */
