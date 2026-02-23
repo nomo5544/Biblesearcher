@@ -1,12 +1,14 @@
-// Перенесемо ініціалізацію змінних на початок
+// 1. ОГОЛОШЕННЯ ЗМІННИХ ТА ЗБЕРЕЖЕННЯ ОСТАННЬОГО МІСЦЯ
 const urlParams = new URLSearchParams(window.location.search);
 let fullRef = decodeURIComponent(urlParams.get('ref') || "").replace(/\+/g, ' ');
 let currentLang = urlParams.get('lang') || 'ukr';
 let bibleData = null;
-    if (fullRef) {
-        localStorage.setItem('lastBibleRef', fullRef);
-        localStorage.setItem('lastBibleLang', currentLang);
-    }
+
+// Запам'ятовуємо розділ, як тільки відкрили сторінку
+if (fullRef) {
+    localStorage.setItem('lastBibleRef', fullRef);
+    localStorage.setItem('lastBibleLang', currentLang);
+}
 const bookMap = {
     "Буття": "Бытие", "Вихід": "Исход", "Левит": "Левит", "Числа": "Числа", 
     "Повторення Закону": "Второзаконие", "Ісус Навин": "Иисус Навин", "Судді": "Судьи", 
