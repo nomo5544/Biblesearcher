@@ -3,10 +3,6 @@ const urlParams = new URLSearchParams(window.location.search);
 let fullRef = decodeURIComponent(urlParams.get('ref') || "").replace(/\+/g, ' ');
 let currentLang = urlParams.get('lang') || 'ukr';
 let bibleData = null;
-const urlParams = new URLSearchParams(window.location.search);
-let fullRef = decodeURIComponent(urlParams.get('ref') || "").replace(/\+/g, ' ');
-let currentLang = urlParams.get('lang') || 'ukr';
-let bibleData = null;
     if (fullRef) {
         localStorage.setItem('lastBibleRef', fullRef);
         localStorage.setItem('lastBibleLang', currentLang);
