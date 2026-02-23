@@ -154,15 +154,23 @@ const maps = {
             if (!resultsDiv) return;
             const div = document.createElement('div');
             div.className = 'verse';
-            // Використовуємо <a> для стандартної поведінки синій/фіолетовий
-            div.innerHTML = `<a href="reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}" class="ref">${ref}</a> ${text}`;
+            // Використовуємо span замість a, щоб керувати історією вручну
+            div.innerHTML = `<span class="ref">${ref}</span> ${text}`;
+            div.querySelector('.ref').onclick = function() {
+                this.classList.add('clicked'); // Фарбуємо в коричневий при кліку
+                window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+            };
             resultsDiv.appendChild(div);
         }
         
         function addVerseToFragment(fragment, ref, htmlContent) {
             const div = document.createElement('div');
             div.className = 'verse'; 
-            div.innerHTML = `<a href="reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}" class="ref">${ref}</a> ${htmlContent}`;
+            div.innerHTML = `<span class="ref">${ref}</span> ${htmlContent}`;
+            div.querySelector('.ref').onclick = function() {
+                this.classList.add('clicked'); // Фарбуємо в коричневий при кліку
+                window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+            };
             fragment.appendChild(div);
         }
 
