@@ -122,16 +122,33 @@ keys.forEach(key => {
     div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
     if (isTarget) div.id = "target";
     
-    // Додаємо номер вірша та текст
     div.innerHTML = `<span class="verse-num">${vNum}</span>${bibleData[key]}`;
 
-    // --- ДОДАЄМО ЦЕЙ ОБРОБНИК (Клік для поширення) ---
-    div.onclick = () => {
-        const text = bibleData[key];
-        const ref = `${bookName} ${chapterNum}:${vNum}`;
-        shareVerse(text, ref);
+    // --- ЛОГІКА ДОВГОГО НАТИСКАННЯ ---
+    let pressTimer;
+
+    const startPress = (e) => {
+        // Запускаємо таймер на 600 мілісекунд (оптимально для long press)
+        pressTimer = setTimeout(() => {
+            const text = bibleData[key];
+            const ref = `${bookName} ${chapterNum}:${vNum}`;
+            shareVerse(text, ref);
+        }, 600);
     };
-    // ------------------------------------------------
+
+    const cancelPress = () => {
+        clearTimeout(pressTimer); // Якщо відпустили раніше — скасовуємо
+    };
+
+    // Події для мобільних пристроїв
+    div.addEventListener('touchstart', startPress, { passive: true });
+    div.addEventListener('touchend', cancelPress, { passive: true });
+    div.addEventListener('touchmove', cancelPress, { passive: true }); // Скасувати, якщо почали скролити
+
+    // Події для комп'ютера (на випадок перевірки з ПК)
+    div.addEventListener('mousedown', startPress);
+    div.addEventListener('mouseup', cancelPress);
+    div.addEventListener('mouseleave', cancelPress);
 
     layout.appendChild(div);
 });
