@@ -163,7 +163,7 @@ const maps = {
     function addVerseToFragment(fragment, ref, htmlContent) {
         const div = document.createElement('div');
         div.className = 'verse'; 
-        div.innerHTML = `<span class="ref" style="cursor:pointer; color: #0000EE; font-weight: normal;">${ref}</span> ${htmlContent}`;
+        div.innerHTML = `<a href="reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}" class="ref">${ref}</a> ${htmlContent}`;
         div.querySelector('.ref').onclick = () => {
             window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
         };
