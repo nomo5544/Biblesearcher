@@ -103,57 +103,50 @@
             padding-top: 20px; 
         }
         
+/* СТИЛІ ВІРШІВ — ОБ'ЄДНАНО ТА ВИПРАВЛЕНО */
         .verse-item { 
             margin-bottom: var(--verse-spacing); 
             font-size: 22px; 
             text-align: justify; 
-            padding: 4px 8px; /* Додаємо невеликий внутрішній відступ для комфортного натискання */
-            display: block;   /* Гарантуємо, що вірш займає весь рядок */
             line-height: var(--line-height);
-        }
-        .verse-num { 
-            font-size: 0.6em; 
-            font-weight: bold; 
-            margin-right: 8px; 
-            vertical-align: super; 
-            opacity: 0.5; 
-            /* Робимо номер частиною рядка, щоб текст не "стрибав" */
-            display: inline-block;
-            vertical-align: baseline;
-        }
-
-        /* ПІДСВІЧУВАННЯ */
-        mark, .highlight { 
-            background-color: #FFFACD;
-            border-radius: 4px; 
-            padding: 0 4px;      /* Розширюємо підсвітку */
-            margin: 0 -4px;      /* ПОВЕРТАЄМО текст на місце за рахунок від'ємного margin */
-            color: inherit;
-            display: inline;     /* Повертаємо inline, щоб не ламати структуру рядка */
-            /* Ця властивість робить так, щоб фон малювався правильно навіть при переносі рядка */
-            box-decoration-break: clone;
-            -webkit-box-decoration-break: clone;
-        }
-        /* ПІДСВІЧУВАННЯ ТЕКСТУ для пересилання */
-        .verse-item {
-            padding: 6px 8px;
+            
+            /* Відступи для комфортного натискання та візуального простору */
+            padding: 4px 8px; 
             border-radius: 8px;
-            transition: background-color 0.6s ease; /* Швидкість "наповнення" кольором */
+            display: block;   
+            
+            /* Анімація підсвічування при затисканні */
+            transition: background-color 0.6s ease;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
         }
-        
-        /* Стан, коли ми затиснули палець */
+
+        .verse-num { 
+            font-size: 0.6em; 
+            font-weight: bold; 
+            margin-right: 8px; 
+            opacity: 0.5; 
+            display: inline-block;
+            vertical-align: baseline;
+        }
+
+        /* Стан, коли ми затиснули палець (Long Press) */
         .verse-item.pressing {
-            background-color: rgba(255, 215, 0, 0.3) !important; /* Напівпрозорий золотистий */
+            background-color: rgba(255, 215, 0, 0.3) !important;
             transition: background-color 0.6s ease; 
         }
         
         /* Стан після спрацювання (спалах) */
         .verse-item.shared-flash {
-            background-color: rgba(255, 215, 0, 0.6);
+            background-color: rgba(255, 215, 0, 0.6) !important;
             transition: background-color 0.1s;
+        }
+
+        /* ПІДСВІЧУВАННЯ (для знайдених слів або цільового вірша) */
+        .highlight { 
+            background-color: #FFFACD;
+            border-radius: 4px; 
         }
         
         /* АДАПТАЦІЯ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ */
