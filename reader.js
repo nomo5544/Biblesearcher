@@ -120,8 +120,19 @@ keys.forEach(key => {
     const isTarget = parseInt(vNum) === targetVerse;
     const div = document.createElement('div');
     div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
+    if (isTarget) div.id = "target";
     
-    div.innerHTML = `<span class="verse-num">${vNum}</span>${bibleData[key]}`;
+    // Створюємо номер
+    const spanNum = document.createElement('span');
+    spanNum.className = 'verse-num';
+    spanNum.innerText = vNum;
+
+    // Створюємо текстовий вузол для самого вірша
+    const textNode = document.createTextNode(" " + bibleData[key]); 
+
+    // Додаємо все в div без зайвих переносів рядків у коді
+    div.appendChild(spanNum);
+    div.appendChild(textNode);
 
     let pressTimer;
 
