@@ -179,7 +179,7 @@ keys.forEach(key => {
         setTimeout(() => {
             const el = document.getElementById('target');
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+        }, 600);
     }
 }
 
