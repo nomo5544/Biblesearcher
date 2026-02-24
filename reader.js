@@ -151,7 +151,7 @@ keys.forEach(key => {
 
             // Прибираємо підсвітку через секунду
             setTimeout(() => div.classList.remove('shared-flash'), 1000);
-        }, 600); // Час утримання
+        }, 1200); // Час утримання
     };
 
     const cancelPress = () => {
