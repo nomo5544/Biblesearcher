@@ -169,6 +169,8 @@ const maps = {
             }
             // 2. Додаємо клас візуально
             el.classList.add('clicked');
+            // ВАЖЛИВО: Оновлюємо збережений HTML перед переходом
+            saveState();
             // 3. Переходимо
             window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
         }
@@ -304,10 +306,15 @@ const maps = {
                     if (countDisplay) countDisplay.innerText = sessionStorage.getItem('lastResultCount') || '0';
                     // Переприв'язка кліків (виправлено)
                     resultsDiv.querySelectorAll('.ref').forEach(el => {
-                        // Беремо текст посилання
                         const ref = el.innerText.replace('● ', '').trim();
-                        // Використовуємо ту саму функцію, що і при свіжому пошуку
-                        el.onclick = function() {
+                        
+                        // Перевіряємо пам'ять сесії: якщо посилання там є, додаємо клас примусово
+                        const clickedRefs = JSON.parse(sessionStorage.getItem('clickedRefs') || '[]');
+                        if (clickedRefs.includes(ref)) {
+                            el.classList.add('clicked');
+                        }
+                        el.onclick = function(e) {
+                            e.preventDefault(); // Запобігаємо подвійним діям
                             handleRefClick(this, ref);
                         };
                     });
