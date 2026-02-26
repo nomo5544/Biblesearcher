@@ -302,11 +302,13 @@ const maps = {
                     resultsDiv.innerHTML = savedHTML;
                     searchInput.value = sessionStorage.getItem('lastSearchQuery') || '';
                     if (countDisplay) countDisplay.innerText = sessionStorage.getItem('lastResultCount') || '0';
-                    // Переприв'язка кліків
+                    // Переприв'язка кліків (виправлено)
                     resultsDiv.querySelectorAll('.ref').forEach(el => {
-                        el.onclick = () => {
-                            const ref = el.innerText.replace('● ', '').trim();
-                            window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${window.currentLang}`;
+                        // Беремо текст посилання
+                        const ref = el.innerText.replace('● ', '').trim();
+                        // Використовуємо ту саму функцію, що і при свіжому пошуку
+                        el.onclick = function() {
+                            handleRefClick(this, ref);
                         };
                     });
                 } else if (searchInput.value.length >= 2) {
@@ -363,7 +365,7 @@ const maps = {
             const refs = Array.from(resultsDiv.querySelectorAll('.ref')).map(el => el.innerText.replace('● ', '').trim()).join(', ');
             if (!refs) return;
             navigator.clipboard.writeText(refs).then(() => {
-                const old = copyRefsBtn.innerText;
+                const old = copyRefsBtn.innerText;    
                 copyRefsBtn.innerText = '✅';
                 setTimeout(() => copyRefsBtn.innerText = old, 2000);
             });
