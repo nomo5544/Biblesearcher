@@ -178,7 +178,7 @@ keys.forEach(key => {
     if (targetVerse) {
         setTimeout(() => {
             const el = document.getElementById('target');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (el) el.scrollIntoView({ behavior: 'instant', block: 'center' });
         }, 600);
     }
 }
