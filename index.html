@@ -11,6 +11,7 @@
             --header-bg: #f8f8f8;
             --border-color: #ddd;
             --accent-color: #1E90FF;
+            --btn-bg: #ececec;
         }
 
         body {
@@ -19,26 +20,28 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            font-family: 'Georgia', 'Times New Roman', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Georgia', 'Times New Roman', serif;
             background-color: var(--bg-color);
             -webkit-tap-highlight-color: transparent;
-        }        
-        
-        /* Встановлюємо колір для всіх станів посилання (звичайне, відвідане, активне) */
+        }
+
+        /* Посилання та вірші */
         .ref {
             color: #0000EE !important;
             text-decoration: none !important;
             cursor: pointer;
         }
-        .ref:hover {
-            color: #6495ED !important; /* колір при наведенні */
-            text-decoration: none !important;
-        }  
-        .ref.clicked {
-            color: #A52A2A !important;  /* Колір для відвіданого посилання (тільки поки сесія активна) */
+        .ref:hover { color: #6495ED !important; }
+        .ref.clicked { color: #A52A2A !important; }
+
+        .verse { 
+            display: block; 
+            margin-bottom: 6px; 
+            line-height: 1.3; 
+            text-align: justify;
         }
 
-        /* ІДЕНТИЧНИЙ ХЕДЕР */
+        /* Хедер та панель керування */
         .header { 
             position: sticky;
             top: 0;
@@ -58,35 +61,34 @@
             gap: 8px;
             width: 100%;
             max-width: 900px;
-            padding: 0 7px; /* Змінено з 10 на 7 для повної ідентичності з reader.html */
+            padding: 0 7px;
             height: 100%;
             box-sizing: border-box;
-            margin: 0;
         }
-        
-        /* УНІФІКОВАНІ КНОПКИ (такі ж як .nav-btn у другому коді) */
+
+        /* Уніфіковані кнопки (об'єднано всі повтори) */
         .btn-ui, .lang-button, .toggle-label {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 40px;
             width: 40px;
-            background: #ececec; /* var(--btn-bg) */
+            background: var(--btn-bg);
             border: 1px solid #ccc;
             border-radius: 8px;
             cursor: pointer;
             flex-shrink: 0;
             user-select: none;
-            font-size: 18px;
-            font-family: Arial, sans-serif !important;
             box-sizing: border-box;
+            font-family: Arial, sans-serif !important;
         }
-        
-        /* Специфічні налаштування для іконок, щоб вони були одного розміру з reader.html */
+
+        /* Специфічні розміри іконок */
         #copyRefsBtn { font-size: 20px; }
         #langToggle { font-size: 19px; }
         .toggle-label { font-size: 22px; }
-        
+
+        /* Поля вводу та текст */
         input#searchInput { 
             flex: 1;
             min-width: 50px;
@@ -108,14 +110,14 @@
             font-family: Arial, sans-serif;
             font-variant-numeric: tabular-nums;
         }
-        
-        /* КОНТЕНТ, СИНХРОНІЗОВАНА ШИРИНА ТА ВІДСТУПИ */
+
+        /* Контейнер контенту */
         .main-container {
             width: 100%;
             max-width: 920px;
-            padding: 0 20px; /* Стандартний відступ від країв */
+            padding: 0 20px;
             box-sizing: border-box;
-            margin: 0 auto;  /* Центрування */
+            margin: 0 auto;
         }
 
         h1 { 
@@ -125,14 +127,7 @@
             line-height: 1.3; 
         }
 
-        .verse { 
-            display: block; 
-            margin-bottom: 6px; 
-            line-height: 1.3; 
-            text-align: justify;
-            /* Початковий розмір буде встановлено через JS */
-        }
-
+        /* Перемикач "Точний пошук" */
         #exactMatch { display: none; }
         #exactMatch:checked + .toggle-label { 
             background: var(--accent-color); 
@@ -141,56 +136,30 @@
         }
 
         mark { 
-            background-color: #FFFF99; /* Світліший жовтий */
-            color: #000;              /* Чорний колір тексту */
-            padding: 0 2px;           /* Невеликі відступи з боків */
-            border-radius: 4px;       /* М'які кути */
+            background-color: #FFFF99; 
+            color: #000; 
+            padding: 0 2px; 
+            border-radius: 4px; 
         }
-       
-/* --- АДАПТАЦІЯ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ --- */
-@media (max-width: 768px) {
-    body {
-        /* Змінюємо шрифт на системний без засічок для чіткості на екранах */
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
 
-    /* Налаштування для тексту віршів на першій сторінці */
-    .verse {
-        /* font-size: 19px;          Оптимальний базовий розмір для телефону */
-        line-height: 1.2;         /* Збільшений відступ між рядками для легкого читання */
-        margin-bottom: 8px;      /* Відступ між самими віршами */
-        letter-spacing: -0.01em;  /* Легке ущільнення для кращого вигляду */
-    }
-
-    /* Налаштування заголовка (цитати) на головній */
-    h1 {
-        font-size: 1.1rem;
-        line-height: 1.4;
-        padding: 0 5px;
-        margin: 6px 0;
-    }
-
-    /* Ховаємо другорядні елементи на вузьких екранах (<430px) */
-    @media (max-width: 430px) {
-        .font-controls, #copyRefsBtn { display: none; }
+        /* Результати пошуку */
+        #results ul { list-style: none; padding: 0; }
+        #results a, #results a:visited {
+            color: var(--accent-color);
+            text-decoration: none;
         }
-    }
-        /* Додайте це в кінець блоку <style> */
+        #results a:hover { text-decoration: underline; color: #0056b3; }
 
-    #results ul {
-        list-style: none;
-        padding: 0;
-    }
-    
-    #results a, #results a:visited {
-        color: var(--accent-color);
-        text-decoration: none;
-    }
-    
-    #results a:hover {
-        color: #0056b3; /* світліший відтінок вашого синього */
-        text-decoration: underline;
-    }
+        /* Адаптація */
+        @media (max-width: 768px) {
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+            .verse { line-height: 1.2; margin-bottom: 8px; letter-spacing: -0.01em; }
+            h1 { font-size: 1.1rem; line-height: 1.4; padding: 0 5px; margin: 6px 0; }
+        }
+
+        @media (max-width: 430px) {
+            .font-controls, #copyRefsBtn { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -221,26 +190,21 @@
     </div>
 
     <div style="text-align: center; padding: 20px; opacity: 0.3; font-size: 12px; font-family: sans-serif;">
-        Версія: <span id="app-version">v1.0150</span>
+        Версія: <span id="app-version">v1.015</span>
     </div>
 
     <script src="script.js"></script>
     <script>
-        /* Логіка повзунка шрифту */
         const range = document.getElementById('fontSizeRange');
         const results = document.getElementById('results');
 
         if (range && results) {
-            // Встановлюємо розмір при завантаженні
             results.style.fontSize = range.value + 'px';
-
-            // Оновлюємо при зміні
             range.addEventListener('input', (e) => {
                 results.style.fontSize = e.target.value + 'px';
             });
         }
 
-        /* Service Worker */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
