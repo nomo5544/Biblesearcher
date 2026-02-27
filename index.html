@@ -190,7 +190,7 @@
     </div>
 
     <div style="text-align: center; padding: 20px; opacity: 0.3; font-size: 12px; font-family: sans-serif;">
-        Версія: <span id="app-version">...</span>
+        Версія: <span id="app-version" style="cursor: pointer;">...</span>
     </div>
 
     <script src="script.js"></script>
@@ -214,24 +214,30 @@
     <script>
       async function displayVersion() {
         try {
-          // 1. Читаємо файл sw.js як текст
           const response = await fetch('sw.js');
           const text = await response.text();
-    
-          // 2. Шукаємо в тексті щось схоже на v1.0142 або цифри після версії
-          // Цей рядок шукає лапки з цифрами/крапками всередині
           const match = text.match(/v\d+\.\d+/); 
-          
+          const versionElement = document.getElementById('app-version');
           if (match) {
-            // 3. Якщо знайшли — замінюємо текст на сторінці
-            document.getElementById('app-version').innerText = match[0];
+            versionElement.innerText = match[0];
+            // Функція оновлення при кліку (без візуальних змін тексту)
+            versionElement.onclick = async function() {
+              if (confirm("Оновити кеш додатка та перезавантажити сторінку?")) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+                
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                  await registration.unregister();
+                }
+                window.location.reload(true);
+              }
+            };
           }
         } catch (e) {
-          console.log("Не вдалося отримати версію з sw.js");
+          console.log("Помилка отримання версії");
         }
       }
-    
-      // Запускаємо перевірку
       displayVersion();
     </script>
 </body>
