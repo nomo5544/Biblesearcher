@@ -54,11 +54,20 @@ if (match) {
 }
 
 async function shareVerse(text, ref) {
-    // encodeURI виправляє проблему з пробілами та кирилицею в адресі
-    const currentUrl = encodeURI(window.location.href); 
+    // 1. Отримуємо повну адресу
+    let currentUrl = window.location.href; 
     
-    // Формуємо текст: спосіб "Біблія: посилання" є найбільш стандартиним
-    const shareText = `«${text}» (${ref})\n\nБіблія:\n${currentUrl}`;
+    // 2. "Причісуємо" посилання: видаляємо https:// та index.html
+    // Це робить посилання коротшим, але месенджери все одно його впізнають
+    let cleanUrl = currentUrl
+        .replace(/^https?:\/\//, '') // Прибирає http:// або https://
+        .replace(/index\.html/, '');  // Прибирає назву файлу, якщо вона є
+    
+    // Декодуємо для читабельності, але кодуємо назад лише проблемні символи
+    cleanUrl = decodeURI(cleanUrl);
+
+    // 3. Формуємо текст повідомлення
+    const shareText = `«${text}» (${ref})\n\nБіблія: ${cleanUrl}`;
     
     if (navigator.share) {
         try {
