@@ -211,5 +211,28 @@
             });
         }
     </script>
+    <script>
+      async function displayVersion() {
+        try {
+          // 1. Читаємо файл sw.js як текст
+          const response = await fetch('sw.js');
+          const text = await response.text();
+    
+          // 2. Шукаємо в тексті щось схоже на v1.0142 або цифри після версії
+          // Цей рядок шукає лапки з цифрами/крапками всередині
+          const match = text.match(/v\d+\.\d+/); 
+          
+          if (match) {
+            // 3. Якщо знайшли — замінюємо текст на сторінці
+            document.getElementById('app-version').innerText = match[0];
+          }
+        } catch (e) {
+          console.log("Не вдалося отримати версію з sw.js");
+        }
+      }
+    
+      // Запускаємо перевірку
+      displayVersion();
+    </script>
 </body>
 </html>
