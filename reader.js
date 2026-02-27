@@ -54,22 +54,26 @@ if (match) {
 }
 
 async function shareVerse(text, ref) {
-    const shareText = `«${text}» (${ref})\n\nБіблія`;
+    // window.location.href бере повну поточну адресу сторінки
+    const currentUrl = window.location.href; 
+    const shareText = `«${text}» (${ref})\n\nБіблія: ${currentUrl}`;
     
     if (navigator.share) {
         try {
             await navigator.share({
-                title: 'Біблія говорить',
-                text: shareText,
-                // Якщо хочете замість посилання просто назву, 
-                // можна видалити рядок url або залишити порожнім
+                title: 'Біблія',
+                text: shareText
             });
         } catch (err) {
             console.log("Скасовано");
         }
     } else {
-        navigator.clipboard.writeText(shareText);
-        alert("Текст скопійовано!");
+        try {
+            await navigator.clipboard.writeText(shareText);
+            alert("Текст та посилання скопійовано!");
+        } catch (err) {
+            console.error("Помилка копіювання");
+        }
     }
 }
 
