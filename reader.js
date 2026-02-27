@@ -44,13 +44,16 @@ function getTranslatedBookName(name, toLang) {
 }
 
 // Розбір посилання
-let bookName = "", chapterNum = "1", targetVerse = null;
-// 2. Більш надійний Regex (додано trim() та виправлено захоплення групи)
+let bookName = "", chapterNum = "1", vStart = null, vEnd = null;
+
+// Регулярний вираз для підтримки діапазонів (напр. Мат 3:1-11)
 const match = fullRef.trim().match(/^(.+?)\s+(\d+)(?::(\d+)(?:-(\d+))?)?$/);
+
 if (match) {
-    bookName = match[1];
-    chapterNum = match[2];
-    targetVerse = match[3] ? parseInt(match[3]) : null;
+    bookName = match[1];
+    chapterNum = match[2];
+    vStart = match[3] ? parseInt(match[3]) : null;
+    vEnd = match[4] ? parseInt(match[4]) : vStart; // Якщо діапазону немає, vEnd = vStart
 }
 
 async function shareVerse(text, ref) {
