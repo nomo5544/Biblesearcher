@@ -98,55 +98,53 @@ function loadBible() {
 }
 
 function renderContent() {
-    const layout = document.getElementById('reader-layout');
-    const refHeader = document.getElementById('refHeader');
-    if (!layout || !bibleData) return;
+    const layout = document.getElementById('reader-layout');
+    const refHeader = document.getElementById('refHeader');
+    if (!layout || !bibleData) return;
     
-    // СИЛОВЕ СКИНУТИ СТИЛІВ (щоб текст не зависав)
     layout.style.transform = "none";
     layout.style.opacity = "1";
     layout.classList.remove('no-transition');
     
-    layout.innerHTML = "";
-    if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
+    layout.innerHTML = "";
+    if (refHeader) refHeader.innerText = `${bookName} ${chapterNum}`;
 
-    const prefix = `${bookName} ${chapterNum}:`;
-    const keys = Object.keys(bibleData).filter(k => k.startsWith(prefix));
-    
-    keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
-
-    if (keys.length === 0) {
-        // Якщо на десктопі порожньо — виведемо технічну назву, яку шукав скрипт
-        layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Розділ не знайдено (${bookName} ${chapterNum}).</div>`;
-        return;
-    }
-
-keys.forEach(key => {
-    const vNum = parseInt(key.split(':')[1]);
+    const prefix = `${bookName} ${chapterNum}:`;
+    const keys = Object.keys(bibleData).filter(k => k.startsWith(prefix));
     
-    // Перевіряємо, чи номер вірша входить у діапазон (включно)
-    let isTarget = false;
-    if (vStart !== null) {
-        isTarget = (vNum >= vStart && vNum <= vEnd);
+    keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
+
+    if (keys.length === 0) {
+        layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Розділ не знайдено (${bookName} ${chapterNum}).</div>`;
+        return;
     }
-    
-    const div = document.createElement('div');
-    // Додаємо клас highlight для всього діапазону
-    div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
-    
-    // ID "target" ставимо тільки першому віршу діапазону для скролу
-    if (vNum === vStart) div.id = "target";
-    
-    // --- Далі ваш стандартний код створення елементів ---
-    const spanNum = document.createElement('span');
-    spanNum.className = 'verse-num';
-    spanNum.innerText = vNum;
 
-    const textNode = document.createTextNode(" " + bibleData[key]); 
+    keys.forEach(key => {
+        const vNum = parseInt(key.split(':')[1]);
+        
+        // ПЕРЕВІРКА ДІАПАЗОНУ
+        let isHighlighted = false;
+        if (vStart !== null) {
+            isHighlighted = (vNum >= vStart && vNum <= vEnd);
+        }
+        
+        const div = document.createElement('div');
+        div.className = `verse-item ${isHighlighted ? 'highlight' : ''}`;
+        
+        // Ставимо ID для скролу тільки на перший вірш виділення
+        if (vStart !== null && vNum === vStart) {
+            div.id = "target";
+        }
+        
+        const spanNum = document.createElement('span');
+        spanNum.className = 'verse-num';
+        spanNum.innerText = vNum;
 
-    div.appendChild(spanNum);
-    div.appendChild(textNode);
+        const textNode = document.createTextNode(" " + bibleData[key]); 
 
+        div.appendChild(spanNum);
+        div.appendChild(textNode);
+        
     let pressTimer;
 
     const startPress = (e) => {
@@ -188,12 +186,13 @@ keys.forEach(key => {
     layout.appendChild(div);
 });
 
-    if (targetVerse) {
-        setTimeout(() => {
-            const el = document.getElementById('target');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 600);
-    }
+// СКРОЛ ДО ПОЧАТКУ ВИДІЛЕННЯ
+    if (vStart !== null) {
+        setTimeout(() => {
+            const el = document.getElementById('target');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 600);
+    }
 }
 
 document.getElementById('langBtn').onclick = () => {
