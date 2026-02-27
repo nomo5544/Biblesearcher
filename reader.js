@@ -54,9 +54,11 @@ if (match) {
 }
 
 async function shareVerse(text, ref) {
-    // window.location.href бере повну поточну адресу сторінки
-    const currentUrl = window.location.href; 
-    const shareText = `«${text}» (${ref})\n\nБіблія: ${currentUrl}`;
+    // encodeURI виправляє проблему з пробілами та кирилицею в адресі
+    const currentUrl = encodeURI(window.location.href); 
+    
+    // Формуємо текст: спосіб "Біблія: посилання" є найбільш стандартиним
+    const shareText = `«${text}» (${ref})\n\nБіблія:\n${currentUrl}`;
     
     if (navigator.share) {
         try {
