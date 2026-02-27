@@ -46,7 +46,7 @@ function getTranslatedBookName(name, toLang) {
 // Розбір посилання
 let bookName = "", chapterNum = "1", targetVerse = null;
 // 2. Більш надійний Regex (додано trim() та виправлено захоплення групи)
-const match = fullRef.trim().match(/^(.+?)\s+(\d+)(?::(\d+))?$/);
+const match = fullRef.trim().match(/^(.+?)\s+(\d+)(?::(\d+)(?:-(\d+))?)?$/);
 if (match) {
     bookName = match[1];
     chapterNum = match[2];
