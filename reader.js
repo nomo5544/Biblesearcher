@@ -196,10 +196,17 @@ function renderContent() {
 }
 
 document.getElementById('langBtn').onclick = () => {
-    const nextLang = currentLang === 'ukr' ? 'rus' : 'ukr';
-    const translatedBook = getTranslatedBookName(bookName, nextLang);
-    const newRef = `${translatedBook} ${chapterNum}${targetVerse ? ':' + targetVerse : ''}`;
-    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
+    const nextLang = currentLang === 'ukr' ? 'rus' : 'ukr';
+    const translatedBook = getTranslatedBookName(bookName, nextLang);
+    
+    // Формуємо частину з віршами (діапазон або один вірш)
+    let versePart = "";
+    if (vStart) {
+        versePart = `:${vStart}${vEnd !== vStart ? '-' + vEnd : ''}`;
+    }
+    
+    const newRef = `${translatedBook} ${chapterNum}${versePart}`;
+    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
 };
 
 function navigate(step) {
