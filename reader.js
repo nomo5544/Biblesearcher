@@ -55,7 +55,7 @@ if (match) {
 
 async function shareVerse(text, ref) {
     // Формуємо чистий текст без посилання 
-    const shareText = `«${text}» (${ref})\n\nhttps://nomo5544.github.io/Biblesearcher/`;
+    const shareText = `«${text}» (${ref})\n\n`;
     
     if (navigator.share) {
         try {
