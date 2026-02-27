@@ -54,20 +54,8 @@ if (match) {
 }
 
 async function shareVerse(text, ref) {
-    // 1. Отримуємо повну адресу
-    let currentUrl = window.location.href; 
-    
-    // 2. "Причісуємо" посилання: видаляємо https:// та index.html
-    // Це робить посилання коротшим, але месенджери все одно його впізнають
-    let cleanUrl = currentUrl
-        .replace(/^https?:\/\//, '') // Прибирає http:// або https://
-        .replace(/index\.html/, '');  // Прибирає назву файлу, якщо вона є
-    
-    // Декодуємо для читабельності, але кодуємо назад лише проблемні символи
-    cleanUrl = decodeURI(cleanUrl);
-
-    // 3. Формуємо текст повідомлення
-    const shareText = `«${text}» (${ref})\n\nБіблія: ${cleanUrl}`;
+    // Формуємо чистий текст без посилання 
+    const shareText = `«${text}» (${ref})\n\nБіблія`;
     
     if (navigator.share) {
         try {
@@ -81,7 +69,7 @@ async function shareVerse(text, ref) {
     } else {
         try {
             await navigator.clipboard.writeText(shareText);
-            alert("Текст та посилання скопійовано!");
+            alert("Текст скопійовано!");
         } catch (err) {
             console.error("Помилка копіювання");
         }
