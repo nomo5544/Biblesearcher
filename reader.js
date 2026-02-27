@@ -119,21 +119,28 @@ function renderContent() {
     }
 
 keys.forEach(key => {
-    const vNum = key.split(':')[1];
-    const isTarget = parseInt(vNum) === targetVerse;
-    const div = document.createElement('div');
-    div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
-    if (isTarget) div.id = "target";
+    const vNum = parseInt(key.split(':')[1]);
     
-    // Створюємо номер
+    // Перевіряємо, чи номер вірша входить у діапазон (включно)
+    let isTarget = false;
+    if (vStart !== null) {
+        isTarget = (vNum >= vStart && vNum <= vEnd);
+    }
+    
+    const div = document.createElement('div');
+    // Додаємо клас highlight для всього діапазону
+    div.className = `verse-item ${isTarget ? 'highlight' : ''}`;
+    
+    // ID "target" ставимо тільки першому віршу діапазону для скролу
+    if (vNum === vStart) div.id = "target";
+    
+    // --- Далі ваш стандартний код створення елементів ---
     const spanNum = document.createElement('span');
     spanNum.className = 'verse-num';
     spanNum.innerText = vNum;
 
-    // Створюємо текстовий вузол для самого вірша
     const textNode = document.createTextNode(" " + bibleData[key]); 
 
-    // Додаємо все в div без зайвих переносів рядків у коді
     div.appendChild(spanNum);
     div.appendChild(textNode);
 
