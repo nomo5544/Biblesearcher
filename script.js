@@ -127,6 +127,7 @@ if (!urlParams.has('fromSearch')) {
         if (isExact) {
             let regex;
             try {
+                // Знайдіть цей рядок у performSearch і замініть pattern:
                 const pattern = `(?<![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ\\u0370-\\u03FF\\u0100-\\u017FñÑáéíóúÁÉÍÓÚ])${query}(?![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ\\u0370-\\u03FF\\u0100-\\u017FñÑáéíóúÁÉÍÓÚ])`;
                 regex = new RegExp(pattern, 'gi');
             } catch (e) { return; }
@@ -211,24 +212,33 @@ window.loadLanguage = function(langCode) {
 if (langToggle) {
     const availableLangs = ['ukr', 'ru', 'en', 'pl', 'es', 'el'];
 
-    langToggle.onclick = () => {
-        let currentIndex = availableLangs.indexOf(window.currentLang);
-        let nextIndex = (currentIndex + 1) % availableLangs.length;
-        window.currentLang = availableLangs[nextIndex];
+langToggle.onclick = () => {
+    let currentIndex = availableLangs.indexOf(window.currentLang);
+    let nextIndex = (currentIndex + 1) % availableLangs.length;
+    window.currentLang = availableLangs[nextIndex];
 
-        const displayNames = {
-            'ukr': 'UA', 'ru': 'RU', 'en': 'EN', 
-            'pl': 'PL', 'es': 'ES', 'el': 'GR'
-        };
-        langToggle.innerText = displayNames[window.currentLang];
-
-        // !!! ВАЖЛИВО: Очищуємо екран і сесію перед завантаженням нової мови
-        resultsDiv.innerHTML = ""; 
-        sessionStorage.removeItem('lastSearchResults'); 
-        
-        localStorage.setItem('selectedLang', window.currentLang);
-        window.loadLanguage(window.currentLang);
+    const displayNames = {
+        'ukr': 'UA', 'ru': 'RU', 'en': 'EN', 
+        'pl': 'PL', 'es': 'ES', 'el': 'GR'
     };
+    langToggle.innerText = displayNames[window.currentLang];
+
+    // 1. ОЧИЩАЄМО ЕКРАН ВІДРАЗУ (щоб польська не висіла)
+    resultsDiv.innerHTML = ""; 
+    if (countDisplay) countDisplay.innerText = "0";
+    
+    // 2. ОЧИЩАЄМО ДАНІ (щоб старий пошук не спрацював на старих даних)
+    window.currentLangData = {}; 
+    
+    // 3. ОЧИЩАЄМО СЕСІЮ
+    sessionStorage.removeItem('lastSearchResults');
+    sessionStorage.removeItem('lastSearchQuery');
+
+    localStorage.setItem('selectedLang', window.currentLang);
+    
+    // 4. ЗАВАНТАЖУЄМО ІСПАНСЬКУ
+    window.loadLanguage(window.currentLang);
+};
     
     const displayNames = { 'ukr': 'UA', 'ru': 'RU', 'en': 'EN', 'pl': 'PL', 'es': 'ES', 'el': 'GR' };
     langToggle.innerText = displayNames[window.currentLang] || 'UA';
