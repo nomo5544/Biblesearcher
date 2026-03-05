@@ -80,16 +80,21 @@ if (!urlParams.has('fromSearch')) {
 
         // Знаходимо цей блок у вашому script.js:
         if (match) {
-            // 1. Отримуємо ввід користувача
             const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
-            const chapter = match[2];
-            const vStart = parseInt(match[3] || "1");
-            const vEnd = match[4] ? parseInt(match[4]) : vStart;
+            
+            // ПЕРЕВІРКА: чи існує об'єкт maps взагалі
+            if (typeof maps === 'undefined') {
+                console.error("Критична помилка: файл biblemaps.js не завантажений!");
+                return;
+            }
         
-            // 2. Отримуємо мапу для поточної мови
-            const currentMap = maps[window.currentLang]; 
-            // ШУКАЄМО ПОВНУ НАЗВУ КНИГИ
-            const fullBookName = currentMap ? currentMap[bookInput] : null;
+            const currentMap = maps[window.currentLang];
+            if (!currentMap) {
+                console.error("Мапа для мови не знайдена:", window.currentLang);
+                return;
+            }
+        
+            const fullBookName = currentMap[bookInput];
         
             if (fullBookName) {
                 let combinedText = "";
