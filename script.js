@@ -242,24 +242,37 @@ langToggle.onclick = () => {
 
     if (searchInput) {
         searchInput.oninput = window.performSearch;
-        searchInput.onkeydown = (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const query = searchInput.value.trim();
-                const refRegex = /^(\d?\s?[A-Za-zА-Яа-яІіЇЄєҐ\u0370-\u03FF][A-Za-zА-Яа-яІіЇЄєҐ'ыэё\u0370-\u03FF]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
-                const match = query.match(refRegex);
-                if (match) {
-                    const book = maps[window.currentLang][match[1].trim().toLowerCase().replace(/\.$/, "")];
-                    if (book) {
-                        let r = `${book} ${match[2]}:${match[3] || "1"}`;
-                        if (match[4]) r += `-${match[4]}`;
-                        window.location.href = `reader.html?ref=${encodeURIComponent(r)}&lang=${window.currentLang}`;
-                        return;
-                    }
+searchInput.onkeydown = (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const query = searchInput.value.trim();
+        
+        // Використовуємо той самий regex для розпізнавання посилання
+        const match = query.match(refRegex);
+        
+        if (match) {
+            const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
+            
+            // Перевіряємо, чи завантажені мапи книг
+            if (typeof maps !== 'undefined' && maps[window.currentLang]) {
+                const fullBookName = maps[window.currentLang][bookInput];
+                
+                if (fullBookName) {
+                    const chapter = match[2];
+                    const verse = match[3] || "1";
+                    let finalRef = `${fullBookName} ${chapter}:${verse}`;
+                    if (match[4]) finalRef += `-${match[4]}`;
+                    
+                    // ПРЯМИЙ ПЕРЕХІД В ЧИТАЧ (reader.html)
+                    window.location.href = `reader.html?ref=${encodeURIComponent(finalRef)}&lang=${window.currentLang}`;
+                    return;
                 }
-                window.performSearch();
             }
-        };
+        }
+        // Якщо це не пряме посилання — просто виконуємо звичайний пошук
+        window.performSearch();
+    }
+};
     }
 
     if (exactMatch) exactMatch.onchange = window.performSearch;
