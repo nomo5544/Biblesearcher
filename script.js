@@ -128,6 +128,7 @@ if (!urlParams.has('fromSearch')) {
             let regex;
             try {
                 // Знайдіть цей рядок у performSearch і замініть pattern:
+                // Додано підтримку іспанських символів: ñ, á, é, í, ó, ú
                 const pattern = `(?<![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ\\u0370-\\u03FF\\u0100-\\u017FñÑáéíóúÁÉÍÓÚ])${query}(?![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ\\u0370-\\u03FF\\u0100-\\u017FñÑáéíóúÁÉÍÓÚ])`;
                 regex = new RegExp(pattern, 'gi');
             } catch (e) { return; }
