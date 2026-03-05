@@ -181,27 +181,30 @@ window.loadLanguage = function(langCode) {
         'ru': 'bibleTextRU.json',
         'en': 'bibleTextEN.json',
         'pl': 'bibleTextPL.json',
-        'es': 'bibleTextES.json',
+        'es': 'bibleTextES.json', // ПЕРЕВІРТЕ: на GitHub файл має бути точно bibleTextES.json
         'el': 'bibleTextGR.json'
     };
 
     const fileName = fileMap[langCode] || 'bibleTextUA.json';
 
-fetch(fileName)
-    .then(res => {
-        if (!res.ok) throw new Error(`Файл не знайдено: ${fileName}`);
-        return res.text();
-    })
-    .then(text => {
-        try {
-            window.currentLangData = JSON.parse(text);
-            console.log("Дані завантажено для", langCode);
-        } catch (e) {
-            console.error("Отримано не JSON. Перші 50 символів відповіді:", text.substring(0, 50));
-            throw new Error("Файл пошкоджений або сервер повернув помилку 404");
-        }
-    })
-    .catch(err => console.error("Помилка завантаження мови:", err));
+    fetch(fileName)
+        .then(res => {
+            if (!res.ok) throw new Error(`404: Файл ${fileName} не знайдено`);
+            return res.json(); // Використовуємо .json() напряму, це надійніше
+        })
+        .then(data => {
+            window.currentLangData = data;
+            console.log("Успішно завантажено:", langCode);
+            // Виконуємо пошук, якщо в полі вже щось є
+            if (searchInput && searchInput.value.length >= 2) {
+                window.performSearch();
+            }
+        })
+        .catch(err => {
+            console.error("Помилка завантаження мови:", err.message);
+            // Виводимо підказку в результати, щоб ви бачили проблему на телефоні
+            if (resultsDiv) resultsDiv.innerHTML = `<p style="color:red; padding:20px;">Помилка: ${err.message}. Перевірте назву файлу на GitHub.</p>`;
+        });
 };
 if (langToggle) {
     const availableLangs = ['ukr', 'ru', 'en', 'pl', 'es', 'el'];
