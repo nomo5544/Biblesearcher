@@ -1,11 +1,18 @@
-const CACHE_NAME = 'bible-searcher-v1.0160'; // Оновив версію тут
+const CACHE_NAME = 'bible-searcher-v1.0161'; // Оновив версію для скидання кешу
+
 const ASSETS = [
   'index.html',
   'reader.html',
   'reader.js',
+  'script.js',      // Додав ваш основний скрипт
+  'bibleMaps.js',   // Додав мапи скорочень
   'app.webmanifest.json',
   'bibleTextUA.json',
   'bibleTextRU.json',
+  'bibleTextEN.json', // Додав нові мови
+  'bibleTextPL.json',
+  'bibleTextES.json',
+  'bibleTextGR.json',
   'icon-192.png',
   'icon-512.png'
 ];
@@ -34,26 +41,28 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Стратегія "Stale-While-Revalidate" (найкраща для таких додатків)
-// Видає файл із кешу миттєво, але у фоні йде в мережу, перевіряє оновлення 
-// і тихо оновлює кеш для наступного разу.
+// 3. Стратегія "Stale-While-Revalidate" з фільтрацією запитів
 self.addEventListener('fetch', (event) => {
+  // ФІКС ПОМИЛКИ: Ігноруємо запити від розширень (chrome-extension://)
+  // Кешуємо лише стандартні запити http та https
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-    // ignoreSearch: true ігнорує все, що йде після "?" в URL
-    // тепер reader.html?ref=... завжди буде братися з кешу як reader.html
+        
         const fetchPromise = fetch(event.request).then((networkResponse) => {
-          // Якщо відповідь від мережі успішна, зберігаємо її копію в кеш
-          if (networkResponse && networkResponse.status === 200) {
+          // Зберігаємо в кеш тільки успішні відповіді від сервера
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
         }).catch(() => {
-            // Якщо мережі немає, ми просто нічого не оновлюємо
+          // Якщо мережі немає, помилка не повинна валити скрипт
         });
 
-        // Повертаємо кеш негайно, якщо він є, інакше чекаємо на мережу
         return cachedResponse || fetchPromise;
       });
     })
