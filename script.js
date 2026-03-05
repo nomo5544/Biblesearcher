@@ -187,33 +187,21 @@ window.loadLanguage = function(langCode) {
 
     const fileName = fileMap[langCode] || 'bibleTextUA.json';
 
-    fetch(fileName)
-        .then(res => res.json())
-        .then(data => {
-            window.currentLangData = data;
-            
-            const savedHTML = sessionStorage.getItem('lastSearchResults');
-            const savedLang = sessionStorage.getItem('lastSearchLang'); // Перевіряємо мову останнього пошуку
-
-            // Відновлюємо тільки якщо мова збігається
-            if (savedHTML && resultsDiv.innerHTML === "" && savedLang === langCode) {
-                resultsDiv.innerHTML = savedHTML;
-                searchInput.value = sessionStorage.getItem('lastSearchQuery') || '';
-                if (countDisplay) countDisplay.innerText = sessionStorage.getItem('lastResultCount') || '0';
-
-                resultsDiv.querySelectorAll('.ref').forEach(el => {
-                    const ref = el.innerText.replace('● ', '').trim();
-                    el.onclick = function(e) {
-                        e.preventDefault();
-                        handleRefClick(this, ref);
-                    };
-                });
-            } else if (searchInput.value.length >= 2) {
-                // Якщо мова нова — запускаємо пошук заново
-                window.performSearch();
-            }
-        })
-        .catch(err => console.error("Помилка завантаження мови:", err));
+fetch(fileName)
+    .then(res => {
+        if (!res.ok) throw new Error(`Файл не знайдено: ${fileName}`);
+        return res.text();
+    })
+    .then(text => {
+        try {
+            window.currentLangData = JSON.parse(text);
+            console.log("Дані завантажено для", langCode);
+        } catch (e) {
+            console.error("Отримано не JSON. Перші 50 символів відповіді:", text.substring(0, 50));
+            throw new Error("Файл пошкоджений або сервер повернув помилку 404");
+        }
+    })
+    .catch(err => console.error("Помилка завантаження мови:", err));
 };
 if (langToggle) {
     const availableLangs = ['ukr', 'ru', 'en', 'pl', 'es', 'el'];
