@@ -163,6 +163,19 @@ function navigate(step) {
     window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + nextChap)}&lang=${currentLang}`;
 }
 
+function getBookKey(fullBookName, currentLang) {
+    const map = maps[currentLang];
+    for (let key in map) {
+        if (map[key] === fullBookName) {
+            // Повертаємо ключ (наприклад, "gen"), але ми знаємо, 
+            // що в мапах ключі часто — це скорочення. 
+            // Найкраще знайти ключ, який є спільним для всіх мов.
+            return key; 
+        }
+    }
+    return null;
+}
+
 document.getElementById('prevBtn').onclick = () => navigate(-1);
 document.getElementById('nextBtn').onclick = () => navigate(1);
 
