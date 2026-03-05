@@ -77,33 +77,44 @@ if (!urlParams.has('fromSearch')) {
         const refRegex = /^(\d?\s?[A-Za-zА-Яа-яІіЇЄєҐыЫэЭёЁ\u0370-\u03FF][A-Za-zА-Яа-яІіЇЄєҐ'ыэё\u0370-\u03FF]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
         const match = query.match(refRegex);
 
+        // Знаходимо цей блок у вашому script.js:
         if (match) {
+            // 1. Отримуємо ввід користувача
             const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
             const chapter = match[2];
             const vStart = parseInt(match[3] || "1");
             const vEnd = match[4] ? parseInt(match[4]) : vStart;
-            const currentMap = maps[window.currentLang];
+        
+            // 2. Отримуємо мапу для поточної мови
+            const currentMap = maps[window.currentLang]; 
+            // ШУКАЄМО ПОВНУ НАЗВУ КНИГИ
             const fullBookName = currentMap ? currentMap[bookInput] : null;
-
+        
             if (fullBookName) {
                 let combinedText = "";
                 let foundAny = false;
+                
                 for (let v = vStart; v <= vEnd; v++) {
-                    const ref = `${fullBookName} ${chapter}:${v}`;
+                    // Складаємо ключ так, як він зберігається у ваших JSON (напр. "Від Матвія 5:3")
+                    const refKey = `${fullBookName} ${chapter}:${v}`;
                     const refPadded = `${fullBookName} ${chapter}:${String(v).padStart(2, '0')}`;
-                    const text = window.currentLangData[ref] || window.currentLangData[refPadded];
+                    
+                    const text = window.currentLangData[refKey] || window.currentLangData[refPadded];
+                    
                     if (text) {
                         combinedText += `<b style="color: #888; font-size: 0.8em; margin-left: 5px;">${v}</b> ${text} `;
                         foundAny = true;
                     }
                 }
+        
                 if (foundAny) {
                     let displayRef = `${fullBookName} ${chapter}:${vStart}`;
                     if (match[4]) displayRef += `-${vEnd}`;
+                    
                     renderDirectResult(displayRef, combinedText);
                     if (countDisplay) countDisplay.innerText = '1';
                     saveState();
-                    return; 
+                    return; // Перериваємо функцію, бо знайшли пряме посилання
                 }
             }
         }
