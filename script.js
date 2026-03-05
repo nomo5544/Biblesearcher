@@ -212,7 +212,8 @@ const maps = {
             return; 
         }
 
-        const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
+        // Додано a-zA-Z (латиниця) та \u0370-\u03FF (грецька)
+        const refRegex = /^(\d?\s?[A-Za-zА-Яа-яІіЇЄєҐыЫэЭёЁ\u0370-\u03FF][A-Za-zА-Яа-яІіЇЄєҐ'ыэё\u0370-\u03FF]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
         const match = query.match(refRegex);
 
         if (match) {
@@ -253,7 +254,8 @@ const maps = {
         if (isExact) {
             let regex;
             try {
-                regex = new RegExp(`(?<![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])${query}(?![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ])`, 'gi');
+                const pattern = `(?<![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ\\u0370-\\u03FF\\u0100-\\u017FñÑáéíóúÁÉÍÓÚ])${query}(?![a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9ыЫэЭёЁ\\u0370-\\u03FF\\u0100-\\u017FñÑáéíóúÁÉÍÓÚ])`;
+                regex = new RegExp(pattern, 'gi');
             } catch (e) { return; }
             for (const ref in window.currentLangData) {
                 const text = window.currentLangData[ref];
@@ -293,28 +295,39 @@ const maps = {
     }
 
     window.loadLanguage = function(langCode) {
-        const fileName = langCode === 'ukr' ? 'bibleTextUA.json' : 'bibleTextRU.json';
+        // 1. Створюємо список файлів для всіх мов
+        const fileMap = {
+            'ukr': 'bibleTextUA.json',
+            'ru': 'bibleTextRU.json',
+            'en': 'bibleTextEN.json',
+            'pl': 'bibleTextPL.json',
+            'es': 'bibleTextES.json',
+            'el': 'bibleTextGR.json'
+        };
+    
+        // 2. Вибираємо потрібний файл (якщо мови немає в списку, беремо UA)
+        const fileName = fileMap[langCode] || 'bibleTextUA.json';
+    
         fetch(fileName)
             .then(res => res.json())
             .then(data => {
                 window.currentLangData = data;
-                // Відновлюємо тільки ПРИ першому завантаженні, якщо є дані
+                
+                // Твоя логіка відновлення результатів (залишаємо як було)
                 const savedHTML = sessionStorage.getItem('lastSearchResults');
                 if (savedHTML && resultsDiv.innerHTML === "") {
                     resultsDiv.innerHTML = savedHTML;
                     searchInput.value = sessionStorage.getItem('lastSearchQuery') || '';
                     if (countDisplay) countDisplay.innerText = sessionStorage.getItem('lastResultCount') || '0';
-                    // Переприв'язка кліків (виправлено)
+    
                     resultsDiv.querySelectorAll('.ref').forEach(el => {
                         const ref = el.innerText.replace('● ', '').trim();
-                        
-                        // Перевіряємо пам'ять сесії: якщо посилання там є, додаємо клас примусово
                         const clickedRefs = JSON.parse(sessionStorage.getItem('clickedRefs') || '[]');
                         if (clickedRefs.includes(ref)) {
                             el.classList.add('clicked');
                         }
                         el.onclick = function(e) {
-                            e.preventDefault(); // Запобігаємо подвійним діям
+                            e.preventDefault();
                             handleRefClick(this, ref);
                         };
                     });
@@ -322,17 +335,33 @@ const maps = {
                     window.performSearch();
                 }
             })
-            .catch(err => console.error(err));
+            .catch(err => console.error("Помилка завантаження мови:", err));
     };
 
     if (langToggle) {
+        // Список мов, які ми хочемо перемикати по черзі
+        const availableLangs = ['ukr', 'ru', 'en', 'pl', 'es', 'el'];
+    
         langToggle.onclick = () => {
-            window.currentLang = (window.currentLang === 'ukr') ? 'ru' : 'ukr';
-            langToggle.innerText = window.currentLang === 'ukr' ? 'UA' : 'RU';
+            // Знаходимо індекс поточної мови і беремо наступну
+            let currentIndex = availableLangs.indexOf(window.currentLang);
+            let nextIndex = (currentIndex + 1) % availableLangs.length;
+            window.currentLang = availableLangs[nextIndex];
+    
+            // Оновлюємо текст на кнопці (робимо великими літерами, напр. "EN", "EL")
+            const displayNames = {
+                'ukr': 'UA', 'ru': 'RU', 'en': 'EN', 
+                'pl': 'PL', 'es': 'ES', 'el': 'GR'
+            };
+            langToggle.innerText = displayNames[window.currentLang];
+    
             localStorage.setItem('selectedLang', window.currentLang);
             window.loadLanguage(window.currentLang);
         };
-        langToggle.innerText = window.currentLang === 'ukr' ? 'UA' : 'RU';
+    
+        // Початковий текст кнопки при завантаженні сторінки
+        const displayNames = { 'ukr': 'UA', 'ru': 'RU', 'en': 'EN', 'pl': 'PL', 'es': 'ES', 'el': 'GR' };
+        langToggle.innerText = displayNames[window.currentLang] || 'UA';
     }
 
     if (searchInput) {
