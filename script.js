@@ -1,4 +1,3 @@
-// ПЕРШИЙ РЯДОК ФАЙЛУ script.js
 const urlParams = new URLSearchParams(window.location.search);
 if (!urlParams.has('fromSearch')) {
     const lastRef = localStorage.getItem('lastBibleRef');
