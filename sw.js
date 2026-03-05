@@ -1,15 +1,16 @@
-const CACHE_NAME = 'bible-searcher-v1.023'; // Оновив версію для скидання кешу
+const CACHE_NAME = 'bible-searcher-v1.026'; // Оновлена версія
 
 const ASSETS = [
+  './',
   'index.html',
   'reader.html',
   'reader.js',
-  'script.js',      // Додав ваш основний скрипт
-  'bibleMaps.js',   // Додав мапи скорочень
+  'script.js', 
+  'biblemaps.js', // РЕКОМЕНДАЦІЯ: перейменуйте файл на github у нижній регістр
   'app.webmanifest.json',
   'bibleTextUA.json',
   'bibleTextRU.json',
-  'bibleTextEN.json', // Додав нові мови
+  'bibleTextEN.json',
   'bibleTextPL.json',
   'bibleTextES.json',
   'bibleTextGR.json',
@@ -17,22 +18,30 @@ const ASSETS = [
   'icon-512.png'
 ];
 
-// 1. Встановлення
+// 1. Встановлення (М'яке завантаження кожного файлу окремо)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+      // Замість одного addAll робимо індивідуальні запити
+      const cachePromises = ASSETS.map(url => {
+        return cache.add(url).catch(err => {
+          console.warn(`[SW] Не вдалося закешувати ${url}:`, err);
+          // Помилка одного файлу тепер не зупиняє процес
+        });
+      });
+      return Promise.all(cachePromises);
     }).then(() => self.skipWaiting())
   );
 });
 
-// 2. Активація (очищення старих версій)
+// 2. Активація (очищення старого кешу)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
+            console.log('[SW] Видалення старого кешу:', cache);
             return caches.delete(cache);
           }
         })
@@ -41,39 +50,31 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Стратегія "Stale-While-Revalidate" з фільтрацією запитів
+// 3. Стратегія запитів (Stale-While-Revalidate)
 self.addEventListener('fetch', (event) => {
-  // ФІКС ПОМИЛКИ: Ігноруємо запити від розширень (chrome-extension://)
-  // Кешуємо лише стандартні запити http та https
-  if (!event.request.url.startsWith('http')) {
-    return;
-  }
+  if (!event.request.url.startsWith('http')) return;
 
   event.respondWith(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-        
-        const fetchPromise = fetch(event.request).then((networkResponse) => {
-          // Зберігаємо в кеш тільки успішні відповіді від сервера
-          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            cache.put(event.request, networkResponse.clone());
-          }
-          return networkResponse;
-        }).catch(() => {
-          // Якщо мережі немає, помилка не повинна валити скрипт
-        });
+    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        // Оновлюємо кеш тільки при успішній відповіді
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => cachedResponse);
 
-        return cachedResponse || fetchPromise;
-      });
+      return cachedResponse || fetchPromise;
     })
   );
 });
 
-// 4. Подія для отримання версії
+// 4. Повідомлення версії
 self.addEventListener('message', (event) => {
   if (event.data.action === 'getVersion') {
-    event.source.postMessage({
-      version: CACHE_NAME
-    });
+    event.source.postMessage({ version: CACHE_NAME });
   }
 });
