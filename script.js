@@ -1,7 +1,7 @@
-// 1. РЕГУЛЯРНИЙ ВИРАЗ (Ваш оригінальний)
+// 1. ВАШ ОРИГІНАЛЬНИЙ РЕГУЛЯРНИЙ ВИРАЗ
 const refRegex = /^(\d?\s?[A-Za-zА-Яа-яІіЇЄєҐ\u0370-\u03FFñÑáéíóúÁÉÍÓÚ][A-Za-zА-Яа-яІіЇЄєҐ'ыэё\u0370-\u03FFñÑáéíóúÁÉÍÓÚ]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
 
-// 2. ІНІЦІАЛІЗАЦІЯ ЗМІННИХ
+// 2. ІНІЦІАЛІЗАЦІЯ
 let currentLang = localStorage.getItem('lastBibleLang') || 'ukr';
 let currentLangData = null;
 
@@ -10,7 +10,7 @@ const resultsContainer = document.getElementById('results');
 const countDisplay = document.getElementById('countDisplay');
 const langBtn = document.getElementById('langBtn');
 
-// 3. ФУНКЦІЯ ПОШУКУ
+// 3. ФУНКЦІЯ ПОШУКУ (Повернено ваші класи та структуру)
 function performSearch() {
     if (!searchInput || !resultsContainer) return;
     const query = searchInput.value.trim().toLowerCase();
@@ -24,6 +24,7 @@ function performSearch() {
     localStorage.setItem('lastSearchQuery', query);
     const match = query.match(refRegex);
     
+    // ЛОГІКА ПРЯМОГО ПОСИЛАННЯ (Мат 1:1)
     if (match) {
         const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
         if (typeof maps !== 'undefined' && maps[currentLang]) {
@@ -39,7 +40,7 @@ function performSearch() {
                     const key = `${book} ${chapter}:${v}`;
                     const text = currentLangData[key];
                     if (text) {
-                        combinedText += `<b style="color:#888;">${v}</b> ${text} `;
+                        combinedText += `<span class="verse-num">${v}</span> ${text} `;
                         found = true;
                     }
                 }
@@ -52,6 +53,7 @@ function performSearch() {
         }
     }
 
+    // ЗВИЧАЙНИЙ ПОШУК ЗА СЛОВАМИ (Ваші класи: result-item, result-ref, result-text)
     let resultsHtml = "";
     let count = 0;
     for (const [ref, text] of Object.entries(currentLangData)) {
@@ -78,7 +80,7 @@ function highlight(text, query) {
 function renderDirectResult(ref, text) {
     if (resultsContainer) {
         resultsContainer.innerHTML = `
-            <div class="result-item direct" onclick="goToReader('${ref}')">
+            <div class="result-item" onclick="goToReader('${ref}')">
                 <div class="result-ref">${ref}</div>
                 <div class="result-text">${text}</div>
             </div>`;
@@ -89,14 +91,18 @@ function goToReader(ref) {
     window.location.href = `reader.html?ref=${encodeURIComponent(ref)}&lang=${currentLang}`;
 }
 
-// 5. ЗАВАНТАЖЕННЯ МОВИ
+// 5. ЗАВАНТАЖЕННЯ МОВИ (Ключі синхронізовано з читалкою)
 function loadLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('lastBibleLang', lang);
     
     const fileMap = {
-        'ukr': 'bibleTextUA.json', 'rus': 'bibleTextRU.json', 'en': 'bibleTextEN.json',
-        'pl': 'bibleTextPL.json', 'es': 'bibleTextES.json', 'gr': 'bibleTextGR.json'
+        'ukr': 'bibleTextUA.json', 
+        'rus': 'bibleTextRU.json', 
+        'en': 'bibleTextEN.json',
+        'pl': 'bibleTextPL.json', 
+        'es': 'bibleTextES.json', 
+        'gr': 'bibleTextGR.json'
     };
 
     const displayNames = { 'ukr':'UA', 'rus':'RU', 'en':'EN', 'pl':'PL', 'es':'ES', 'gr':'GR' };
@@ -106,16 +112,17 @@ function loadLanguage(lang) {
         .then(r => r.json())
         .then(data => {
             currentLangData = data;
+            // АВТО-ПОШУК ПРИ ПОВЕРНЕННІ
             const savedQuery = localStorage.getItem('lastSearchQuery');
             if (savedQuery && searchInput) {
                 searchInput.value = savedQuery;
                 performSearch();
             }
         })
-        .catch(err => console.error("Помилка завантаження JSON:", err));
+        .catch(err => console.error("Помилка JSON:", err));
 }
 
-// 6. ПРИВ'ЯЗКА ПОДІЙ (з перевіркою на null)
+// 6. ОБРОБНИКИ ПОДІЙ
 if (langBtn) {
     langBtn.onclick = () => {
         const langs = ['ukr', 'rus', 'en', 'pl', 'es', 'gr'];
@@ -134,5 +141,4 @@ if (searchInput) {
     };
 }
 
-// Старт
 loadLanguage(currentLang);
