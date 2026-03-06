@@ -1,4 +1,4 @@
-// 1. РЕГУЛЯРНИЙ ВИРАЗ
+// 1. ОГОЛОШЕННЯ РЕГУЛЯРНОГО ВИРАЗУ
 const refRegex = /^(\d?\s?[A-Za-zА-Яа-яІіЇЄєҐ\u0370-\u03FFñÑáéíóúÁÉÍÓÚ][A-Za-zА-Яа-яІіЇЄєҐ'ыэё\u0370-\u03FFñÑáéíóúÁÉÍÓÚ]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
 
 // 2. ІНІЦІАЛІЗАЦІЯ
@@ -21,11 +21,12 @@ function performSearch() {
         return;
     }
 
-    // Зберігаємо запит для повернення
+    // Запам'ятовуємо слово
     localStorage.setItem('lastSearchQuery', query);
 
     const match = query.match(refRegex);
     
+    // ПРЯМЕ ПОСИЛАННЯ (Використовуємо ваші класи)
     if (match) {
         const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
         if (typeof maps !== 'undefined' && maps[currentLang]) {
@@ -41,15 +42,15 @@ function performSearch() {
                     const key = `${book} ${chapter}:${v}`;
                     const text = currentLangData[key];
                     if (text) {
-                        // Використовуємо вашу оригінальну структуру для прямого результату
-                        combinedText += `<b>${v}</b> ${text} `;
+                        combinedText += v + " " + text + " ";
                         found = true;
                     }
                 }
                 if (found) {
+                    const fullRef = book + " " + chapter + ":" + vStart + (vEnd !== vStart ? "-" + vEnd : "");
                     resultsContainer.innerHTML = `
-                        <div class="result-item" onclick="goToReader('${book} ${chapter}:${vStart}${vEnd !== vStart ? '-'+vEnd : ''}')">
-                            <div class="result-ref">${book} ${chapter}:${vStart}${vEnd !== vStart ? '-'+vEnd : ''}</div>
+                        <div class="result-item" onclick="goToReader('${fullRef}')">
+                            <div class="result-ref">${fullRef}</div>
                             <div class="result-text">${combinedText}</div>
                         </div>`;
                     if (countDisplay) countDisplay.innerText = "1";
@@ -59,6 +60,7 @@ function performSearch() {
         }
     }
 
+    // ПОШУК ЗА СЛОВАМИ
     let resultsHtml = "";
     let count = 0;
     for (const [ref, text] of Object.entries(currentLangData)) {
@@ -91,8 +93,12 @@ function loadLanguage(lang) {
     localStorage.setItem('lastBibleLang', lang);
     
     const fileMap = {
-        'ukr': 'bibleTextUA.json', 'rus': 'bibleTextRU.json', 'en': 'bibleTextEN.json',
-        'pl': 'bibleTextPL.json', 'es': 'bibleTextES.json', 'gr': 'bibleTextGR.json'
+        'ukr': 'bibleTextUA.json', 
+        'rus': 'bibleTextRU.json', 
+        'en': 'bibleTextEN.json',
+        'pl': 'bibleTextPL.json', 
+        'es': 'bibleTextES.json', 
+        'gr': 'bibleTextGR.json'
     };
 
     const displayNames = { 'ukr':'UA', 'rus':'RU', 'en':'EN', 'pl':'PL', 'es':'ES', 'gr':'GR' };
@@ -102,16 +108,18 @@ function loadLanguage(lang) {
         .then(r => r.json())
         .then(data => {
             currentLangData = data;
-            // Повернення результатів
+            
+            // ВІДНОВЛЕННЯ ПОШУКУ ПРИ ПОВЕРНЕННІ
             const savedQuery = localStorage.getItem('lastSearchQuery');
             if (savedQuery && searchInput) {
                 searchInput.value = savedQuery;
                 performSearch();
             }
-        });
+        })
+        .catch(err => console.error("Error:", err));
 }
 
-// 5. ОБРОБНИКИ ПОДІЙ
+// 5. ОБРОБНИКИ ПОДІЙ (з перевіркою на існування елементів)
 if (langBtn) {
     langBtn.onclick = () => {
         const langs = ['ukr', 'rus', 'en', 'pl', 'es', 'gr'];
@@ -130,4 +138,5 @@ if (searchInput) {
     };
 }
 
+// Початковий запуск
 loadLanguage(currentLang);
