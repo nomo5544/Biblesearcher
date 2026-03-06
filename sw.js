@@ -5,14 +5,9 @@ const ASSETS = [
   'reader.html',
   'reader.js',
   'script.js',      // Додав ваш основний скрипт
-  'bibleMaps.js',   // Додав мапи скорочень
   'app.webmanifest.json',
   'bibleTextUA.json',
   'bibleTextRU.json',
-  'bibleTextEN.json', // Додав нові мови
-  'bibleTextPL.json',
-  'bibleTextES.json',
-  'bibleTextGR.json',
   'icon-192.png',
   'icon-512.png'
 ];
