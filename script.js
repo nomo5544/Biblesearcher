@@ -1,7 +1,7 @@
-// 1. ОГОЛОШЕННЯ РЕГУЛЯРНОГО ВИРАЗУ
+// 1. РЕГУЛЯРНИЙ ВИРАЗ (Ваш оригінальний)
 const refRegex = /^(\d?\s?[A-Za-zА-Яа-яІіЇЄєҐ\u0370-\u03FFñÑáéíóúÁÉÍÓÚ][A-Za-zА-Яа-яІіЇЄєҐ'ыэё\u0370-\u03FFñÑáéíóúÁÉÍÓÚ]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
 
-// 2. ІНІЦІАЛІЗАЦІЯ
+// 2. ІНІЦІАЛІЗАЦІЯ ЗМІННИХ
 let currentLang = localStorage.getItem('lastBibleLang') || 'ukr';
 let currentLangData = null;
 
@@ -10,21 +10,20 @@ const resultsContainer = document.getElementById('results');
 const countDisplay = document.getElementById('countDisplay');
 const langBtn = document.getElementById('langBtn');
 
-// 3. ФУНКЦІЯ ПОШУКУ (Ваша оригінальна логіка)
+// 3. ФУНКЦІЯ ПОШУКУ
 function performSearch() {
+    if (!searchInput || !resultsContainer) return;
     const query = searchInput.value.trim().toLowerCase();
+    
     if (!query || !currentLangData) {
         resultsContainer.innerHTML = "";
-        countDisplay.innerText = "0";
+        if (countDisplay) countDisplay.innerText = "0";
         return;
     }
 
-    // Зберігаємо запит, щоб він не зникав при поверненні
     localStorage.setItem('lastSearchQuery', query);
-
     const match = query.match(refRegex);
     
-    // ПРЯМЕ ПОСИЛАННЯ (Мат 2:23)
     if (match) {
         const bookInput = match[1].trim().toLowerCase().replace(/\.$/, "");
         if (typeof maps !== 'undefined' && maps[currentLang]) {
@@ -46,14 +45,13 @@ function performSearch() {
                 }
                 if (found) {
                     renderDirectResult(`${book} ${chapter}:${vStart}${vEnd !== vStart ? '-'+vEnd : ''}`, combinedText);
-                    countDisplay.innerText = "1";
+                    if (countDisplay) countDisplay.innerText = "1";
                     return;
                 }
             }
         }
     }
 
-    // ЗВИЧАЙНИЙ ПОШУК
     let resultsHtml = "";
     let count = 0;
     for (const [ref, text] of Object.entries(currentLangData)) {
@@ -68,21 +66,23 @@ function performSearch() {
         }
     }
     resultsContainer.innerHTML = resultsHtml;
-    countDisplay.innerText = count;
+    if (countDisplay) countDisplay.innerText = count;
 }
 
-// 4. ДОПОМІЖНІ ФУНКЦІЇ (Ваші оригінальні)
+// 4. ДОПОМІЖНІ ФУНКЦІЇ
 function highlight(text, query) {
     const regex = new RegExp(`(${query})`, 'gi');
     return text.replace(regex, `<mark>$1</mark>`);
 }
 
 function renderDirectResult(ref, text) {
-    resultsContainer.innerHTML = `
-        <div class="result-item direct" onclick="goToReader('${ref}')">
-            <div class="result-ref">${ref}</div>
-            <div class="result-text">${text}</div>
-        </div>`;
+    if (resultsContainer) {
+        resultsContainer.innerHTML = `
+            <div class="result-item direct" onclick="goToReader('${ref}')">
+                <div class="result-ref">${ref}</div>
+                <div class="result-text">${text}</div>
+            </div>`;
+    }
 }
 
 function goToReader(ref) {
@@ -106,31 +106,33 @@ function loadLanguage(lang) {
         .then(r => r.json())
         .then(data => {
             currentLangData = data;
-            
-            // ВІДНОВЛЕННЯ РЕЗУЛЬТАТІВ ПРИ ПОВЕРНЕННІ
             const savedQuery = localStorage.getItem('lastSearchQuery');
-            if (savedQuery) {
+            if (savedQuery && searchInput) {
                 searchInput.value = savedQuery;
                 performSearch();
             }
-        });
+        })
+        .catch(err => console.error("Помилка завантаження JSON:", err));
 }
 
-// 6. ОБРОБНИКИ ПОДІЙ
-langBtn.onclick = () => {
-    const langs = ['ukr', 'rus', 'en', 'pl', 'es', 'gr'];
-    let idx = (langs.indexOf(currentLang) + 1) % langs.length;
-    loadLanguage(langs[idx]);
-};
+// 6. ПРИВ'ЯЗКА ПОДІЙ (з перевіркою на null)
+if (langBtn) {
+    langBtn.onclick = () => {
+        const langs = ['ukr', 'rus', 'en', 'pl', 'es', 'gr'];
+        let idx = (langs.indexOf(currentLang) + 1) % langs.length;
+        loadLanguage(langs[idx]);
+    };
+}
 
-searchInput.oninput = performSearch;
+if (searchInput) {
+    searchInput.oninput = performSearch;
+    searchInput.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+            const firstResult = resultsContainer ? resultsContainer.querySelector('.result-item') : null;
+            if (firstResult) firstResult.click();
+        }
+    };
+}
 
-// ВАШ ЕНТЕР (Прямий перехід)
-searchInput.onkeydown = (e) => {
-    if (e.key === 'Enter') {
-        const firstResult = resultsContainer.querySelector('.result-item');
-        if (firstResult) firstResult.click();
-    }
-};
-
+// Старт
 loadLanguage(currentLang);
