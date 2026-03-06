@@ -1,4 +1,3 @@
-я вже заплутався
 // 1. ОГОЛОШЕННЯ ЗМІННИХ ТА ЗБЕРЕЖЕННЯ ОСТАННЬОГО МІСЦЯ
 const urlParams = new URLSearchParams(window.location.search);
 let fullRef = decodeURIComponent(urlParams.get('ref') || "").replace(/\+/g, ' ');
