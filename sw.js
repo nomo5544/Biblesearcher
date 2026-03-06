@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bible-searcher-v1.038'; // Оновлена версія
+const CACHE_NAME = 'bible-searcher-v1.039'; // Оновлена версія
 
 const ASSETS = [
   './',
