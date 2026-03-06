@@ -4,7 +4,7 @@ if (!urlParams.has('fromSearch')) {
     const lastRef = localStorage.getItem('lastBibleRef');
     const lastLang = localStorage.getItem('lastBibleLang');
     if (lastRef) {
-        window.location.href = `reader.html?ref=${encodeURIComponent(lastRef)}&lang=${lastLang || 'ukr'}`;
+        window.location.href = `reader.html?ref=${encodeURIComponent(lastRef)}&lang=${lastLang || 'ua'}`;
     }
 }
 // --- 1. ОГОЛОШЕННЯ ЗМІННИХ ---
@@ -17,14 +17,14 @@ if (!urlParams.has('fromSearch')) {
     const copyRefsBtn = document.getElementById('copyRefsBtn');
     const fontSizeRange = document.getElementById('fontSizeRange');
 
-    window.currentLang = localStorage.getItem('selectedLang') || 'ukr';
+    window.currentLang = localStorage.getItem('selectedLang') || 'ua';
     window.currentLangData = {};
 
-    // Масив для циклічного перемикання
+    // Масив мов по 2 літери
     const languages = ['ua', 'ru', 'en', 'pl', 'es', 'gr'];
 
 const maps = {
-    ukr: {
+    ua: {
         "бут": "Буття", "буття": "Буття", "вих": "Вихід", "вихід": "Вихід", "лев": "Левит", "левит": "Левит",
         "чис": "Числа", "числа": "Числа", "повт": "Повторення Закону", "повторення": "Повторення Закону", "втор": "Повторення Закону",
         "ісН": "Ісус Навин", "нав": "Ісус Навин", "суд": "Судді", "суддів": "Судді", "рут": "Рут", "Рути": "Рут",
@@ -108,7 +108,6 @@ const maps = {
             return; 
         }
 
-        // РЕГУЛЯРНИЙ ВИРАЗ (тепер підтримує і латиницю)
         const refRegex = /^(\d?\s?[A-Za-zА-Яа-яІіЇЄєҐыЫэЭёЁ\u0370-\u03FFñÑáéíóúÁÉÍÓÚ][A-Za-zа-яіїєґ'ыэё\u0370-\u03FFñÑáéíóúÁÉÍÓÚ]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
         const match = query.match(refRegex);
 
@@ -189,7 +188,7 @@ const maps = {
 
     window.loadLanguage = function(langCode) {
         const fileMap = {
-            'ukr': 'bibleTextUA.json', 'ru': 'bibleTextRU.json', 'en': 'bibleTextEN.json',
+            'ua': 'bibleTextUA.json', 'ru': 'bibleTextRU.json', 'en': 'bibleTextEN.json',
             'pl': 'bibleTextPL.json', 'es': 'bibleTextES.json', 'gr': 'bibleTextGR.json'
         };
         fetch(fileMap[langCode] || 'bibleTextUA.json')
@@ -234,7 +233,6 @@ const maps = {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const query = searchInput.value.trim();
-                // Використовуємо той самий Regex для Enter
                 const regex = /^(\d?\s?[A-Za-zА-Яа-яІіЇЄєҐыЫэЭёЁ\u0370-\u03FFñÑáéíóúÁÉÍÓÚ][A-Za-zа-яіїєґ'ыэё\u0370-\u03FFñÑáéíóúÁÉÍÓÚ]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
                 const match = query.match(regex);
                 if (match) {
