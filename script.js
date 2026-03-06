@@ -22,7 +22,7 @@ if (!urlParams.has('fromSearch')) {
     window.currentLangData = {};
 
     // ОНОВЛЕНИЙ МАСИВ МОВ
-    const languages = ['ukr', 'ru', 'en', 'pl', 'es', 'gr'];
+    const languages = ['ua', 'ru', 'en', 'pl', 'es', 'gr'];
 
     const maps = {
         ukr: {
