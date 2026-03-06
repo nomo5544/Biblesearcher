@@ -10,23 +10,35 @@ if (fullRef) {
     localStorage.setItem('lastBibleLang', currentLang);
 }
 
-// 2. ФУНКЦІЯ ПЕРЕКЛАДУ НАЗВИ КНИГИ (використовує глобальний maps з bibleMaps.js)
-function getTranslatedBookName(oldName, toLang) {
-    // Шукаємо, якій книзі відповідає oldName у поточній мові
-    const currentMap = maps[currentLang];
+// 2. ФУНКЦІЯ ПЕРЕКЛАДУ НАЗВИ КНИГИ
+function getTranslatedBookName(oldName, fromLang, toLang) {
+    const fromMap = maps[fromLang];
+    const toMap = maps[toLang];
     let bookKey = null;
 
-    for (let key in currentMap) {
-        if (currentMap[key] === oldName) {
-            bookKey = key; // знайшли внутрішній ключ (напр. "мат")
+    // 1. Шукаємо ключ, за яким лежить стара назва (напр. "мат")
+    for (let key in fromMap) {
+        if (fromMap[key] === oldName) {
+            bookKey = key;
             break;
         }
     }
 
-    if (!bookKey) return oldName; // якщо не знайшли, лишаємо як є
+    // 2. Якщо ключ знайдено, беремо назву з нової мови за ЦИМ ЖЕ ключем
+    if (bookKey && toMap[bookKey]) {
+        return toMap[bookKey];
+    }
 
-    // Тепер беремо назву цієї ж книги у новій мові
-    return maps[toLang][bookKey] || oldName;
+    // 3. ЯКЩО КЛЮЧІ РІЗНІ (для іспанської/англійської):
+    // Шукаємо книгу в новій мові, назва якої починається так само (перші 3 літери)
+    const shortName = oldName.substring(0, 3).toLowerCase();
+    for (let key in toMap) {
+        if (toMap[key].toLowerCase().startsWith(shortName)) {
+            return toMap[key];
+        }
+    }
+
+    return oldName; // Якщо нічого не допомогло
 }
 
 // 3. РОЗБІР ПОСИЛАННЯ
@@ -71,18 +83,20 @@ function loadBible() {
         });
 }
 
-// 5. ПЕРЕМИКАЧ МОВ (Циклічний, як у пошуку)
+// 5. ПЕРЕМИКАЧ МОВ
 document.getElementById('langBtn').onclick = () => {
     const availableLangs = ['ukr', 'ru', 'en', 'pl', 'es', 'el'];
     let currentIndex = availableLangs.indexOf(currentLang);
     let nextIndex = (currentIndex + 1) % availableLangs.length;
     const nextLang = availableLangs[nextIndex];
 
-    const translatedBook = getTranslatedBookName(bookName, nextLang);
+    // ВАЖЛИВО: Передаємо поточну мову (currentLang) як джерело
+    const translatedBook = getTranslatedBookName(bookName, currentLang, nextLang);
     
     let versePart = vStart ? `:${vStart}${vEnd !== vStart ? '-' + vEnd : ''}` : "";
     const newRef = `${translatedBook} ${chapterNum}${versePart}`;
     
+    // ПЕРЕХІД
     window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
 };
 
