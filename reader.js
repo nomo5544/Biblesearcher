@@ -10,7 +10,7 @@ if (fullRef) {
     localStorage.setItem('lastBibleLang', currentLang);
 }
 
-// Ваша надійна мапа для UA/RU (залишаємо без змін)
+// Ваша надійна мапа для UA/RU
 const bookMap = {
     "Буття": "Бытие", "Вихід": "Исход", "Левит": "Левит", "Числа": "Числа", 
     "Повторення Закону": "Второзаконие", "Ісус Навин": "Иисус Навин", "Судді": "Судьи", 
@@ -36,15 +36,15 @@ const bookMap = {
     "3 Івана": "3 Иоанна", "Юди": "Иуды", "Об'явлення": "Откровение"
 };
 
-// 2. ФУНКЦІЯ ПЕРЕКЛАДУ (Ваша стара логіка + додана підтримка інших мов)
+// 2. ФУНКЦІЯ ПЕРЕКЛАДУ
 function getTranslatedBookName(name, toLang) {
-    // Якщо перемикання між UA та RU
+    // Якщо перемикання між UA та RU (використовуємо ваш bookMap)
     if ((currentLang === 'ukr' || currentLang === 'rus') && (toLang === 'ukr' || toLang === 'rus')) {
         if (toLang === 'rus') return bookMap[name] || name;
         return Object.keys(bookMap).find(key => bookMap[key] === name) || name;
     }
 
-    // Якщо перемикання на іспанську/англійську тощо (через порядковий номер)
+    // Для інших мов (ES, EN, PL, GR) шукаємо за індексом у biblemaps.js
     if (typeof maps !== 'undefined' && maps[currentLang] && maps[toLang]) {
         const currentTitles = Object.values(maps[currentLang]);
         const nextTitles = Object.values(maps[toLang]);
@@ -65,7 +65,7 @@ if (match) {
     vEnd = match[4] ? parseInt(match[4]) : vStart;
 }
 
-// 4. ЗАВАНТАЖЕННЯ БІБЛІЇ
+// 4. ЗАВАНТАЖЕННЯ ТЕКСТУ
 function loadBible() {
     const fileMap = {
         'ukr': 'bibleTextUA.json',
@@ -73,13 +73,13 @@ function loadBible() {
         'en': 'bibleTextEN.json',
         'pl': 'bibleTextPL.json',
         'es': 'bibleTextES.json',
-        'el': 'bibleTextGR.json'
+        'gr': 'bibleTextGR.json'
     };
 
     const fileName = fileMap[currentLang] || 'bibleTextUA.json';
     const btn = document.getElementById('langBtn');
     
-    const displayNames = { 'ukr': 'UA', 'rus': 'RU', 'en': 'EN', 'pl': 'PL', 'es': 'ES', 'el': 'GR' };
+    const displayNames = { 'ukr': 'UA', 'rus': 'RU', 'en': 'EN', 'pl': 'PL', 'es': 'ES', 'gr': 'GR' };
     if(btn) btn.innerText = displayNames[currentLang] || 'UA';
 
     fetch(fileName)
@@ -89,13 +89,13 @@ function loadBible() {
             renderContent();
         })
         .catch(err => {
-            console.error("Помилка:", err);
+            console.error("Помилка завантаження:", err);
             const layout = document.getElementById('reader-layout');
             if(layout) layout.innerHTML = "Помилка завантаження тексту.";
         });
 }
 
-// 5. РЕНДЕР ТЕКСТУ
+// 5. ВІДОБРАЖЕННЯ ТЕКСТУ
 function renderContent() {
     const layout = document.getElementById('reader-layout');
     const refHeader = document.getElementById('refHeader');
@@ -109,7 +109,7 @@ function renderContent() {
     keys.sort((a, b) => parseInt(a.split(':')[1]) - parseInt(b.split(':')[1]));
 
     if (keys.length === 0) {
-        layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Not found (${bookName} ${chapterNum}).</div>`;
+        layout.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5;">Розділ не знайдено (${bookName} ${chapterNum}).</div>`;
         return;
     }
 
@@ -136,7 +136,7 @@ function renderContent() {
 
 // 6. ПЕРЕМИКАЧ МОВ
 document.getElementById('langBtn').onclick = () => {
-    const availableLangs = ['ukr', 'rus', 'en', 'pl', 'es', 'el'];
+    const availableLangs = ['ukr', 'rus', 'en', 'pl', 'es', 'gr'];
     let currentIndex = availableLangs.indexOf(currentLang);
     let nextIndex = (currentIndex + 1) % availableLangs.length;
     const nextLang = availableLangs[nextIndex];
@@ -148,7 +148,7 @@ document.getElementById('langBtn').onclick = () => {
     window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
 };
 
-// 7. НАВІГАЦІЯ (Вперед/Назад)
+// 7. НАВІГАЦІЯ
 function navigate(step) {
     const nextChap = parseInt(chapterNum) + step;
     if (nextChap < 1) return;
@@ -158,7 +158,7 @@ function navigate(step) {
 document.getElementById('prevBtn').onclick = () => navigate(-1);
 document.getElementById('nextBtn').onclick = () => navigate(1);
 
-// 8. ШЕРІНГ ТА СВАЙПИ
+// 8. ДОПОМІЖНІ ФУНКЦІЇ (Share, Swipes, Keyboard)
 function setupShare(div, text, ref) {
     let pressTimer;
     const start = () => {
@@ -180,18 +180,16 @@ function setupShare(div, text, ref) {
 async function shareVerse(text, ref) {
     const shareText = `«${text}» (${ref})\n\n`;
     if (navigator.share) {
-        try { await navigator.share({ title: 'Bible', text: shareText }); } catch (err) {}
+        try { await navigator.share({ title: 'Біблія', text: shareText }); } catch (err) {}
     } else {
         await navigator.clipboard.writeText(shareText);
-        alert("Copied!");
+        alert("Скопійовано!");
     }
 }
 
-// Події клавіатури
 document.addEventListener('keydown', (e) => {
     if (e.key === "ArrowLeft") navigate(-1);
     else if (e.key === "ArrowRight") navigate(1);
 });
 
-// Ініціалізація
 loadBible();
