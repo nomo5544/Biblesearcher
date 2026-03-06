@@ -1,45 +1,57 @@
-// 1. ОГОЛОШЕННЯ ЗМІННИХ
+// 1. ОГОЛОШЕННЯ ЗМІННИХ ТА ЗБЕРЕЖЕННЯ ОСТАННЬОГО МІСЦЯ
 const urlParams = new URLSearchParams(window.location.search);
 let fullRef = decodeURIComponent(urlParams.get('ref') || "").replace(/\+/g, ' ');
 let currentLang = urlParams.get('lang') || 'ukr';
 let bibleData = null;
 
-// Запам'ятовуємо розділ
+// Запам'ятовуємо розділ для PWA/LocalStorage
 if (fullRef) {
     localStorage.setItem('lastBibleRef', fullRef);
     localStorage.setItem('lastBibleLang', currentLang);
 }
 
-// 2. ФУНКЦІЯ ПЕРЕКЛАДУ НАЗВИ КНИГИ (Універсальна)
-function getTranslatedBookName(oldName, fromLang, toLang) {
-    const fromMap = maps[fromLang];
-    const toMap = maps[toLang];
+// Ваша надійна мапа для UA/RU (залишаємо без змін)
+const bookMap = {
+    "Буття": "Бытие", "Вихід": "Исход", "Левит": "Левит", "Числа": "Числа", 
+    "Повторення Закону": "Второзаконие", "Ісус Навин": "Иисус Навин", "Судді": "Судьи", 
+    "Рут": "Руфь", "1 Самуїлова": "1 Царств", "2 Самуїлова": "2 Царств", 
+    "1 Царів": "3 Царств", "2 Царів": "4 Царств", "1 Хронік": "1 Паралипоменон", 
+    "2 Хронік": "2 Паралипоменон", "Ездра": "Ездра", "Неемія": "Неемия", 
+    "Естер": "Есфирь", "Йов": "Иов", "Псалми": "Псалтирь", "Приповісті": "Притчи", 
+    "Екклезіаст": "Екклезиаст", "Пісня Пісень": "Песнь Песней", "Ісая": "Исаия", 
+    "Єремія": "Иеремия", "Плач Єремії": "Плач Иеремии", "Єзекіїль": "Иезекииль", 
+    "Даниїл": "Даниил", "Осія": "Осия", "Йоіл": "Иоиль", "Амос": "Амос", 
+    "Овдій": "Авдий", "Йона": "Иона", "Михей": "Михей", "Наум": "Наум", 
+    "Авакум": "Аввакум", "Софонія": "Софония", "Огій": "Аггей", 
+    "Захарія": "Захария", "Малахія": "Малахия",
+    "Від Матвія": "Матфея", "Від Марка": "Марка", "Від Луки": "Луки", 
+    "Від Івана": "Иоанна", "Дії Апостолів": "Деяния", "До Римлян": "Римлянам", 
+    "1 до Коринтян": "1 Коринфянам", "2 до Коринтян": "2 Коринфянам", 
+    "До Галатів": "Галатам", "До Ефесян": "Ефесянам", "До Филип'ян": "Филиппийцам", 
+    "До Колосян": "Колоссянам", "1 до Солунян": "1 Фессалоникийцам", 
+    "2 до Солунян": "2 Фессалоникийцам", "1 до Тимофія": "1 Тимофею", 
+    "2 до Тимофія": "2 Тимофею", "До Тита": "Титу", "До Филимона": "Филимону", 
+    "До Євреїв": "Евреям", "Якова": "Иакова", "1 Петра": "1 Петра", 
+    "2 Петра": "2 Петра", "1 Івана": "1 Иоанна", "2 Івана": "2 Иоанна", 
+    "3 Івана": "3 Иоанна", "Юди": "Иуды", "Об'явлення": "Откровение"
+};
 
-    // Отримуємо списки ПОВНИХ назв для обох мов
-    const fromTitles = Object.values(fromMap);
-    const toTitles = Object.values(toMap);
-
-    // Знаходимо, якою за рахунком є наша книга (напр. 40-ва)
-    const bookIndex = fromTitles.indexOf(oldName);
-
-    if (bookIndex !== -1 && toTitles[bookIndex]) {
-        return toTitles[bookIndex]; // Повертаємо 40-ву назву з нової мови
+// 2. ФУНКЦІЯ ПЕРЕКЛАДУ (Ваша стара логіка + додана підтримка інших мов)
+function getTranslatedBookName(name, toLang) {
+    // Якщо перемикання між UA та RU
+    if ((currentLang === 'ukr' || currentLang === 'rus') && (toLang === 'ukr' || toLang === 'rus')) {
+        if (toLang === 'rus') return bookMap[name] || name;
+        return Object.keys(bookMap).find(key => bookMap[key] === name) || name;
     }
 
-    // РЕЗЕРВ: Якщо не знайшли за списком, шукаємо через ключі (для UA/RU)
-    let foundKey = null;
-    for (let key in fromMap) {
-        if (fromMap[key] === oldName) {
-            foundKey = key;
-            break;
-        }
+    // Якщо перемикання на іспанську/англійську тощо (через порядковий номер)
+    if (typeof maps !== 'undefined' && maps[currentLang] && maps[toLang]) {
+        const currentTitles = Object.values(maps[currentLang]);
+        const nextTitles = Object.values(maps[toLang]);
+        const index = currentTitles.indexOf(name);
+        if (index !== -1) return nextTitles[index];
     }
-    
-    if (foundKey && toMap[foundKey]) {
-        return toMap[foundKey];
-    }
-
-    return oldName; // Якщо нічого не спрацювало, лишаємо як було
+    return name;
 }
 
 // 3. РОЗБІР ПОСИЛАННЯ
@@ -57,7 +69,7 @@ if (match) {
 function loadBible() {
     const fileMap = {
         'ukr': 'bibleTextUA.json',
-        'ru': 'bibleTextRU.json',
+        'rus': 'bibleTextRU.json',
         'en': 'bibleTextEN.json',
         'pl': 'bibleTextPL.json',
         'es': 'bibleTextES.json',
@@ -67,8 +79,7 @@ function loadBible() {
     const fileName = fileMap[currentLang] || 'bibleTextUA.json';
     const btn = document.getElementById('langBtn');
     
-    // Відображення на кнопці
-    const displayNames = { 'ukr': 'UA', 'ru': 'RU', 'en': 'EN', 'pl': 'PL', 'es': 'ES', 'el': 'GR' };
+    const displayNames = { 'ukr': 'UA', 'rus': 'RU', 'en': 'EN', 'pl': 'PL', 'es': 'ES', 'el': 'GR' };
     if(btn) btn.innerText = displayNames[currentLang] || 'UA';
 
     fetch(fileName)
@@ -84,32 +95,7 @@ function loadBible() {
         });
 }
 
-// 5. ПЕРЕМИКАЧ МОВ (Виправлений)
-document.getElementById('langBtn').onclick = () => {
-    const availableLangs = ['ukr', 'ru', 'en', 'pl', 'es', 'el'];
-    let currentIndex = availableLangs.indexOf(currentLang);
-    let nextIndex = (currentIndex + 1) % availableLangs.length;
-    const nextLang = availableLangs[nextIndex];
-
-    // Беремо назву книги, яка ЗАРАЗ відображена в заголовку (це найнадійніше)
-    const currentDisplayedBook = bookName; 
-    const translatedBook = getTranslatedBookName(currentDisplayedBook, currentLang, nextLang);
-    
-    // Формуємо вірші
-    let versePart = "";
-    if (vStart) {
-        versePart = `:${vStart}${vEnd && vEnd !== vStart ? '-' + vEnd : ''}`;
-    }
-    
-    const newRef = `${translatedBook} ${chapterNum}${versePart}`;
-    
-    // ПЕРЕХІД
-    console.log("Перехід на:", newRef, "Мова:", nextLang);
-    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
-};
-
-// --- РЕНДЕР ТА НАВІГАЦІЯ (залишаємо вашу логіку без змін) ---
-
+// 5. РЕНДЕР ТЕКСТУ
 function renderContent() {
     const layout = document.getElementById('reader-layout');
     const refHeader = document.getElementById('refHeader');
@@ -136,10 +122,7 @@ function renderContent() {
         if (vStart !== null && vNum === vStart) div.id = "target";
         
         div.innerHTML = `<span class="verse-num">${vNum}</span> ${bibleData[key]}`;
-
-        // Додаємо вашу логіку shareVerse тут (копіюємо з вашого старого коду)...
         setupShare(div, bibleData[key], `${bookName} ${chapterNum}:${vNum}`);
-
         layout.appendChild(div);
     });
 
@@ -151,6 +134,31 @@ function renderContent() {
     }
 }
 
+// 6. ПЕРЕМИКАЧ МОВ
+document.getElementById('langBtn').onclick = () => {
+    const availableLangs = ['ukr', 'rus', 'en', 'pl', 'es', 'el'];
+    let currentIndex = availableLangs.indexOf(currentLang);
+    let nextIndex = (currentIndex + 1) % availableLangs.length;
+    const nextLang = availableLangs[nextIndex];
+
+    const translatedBook = getTranslatedBookName(bookName, nextLang);
+    let versePart = vStart ? `:${vStart}${vEnd !== vStart ? '-' + vEnd : ''}` : "";
+    const newRef = `${translatedBook} ${chapterNum}${versePart}`;
+    
+    window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
+};
+
+// 7. НАВІГАЦІЯ (Вперед/Назад)
+function navigate(step) {
+    const nextChap = parseInt(chapterNum) + step;
+    if (nextChap < 1) return;
+    window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + nextChap)}&lang=${currentLang}`;
+}
+
+document.getElementById('prevBtn').onclick = () => navigate(-1);
+document.getElementById('nextBtn').onclick = () => navigate(1);
+
+// 8. ШЕРІНГ ТА СВАЙПИ
 function setupShare(div, text, ref) {
     let pressTimer;
     const start = () => {
@@ -179,27 +187,11 @@ async function shareVerse(text, ref) {
     }
 }
 
-function navigate(step) {
-    const nextChap = parseInt(chapterNum) + step;
-    if (nextChap < 1) return;
-    window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + nextChap)}&lang=${currentLang}`;
-}
-
-function getBookKey(fullBookName, currentLang) {
-    const map = maps[currentLang];
-    for (let key in map) {
-        if (map[key] === fullBookName) {
-            // Повертаємо ключ (наприклад, "gen"), але ми знаємо, 
-            // що в мапах ключі часто — це скорочення. 
-            // Найкраще знайти ключ, який є спільним для всіх мов.
-            return key; 
-        }
-    }
-    return null;
-}
-
-document.getElementById('prevBtn').onclick = () => navigate(-1);
-document.getElementById('nextBtn').onclick = () => navigate(1);
+// Події клавіатури
+document.addEventListener('keydown', (e) => {
+    if (e.key === "ArrowLeft") navigate(-1);
+    else if (e.key === "ArrowRight") navigate(1);
+});
 
 // Ініціалізація
 loadBible();
