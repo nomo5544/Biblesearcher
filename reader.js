@@ -10,35 +10,36 @@ if (fullRef) {
     localStorage.setItem('lastBibleLang', currentLang);
 }
 
-// 2. ФУНКЦІЯ ПЕРЕКЛАДУ НАЗВИ КНИГИ
+// 2. ФУНКЦІЯ ПЕРЕКЛАДУ НАЗВИ КНИГИ (Універсальна)
 function getTranslatedBookName(oldName, fromLang, toLang) {
     const fromMap = maps[fromLang];
     const toMap = maps[toLang];
-    let bookKey = null;
 
-    // 1. Шукаємо ключ, за яким лежить стара назва (напр. "мат")
+    // Отримуємо списки ПОВНИХ назв для обох мов
+    const fromTitles = Object.values(fromMap);
+    const toTitles = Object.values(toMap);
+
+    // Знаходимо, якою за рахунком є наша книга (напр. 40-ва)
+    const bookIndex = fromTitles.indexOf(oldName);
+
+    if (bookIndex !== -1 && toTitles[bookIndex]) {
+        return toTitles[bookIndex]; // Повертаємо 40-ву назву з нової мови
+    }
+
+    // РЕЗЕРВ: Якщо не знайшли за списком, шукаємо через ключі (для UA/RU)
+    let foundKey = null;
     for (let key in fromMap) {
         if (fromMap[key] === oldName) {
-            bookKey = key;
+            foundKey = key;
             break;
         }
     }
-
-    // 2. Якщо ключ знайдено, беремо назву з нової мови за ЦИМ ЖЕ ключем
-    if (bookKey && toMap[bookKey]) {
-        return toMap[bookKey];
+    
+    if (foundKey && toMap[foundKey]) {
+        return toMap[foundKey];
     }
 
-    // 3. ЯКЩО КЛЮЧІ РІЗНІ (для іспанської/англійської):
-    // Шукаємо книгу в новій мові, назва якої починається так само (перші 3 літери)
-    const shortName = oldName.substring(0, 3).toLowerCase();
-    for (let key in toMap) {
-        if (toMap[key].toLowerCase().startsWith(shortName)) {
-            return toMap[key];
-        }
-    }
-
-    return oldName; // Якщо нічого не допомогло
+    return oldName; // Якщо нічого не спрацювало, лишаємо як було
 }
 
 // 3. РОЗБІР ПОСИЛАННЯ
@@ -83,20 +84,27 @@ function loadBible() {
         });
 }
 
-// 5. ПЕРЕМИКАЧ МОВ
+// 5. ПЕРЕМИКАЧ МОВ (Виправлений)
 document.getElementById('langBtn').onclick = () => {
     const availableLangs = ['ukr', 'ru', 'en', 'pl', 'es', 'el'];
     let currentIndex = availableLangs.indexOf(currentLang);
     let nextIndex = (currentIndex + 1) % availableLangs.length;
     const nextLang = availableLangs[nextIndex];
 
-    // ВАЖЛИВО: Передаємо поточну мову (currentLang) як джерело
-    const translatedBook = getTranslatedBookName(bookName, currentLang, nextLang);
+    // Беремо назву книги, яка ЗАРАЗ відображена в заголовку (це найнадійніше)
+    const currentDisplayedBook = bookName; 
+    const translatedBook = getTranslatedBookName(currentDisplayedBook, currentLang, nextLang);
     
-    let versePart = vStart ? `:${vStart}${vEnd !== vStart ? '-' + vEnd : ''}` : "";
+    // Формуємо вірші
+    let versePart = "";
+    if (vStart) {
+        versePart = `:${vStart}${vEnd && vEnd !== vStart ? '-' + vEnd : ''}`;
+    }
+    
     const newRef = `${translatedBook} ${chapterNum}${versePart}`;
     
     // ПЕРЕХІД
+    console.log("Перехід на:", newRef, "Мова:", nextLang);
     window.location.href = `reader.html?ref=${encodeURIComponent(newRef)}&lang=${nextLang}`;
 };
 
