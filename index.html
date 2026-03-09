@@ -14,16 +14,37 @@
             --btn-bg: #ececec;
         }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            font-family: 'Georgia', 'Times New Roman', serif;
-            background-color: var(--bg-color);
-            -webkit-tap-highlight-color: transparent;
-        }
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    
+    /* Додаємо фон */
+    background-image: url('bg.jpg'); /* Вкажіть назву свого файлу */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    
+    /* Колір фону залишаємо як запасний */
+    background-color: var(--bg-color);
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Додаємо оверлей (напівпрозорий шар), щоб текст на фоні картинки читався чітко */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7); /* Білий шар з прозорістю 70% */
+    z-index: -1;
+}
 
         /* Посилання та вірші */
         .ref {
