@@ -295,7 +295,7 @@ const maps = {
                 if (text.match(regex)) {
                     count++;
                     addVerseToFragment(fragment, ref, text.replace(regex, '<mark>$&</mark>'));
-                    if (count >= 500) break;
+                    if (count >= 999) break;
                 }
             }
         } else {
@@ -312,7 +312,7 @@ const maps = {
                         highlightedText = highlightedText.replace(new RegExp(`(${cleanWord})`, 'gi'), '<mark>$1</mark>');
                     });
                     addVerseToFragment(fragment, ref, highlightedText);
-                    if (count >= 500) break;
+                    if (count >= 999) break;
                 }
             }
         }
