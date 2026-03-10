@@ -9,7 +9,8 @@ const ASSETS = [
   'bibleTextUA.json',
   'bibleTextRU.json',
   'icon-192.png',
-  'icon-512.png'
+  'icon-512.png',
+  'bg.jpg'
 ];
 
 // 1. Встановлення
