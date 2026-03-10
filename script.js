@@ -208,10 +208,12 @@ const maps = {
         if (!resultsDiv) return;
         resultsDiv.innerHTML = '';
         if (query.length < 2) { 
+            document.body.classList.remove('has-results'); // Повертаємо прозорий фон
             if (countDisplay) countDisplay.innerText = '0'; 
             return; 
         }
-
+        document.body.classList.add('has-results'); // Робимо фон більш щільним
+        
         const refRegex = /^(\d?\s?[А-Яа-яІіЇЄєҐыЫэЭёЁ][а-яіїєґ'ыэё]{0,15})\s*[\s\.\:]\s*(\d+)(?:[\s\:\.\-]+(\d+)(?:\-(\d+))?)?$/;
         const match = query.match(refRegex);
 
