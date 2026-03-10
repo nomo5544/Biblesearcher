@@ -304,6 +304,7 @@ const maps = {
                 const savedHTML = sessionStorage.getItem('lastSearchResults');
                 if (savedHTML && resultsDiv.innerHTML === "") {
                     resultsDiv.innerHTML = savedHTML;
+                    document.body.classList.add('has-results'); // <-- ДОДАЙТЕ ЦЕЙ РЯДОК
                     searchInput.value = sessionStorage.getItem('lastSearchQuery') || '';
                     if (countDisplay) countDisplay.innerText = sessionStorage.getItem('lastResultCount') || '0';
                     // Переприв'язка кліків (виправлено)
