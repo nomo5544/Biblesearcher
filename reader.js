@@ -192,7 +192,6 @@ function renderContent() {
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 600);
     }
-}
 
 document.getElementById('langBtn').onclick = () => {
     const nextLang = currentLang === 'ukr' ? 'rus' : 'ukr';
