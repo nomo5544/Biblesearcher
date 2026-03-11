@@ -215,10 +215,6 @@ function navigate(step) {
     window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + nextChap)}&lang=${currentLang}`;
 }
 
-function goToSearch() {
-    window.location.href = 'index.html'; 
-}
-
 document.getElementById('prevBtn').onclick = () => navigate(-1);
 document.getElementById('nextBtn').onclick = () => navigate(1);
 
@@ -226,11 +222,17 @@ loadBible();
 // --- ОБРОБКА КЛАВІАТУРИ ---
 document.addEventListener('keydown', (e) => {
     if (e.key === "ArrowLeft") {
-        navigate(-1);
+        navigate(-1); // Попередній розділ
     } else if (e.key === "ArrowRight") {
-        navigate(1);
+        navigate(1);  // Наступний розділ
     } else if (e.key === "Escape") {
-        goToSearch(); // Тепер Esc і кнопка роблять одне й те саме
+        // Перевіряємо, чи існує функція, перш ніж викликати її
+        if (typeof clearLastRead === "function") {
+            clearLastRead();
+        } else {
+            // Якщо раптом функція не знайдена, просто переходимо
+            window.location.href = 'index.html?fromSearch=true';
+        }
     }
 });
 
