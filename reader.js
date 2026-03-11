@@ -227,7 +227,7 @@ document.addEventListener('keydown', (e) => {
         navigate(1);  // Наступний розділ
     } else if (e.key === "Escape") {
         // Перехід на сторінку пошуку
-        window.location.href = 'search.html'; 
+        window.location.href = 'index.html'; 
     }
 });
 
