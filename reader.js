@@ -215,6 +215,10 @@ function navigate(step) {
     window.location.href = `reader.html?ref=${encodeURIComponent(bookName + ' ' + nextChap)}&lang=${currentLang}`;
 }
 
+function goToSearch() {
+    window.location.href = 'index.html'; 
+}
+
 document.getElementById('prevBtn').onclick = () => navigate(-1);
 document.getElementById('nextBtn').onclick = () => navigate(1);
 
