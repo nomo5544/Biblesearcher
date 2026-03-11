@@ -222,12 +222,11 @@ loadBible();
 // --- ОБРОБКА КЛАВІАТУРИ ---
 document.addEventListener('keydown', (e) => {
     if (e.key === "ArrowLeft") {
-        navigate(-1); // Попередній розділ
+        navigate(-1);
     } else if (e.key === "ArrowRight") {
-        navigate(1);  // Наступний розділ
+        navigate(1);
     } else if (e.key === "Escape") {
-        // Перехід на сторінку пошуку
-        window.location.href = 'index.html'; 
+        goToSearch(); // Тепер Esc і кнопка роблять одне й те саме
     }
 });
 
