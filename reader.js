@@ -184,7 +184,6 @@ function renderContent() {
     div.addEventListener('mouseleave', cancelPress);
 
     layout.appendChild(div);
-});
 
 // СКРОЛ ДО ПОЧАТКУ ВИДІЛЕННЯ
     if (vStart !== null) {
