@@ -253,5 +253,4 @@ document.addEventListener('touchend', (e) => {
     }
     xDown = null;
 }, { passive: true });
-
 loadBible();
