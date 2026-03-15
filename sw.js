@@ -8,8 +8,8 @@ const ASSETS = [
   'app.webmanifest.json',
   'bibleTextUA.json',
   'bibleTextRU.json',
-  'icon-192.png',
-  'icon-512.png',
+  'icon192.png',
+  'icon512.png',
   'bg.jpg'
 ];
 
