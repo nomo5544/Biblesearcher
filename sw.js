@@ -1,6 +1,7 @@
 const CACHE_NAME = 'bible-searcher-v1.0173'; // версію
 
 const ASSETS = [
+  './',
   'index.html',
   'reader.html',
   'reader.js',
