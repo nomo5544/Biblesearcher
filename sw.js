@@ -6,7 +6,7 @@ const ASSETS = [
   'reader.html',
   'reader.js',
   'script.js',      // Додав ваш основний скрипт
-  'app.webmanifest',
+  'app.webmanifest.json',
   'bibleTextUA.json',
   'bibleTextRU.json',
   'icon192.png',
